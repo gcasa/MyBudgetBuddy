@@ -9,7 +9,12 @@ import com.mybudgetbuddy.model.Transaction;
 import com.mybudgetbuddy.model.TransactionType;
 
 import java.math.BigDecimal;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.Date;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.logging.Level;
@@ -260,6 +265,14 @@ public class TransactionServiceImpl implements TransactionService {
              ResultSet rs = stmt.executeQuery(sql)) {
             
             rs.next();
+            return rs.getBigDecimal(1);
+            
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Failed to get total income", e);
+            throw new RuntimeException("Failed to get total income", e);
+        }
+    }
+
     @Override
     public BigDecimal getTotalExpenses() {
         String sql = "SELECT COALESCE(SUM(amount), 0) FROM transactions WHERE type = 'EXPENSE'";
@@ -294,11 +307,13 @@ public class TransactionServiceImpl implements TransactionService {
             stmt.setDate(1, Date.valueOf(startDate));
             stmt.setDate(2, Date.valueOf(endDate));
             
-            ResultSet rs = stmt.executeQuery();
-            rs.next();
-            return rs.getBigDecimal(1);
+            try (ResultSet rs = stmt.executeQuery()) {
+                rs.next();
+                return rs.getBigDecimal(1);
+            }
             
         } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Failed to get total income for period", e);
             throw new RuntimeException("Failed to get total income for period", e);
         }
     }
@@ -316,11 +331,13 @@ public class TransactionServiceImpl implements TransactionService {
             stmt.setDate(1, Date.valueOf(startDate));
             stmt.setDate(2, Date.valueOf(endDate));
             
-            ResultSet rs = stmt.executeQuery();
-            rs.next();
-            return rs.getBigDecimal(1);
+            try (ResultSet rs = stmt.executeQuery()) {
+                rs.next();
+                return rs.getBigDecimal(1);
+            }
             
         } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Failed to get total expenses for period", e);
             throw new RuntimeException("Failed to get total expenses for period", e);
         }
     }
@@ -349,21 +366,102 @@ public class TransactionServiceImpl implements TransactionService {
             stmt.setDate(1, Date.valueOf(startDate));
             stmt.setDate(2, Date.valueOf(endDate));
             
-            ResultSet rs = stmt.executeQuery();
-            Map<String, BigDecimal> categorySpending = new LinkedHashMap<>();
-            
-            while (rs.next()) {
-                String categoryName = rs.getString("name");
-                BigDecimal total = rs.getBigDecimal("total");
-                if (total != null && total.compareTo(BigDecimal.ZERO) > 0) {
-                    categorySpending.put(categoryName, total);
+            try (ResultSet rs = stmt.executeQuery()) {
+                Map<String, BigDecimal> categorySpending = new LinkedHashMap<>();
+                
+                while (rs.next()) {
+                    String categoryName = rs.getString("name");
+                    BigDecimal total = rs.getBigDecimal("total");
+                    if (total != null && total.compareTo(BigDecimal.ZERO) > 0) {
+                        categorySpending.put(categoryName, total);
+                    }
                 }
+                
+                return categorySpending;
             }
             
-            return categorySpending;
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Failed to get category spending", e);
+            throw new RuntimeException("Failed to get category spending", e);
+        }
+    }
+
+    @Override
+    public BigDecimal getTotalIncome(String planId, LocalDate startDate, LocalDate endDate) {
+        String sql = """
+            SELECT COALESCE(SUM(amount), 0) FROM transactions 
+            WHERE type = 'INCOME' AND plan_id = ? AND transaction_date BETWEEN ? AND ?
+        """;
+        
+        try (Connection conn = databaseManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setString(1, planId);
+            stmt.setDate(2, Date.valueOf(startDate));
+            stmt.setDate(3, Date.valueOf(endDate));
+            
+            try (ResultSet rs = stmt.executeQuery()) {
+                rs.next();
+                return rs.getBigDecimal(1);
+            }
             
         } catch (SQLException e) {
-            throw new RuntimeException("Failed to get category spending", e);
+            LOGGER.log(Level.SEVERE, "Failed to get total income for plan and period", e);
+            throw new RuntimeException("Failed to get total income for plan and period", e);
+        }
+    }
+
+    @Override
+    public BigDecimal getTotalExpenses(String planId, LocalDate startDate, LocalDate endDate) {
+        String sql = """
+            SELECT COALESCE(SUM(amount), 0) FROM transactions 
+            WHERE type = 'EXPENSE' AND plan_id = ? AND transaction_date BETWEEN ? AND ?
+        """;
+        
+        try (Connection conn = databaseManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setString(1, planId);
+            stmt.setDate(2, Date.valueOf(startDate));
+            stmt.setDate(3, Date.valueOf(endDate));
+            
+            try (ResultSet rs = stmt.executeQuery()) {
+                rs.next();
+                return rs.getBigDecimal(1);
+            }
+            
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Failed to get total expenses for plan and period", e);
+            throw new RuntimeException("Failed to get total expenses for plan and period", e);
+        }
+    }
+
+    @Override
+    public List<Transaction> getRecentTransactions(String planId, int limit) {
+        String sql = """
+            SELECT * FROM transactions 
+            WHERE plan_id = ? 
+            ORDER BY transaction_date DESC, created_date DESC
+            LIMIT ?
+        """;
+        
+        try (Connection conn = databaseManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setString(1, planId);
+            stmt.setInt(2, limit);
+            
+            try (ResultSet rs = stmt.executeQuery()) {
+                List<Transaction> transactions = new ArrayList<>();
+                while (rs.next()) {
+                    transactions.add(mapResultSetToTransaction(rs));
+                }
+                return transactions;
+            }
+            
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Failed to get recent transactions for plan", e);
+            throw new RuntimeException("Failed to get recent transactions for plan", e);
         }
     }
 
@@ -447,92 +545,5 @@ public class TransactionServiceImpl implements TransactionService {
         }
         
         return transaction;
-    }
-}
-
-    @Override
-    public BigDecimal getTotalExpenses() {
-        return transactions.values().stream()
-                .filter(t -> t.getType() == TransactionType.EXPENSE)
-                .map(Transaction::getAmount)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-    }
-
-    @Override
-    public BigDecimal getBalance() {
-        return getTotalIncome().subtract(getTotalExpenses());
-    }
-
-    @Override
-    public BigDecimal getTotalIncomeForPeriod(LocalDate startDate, LocalDate endDate) {
-        return getTransactionsByDateRange(startDate, endDate).stream()
-                .filter(t -> t.getType() == TransactionType.INCOME)
-                .map(Transaction::getAmount)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-    }
-
-    @Override
-    public BigDecimal getTotalExpensesForPeriod(LocalDate startDate, LocalDate endDate) {
-        return getTransactionsByDateRange(startDate, endDate).stream()
-                .filter(t -> t.getType() == TransactionType.EXPENSE)
-                .map(Transaction::getAmount)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-    }
-
-    @Override
-    public BigDecimal getBalanceForPeriod(LocalDate startDate, LocalDate endDate) {
-        BigDecimal income = getTotalIncomeForPeriod(startDate, endDate);
-        BigDecimal expenses = getTotalExpensesForPeriod(startDate, endDate);
-        return income.subtract(expenses);
-    }
-
-    @Override
-    public Map<String, BigDecimal> getCategorySpending(LocalDate startDate, LocalDate endDate) {
-        return getTransactionsByDateRange(startDate, endDate).stream()
-                .filter(t -> t.getType() == TransactionType.EXPENSE)
-                .collect(Collectors.groupingBy(
-                        Transaction::getCategoryId,
-                        Collectors.reducing(BigDecimal.ZERO, Transaction::getAmount, BigDecimal::add)
-                ));
-    }
-
-    // Data persistence methods
-    
-    @SuppressWarnings("unchecked")
-    private void load() {
-        File file = new File(DATA_FILE);
-        if (!file.exists()) return;
-        
-        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(file))) {
-            Object obj = ois.readObject();
-            if (obj instanceof List) {
-                // Convert from old List<Transaction> format
-                List<Transaction> transactionList = (List<Transaction>) obj;
-                transactions.clear();
-                for (Transaction t : transactionList) {
-                    if (t.getId() == null) {
-                        t.setId(UUID.randomUUID().toString());
-                    }
-                    transactions.put(t.getId(), t);
-                }
-                save(); // Convert to new format
-            } else if (obj instanceof Map) {
-                // New Map<String, Transaction> format
-                Map<String, Transaction> loadedTransactions = (Map<String, Transaction>) obj;
-                transactions.clear();
-                transactions.putAll(loadedTransactions);
-            }
-        } catch (IOException | ClassNotFoundException e) {
-            // Start fresh if file is corrupt or unreadable
-            transactions.clear();
-        }
-    }
-
-    private void save() {
-        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(DATA_FILE))) {
-            oos.writeObject(transactions);
-        } catch (IOException e) {
-            System.err.println("Failed to save transaction data: " + e.getMessage());
-        }
     }
 }

@@ -2,6 +2,7 @@ package com.mybudgetbuddy.presentation.viewmodel;
 
 import com.mybudgetbuddy.application.service.*;
 import com.mybudgetbuddy.domain.model.*;
+import com.mybudgetbuddy.model.Transaction;
 import com.mybudgetbuddy.command.Command;
 import com.mybudgetbuddy.command.RelayCommand;
 import javafx.beans.property.*;
@@ -71,13 +72,13 @@ public class DashboardViewModel {
         this.reportService = reportService;
         
         // Initialize properties
-        this.currentPlanName = new SimpleStringProperty(\"No Plan Selected\");
-        this.totalIncome = new SimpleStringProperty(\"$0.00\");
-        this.totalExpenses = new SimpleStringProperty(\"$0.00\");
-        this.netIncome = new SimpleStringProperty(\"$0.00\");
-        this.totalSavings = new SimpleStringProperty(\"$0.00\");
-        this.emergencyFund = new SimpleStringProperty(\"$0.00\");
-        this.netWorth = new SimpleStringProperty(\"$0.00\");
+        this.currentPlanName = new SimpleStringProperty("No Plan Selected");
+        this.totalIncome = new SimpleStringProperty("$0.00");
+        this.totalExpenses = new SimpleStringProperty("$0.00");
+        this.netIncome = new SimpleStringProperty("$0.00");
+        this.totalSavings = new SimpleStringProperty("$0.00");
+        this.emergencyFund = new SimpleStringProperty("$0.00");
+        this.netWorth = new SimpleStringProperty("$0.00");
         
         // Initialize collections
         this.recentTransactions = FXCollections.observableArrayList();
@@ -134,14 +135,14 @@ public class DashboardViewModel {
         BigDecimal expenses = transactionService.getTotalExpenses(currentPlanId, monthStart, monthEnd);
         BigDecimal net = income.subtract(expenses);
         
-        totalIncome.set(String.format(\"$%,.2f\", income));
-        totalExpenses.set(String.format(\"$%,.2f\", expenses));
-        netIncome.set(String.format(\"$%,.2f\", net));
+        totalIncome.set(String.format("$%,.2f", income));
+        totalExpenses.set(String.format("$%,.2f", expenses));
+        netIncome.set(String.format("$%,.2f", net));
         
         // TODO: Calculate savings, emergency fund, net worth from appropriate services
-        totalSavings.set(\"$0.00\"); // Placeholder
-        emergencyFund.set(\"$0.00\"); // Placeholder
-        netWorth.set(\"$0.00\"); // Placeholder
+        totalSavings.set("$0.00"); // Placeholder
+        emergencyFund.set("$0.00"); // Placeholder
+        netWorth.set("$0.00"); // Placeholder
     }
     
     private void loadRecentTransactions() {

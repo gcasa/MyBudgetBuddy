@@ -79,15 +79,15 @@ public class BudgetViewModel {
         this.transactionService = transactionService;
         
         // Initialize form properties
-        this.budgetName = new SimpleStringProperty(\"\");
-        this.budgetDescription = new SimpleStringProperty(\"\");
-        this.allocatedAmount = new SimpleStringProperty(\"0.00\");
+        this.budgetName = new SimpleStringProperty("");
+        this.budgetDescription = new SimpleStringProperty("");
+        this.allocatedAmount = new SimpleStringProperty("0.00");
         this.selectedCategoryId = new SimpleObjectProperty<>();
         this.selectedBudgetType = new SimpleObjectProperty<>(BudgetType.CATEGORY_BUDGET);
         this.selectedPeriod = new SimpleObjectProperty<>(Period.ofMonths(1));
         this.startDate = new SimpleObjectProperty<>(LocalDate.now().withDayOfMonth(1));
         this.endDate = new SimpleObjectProperty<>(LocalDate.now().withDayOfMonth(LocalDate.now().lengthOfMonth()));
-        this.warningThreshold = new SimpleStringProperty(\"80\");
+        this.warningThreshold = new SimpleStringProperty("80");
         
         // Initialize collections
         this.budgets = FXCollections.observableArrayList();
@@ -96,19 +96,19 @@ public class BudgetViewModel {
         this.nearThresholdBudgets = FXCollections.observableArrayList();
         
         // Initialize summary properties
-        this.totalAllocated = new SimpleStringProperty(\"$0.00\");
-        this.totalSpent = new SimpleStringProperty(\"$0.00\");
-        this.totalRemaining = new SimpleStringProperty(\"$0.00\");
-        this.overallProgress = new SimpleStringProperty(\"0%\");
+        this.totalAllocated = new SimpleStringProperty("$0.00");
+        this.totalSpent = new SimpleStringProperty("$0.00");
+        this.totalRemaining = new SimpleStringProperty("$0.00");
+        this.overallProgress = new SimpleStringProperty("0%");
         
         // Initialize filter properties
         this.filterBudgetType = new SimpleObjectProperty<>();
         this.showOnlyActive = new SimpleBooleanProperty(true);
         this.showOnlyOverBudget = new SimpleBooleanProperty(false);
-        this.searchText = new SimpleStringProperty(\"\");
+        this.searchText = new SimpleStringProperty("");
         
         // Initialize validation
-        this.validationErrors = new SimpleStringProperty(\"\");
+        this.validationErrors = new SimpleStringProperty("");
         this.isFormValid = new SimpleBooleanProperty(false);
         
         // Initialize commands
@@ -140,15 +140,15 @@ public class BudgetViewModel {
     
     public void clearForm() {
         this.currentEditingBudget = null;
-        budgetName.set(\"\");
-        budgetDescription.set(\"\");
-        allocatedAmount.set(\"0.00\");
+        budgetName.set("");
+        budgetDescription.set("");
+        allocatedAmount.set("0.00");
         selectedCategoryId.set(null);
         selectedBudgetType.set(BudgetType.CATEGORY_BUDGET);
         selectedPeriod.set(Period.ofMonths(1));
         startDate.set(LocalDate.now().withDayOfMonth(1));
         endDate.set(LocalDate.now().withDayOfMonth(LocalDate.now().lengthOfMonth()));
-        warningThreshold.set(\"80\");
+        warningThreshold.set("80");
     }
     
     private void refreshData() {
@@ -171,7 +171,7 @@ public class BudgetViewModel {
         selectedPeriod.set(budget.getBudgetPeriod());
         startDate.set(budget.getStartDate());
         endDate.set(budget.getEndDate());
-        warningThreshold.set(budget.getWarningThreshold().multiply(new BigDecimal(\"100\")).toString());
+        warningThreshold.set(budget.getWarningThreshold().multiply(new BigDecimal("100")).toString());
     }
     
     private void updateSummaryData() {
@@ -185,16 +185,16 @@ public class BudgetViewModel {
         
         BigDecimal totalRemainingAmount = totalAllocatedAmount.subtract(totalSpentAmount);
         
-        totalAllocated.set(String.format(\"$%,.2f\", totalAllocatedAmount));
-        totalSpent.set(String.format(\"$%,.2f\", totalSpentAmount));
-        totalRemaining.set(String.format(\"$%,.2f\", totalRemainingAmount));
+        totalAllocated.set(String.format("$%,.2f", totalAllocatedAmount));
+        totalSpent.set(String.format("$%,.2f", totalSpentAmount));
+        totalRemaining.set(String.format("$%,.2f", totalRemainingAmount));
         
         if (totalAllocatedAmount.compareTo(BigDecimal.ZERO) > 0) {
             BigDecimal progressPercent = totalSpentAmount.divide(totalAllocatedAmount, 2, BigDecimal.ROUND_HALF_UP)
-                    .multiply(new BigDecimal(\"100\"));
-            overallProgress.set(String.format(\"%.1f%%\", progressPercent));
+                    .multiply(new BigDecimal("100"));
+            overallProgress.set(String.format("%.1f%%", progressPercent));
         } else {
-            overallProgress.set(\"0%\");
+            overallProgress.set("0%");
         }
     }
     
@@ -229,7 +229,7 @@ public class BudgetViewModel {
             clearForm();
             refreshData();
         } catch (Exception e) {
-            validationErrors.set(\"Error creating budget: \" + e.getMessage());
+            validationErrors.set("Error creating budget: " + e.getMessage());
         }
     }
     
@@ -247,7 +247,7 @@ public class BudgetViewModel {
             clearForm();
             refreshData();
         } catch (Exception e) {
-            validationErrors.set(\"Error updating budget: \" + e.getMessage());
+            validationErrors.set("Error updating budget: " + e.getMessage());
         }
     }
     
@@ -264,7 +264,7 @@ public class BudgetViewModel {
             
             refreshData();
         } catch (Exception e) {
-            validationErrors.set(\"Error deleting budget: \" + e.getMessage());
+            validationErrors.set("Error deleting budget: " + e.getMessage());
         }
     }
     
@@ -297,7 +297,7 @@ public class BudgetViewModel {
         budget.setBudgetPeriod(selectedPeriod.get());
         budget.setStartDate(startDate.get());
         budget.setEndDate(endDate.get());
-        budget.setWarningThreshold(new BigDecimal(warningThreshold.get()).divide(new BigDecimal(\"100\")));
+        budget.setWarningThreshold(new BigDecimal(warningThreshold.get()).divide(new BigDecimal("100")));
     }
     
     // Validation methods

@@ -234,21 +234,6 @@ public class Recommendation implements Serializable {
     public void setUserRating(int userRating) { this.userRating = Math.max(1, Math.min(5, userRating)); }
 }
 
-enum RecommendationType {
-    BUDGET_OPTIMIZATION,
-    EXPENSE_REDUCTION,
-    INCOME_IMPROVEMENT,
-    DEBT_MANAGEMENT,
-    SAVINGS_OPTIMIZATION,
-    INVESTMENT_ADVICE,
-    GOAL_ADJUSTMENT,
-    EMERGENCY_FUND,
-    TAX_OPTIMIZATION,
-    CASH_FLOW_IMPROVEMENT,
-    RISK_MITIGATION,
-    ACCOUNT_MANAGEMENT
-}
-
 enum RecommendationStatus {
     NEW,
     VIEWED,

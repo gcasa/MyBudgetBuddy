@@ -110,10 +110,3 @@ public class Budget implements Serializable {
     public LocalDate getLastModified() { return lastModified; }
     public void setLastModified(LocalDate lastModified) { this.lastModified = lastModified; }
 }
-
-enum BudgetType {
-    CATEGORY_BUDGET,
-    TOTAL_BUDGET,
-    PROJECT_BUDGET,
-    FLEXIBLE_BUDGET
-}

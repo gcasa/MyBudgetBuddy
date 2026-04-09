@@ -264,33 +264,3 @@ public class Transaction implements Serializable {
         setCategoryId(categoryId);
     }
 }
-
-public enum PaymentMethod {
-    CASH,
-    CREDIT_CARD,
-    DEBIT_CARD,
-    CHECK,
-    BANK_TRANSFER,
-    DIGITAL_WALLET,
-    CRYPTOCURRENCY,
-    OTHER
-}
-
-public enum RecurringFrequency {
-    DAILY,
-    WEEKLY,
-    BI_WEEKLY,
-    MONTHLY,
-    BI_MONTHLY,
-    QUARTERLY,
-    SEMI_ANNUALLY,
-    ANNUALLY
-}
-
-public enum TransactionStatus {
-    PENDING,
-    CONFIRMED,
-    CANCELLED,
-    FAILED,
-    REFUNDED
-}

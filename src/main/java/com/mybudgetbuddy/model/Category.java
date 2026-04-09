@@ -43,7 +43,3 @@ public class Category implements Serializable {
         return name;
     }
 }
-
-public enum CategoryType {
-    INCOME, EXPENSE
-}

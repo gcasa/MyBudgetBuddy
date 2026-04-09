@@ -255,38 +255,3 @@ public class Report implements Serializable {
     public String getTemplateVersion() { return templateVersion; }
     public void setTemplateVersion(String templateVersion) { this.templateVersion = templateVersion; }
 }
-
-enum ReportType {
-    FINANCIAL_SUMMARY,
-    BUDGET_ANALYSIS,
-    GOAL_PROGRESS,
-    CASH_FLOW,
-    EXPENSE_BREAKDOWN,
-    INCOME_ANALYSIS,
-    TREND_ANALYSIS,
-    FORECAST,
-    TAX_SUMMARY,
-    NET_WORTH,
-    CUSTOM,
-    ANNUAL_SUMMARY,
-    MONTHLY_SUMMARY,
-    COMPARATIVE_ANALYSIS
-}
-
-enum ReportFormat {
-    PDF,
-    HTML,
-    EXCEL,
-    CSV,
-    JSON,
-    WORD
-}
-
-enum ReportStatus {
-    PENDING,
-    GENERATING,
-    COMPLETED,
-    FAILED,
-    EXPIRED,
-    ARCHIVED
-}

@@ -34,4 +34,9 @@ public interface TransactionService {
     BigDecimal getTotalExpensesForPeriod(LocalDate startDate, LocalDate endDate);
     BigDecimal getBalanceForPeriod(LocalDate startDate, LocalDate endDate);
     Map<String, BigDecimal> getCategorySpending(LocalDate startDate, LocalDate endDate);
+    
+    // Plan-specific calculations for dashboard
+    BigDecimal getTotalIncome(String planId, LocalDate startDate, LocalDate endDate);
+    BigDecimal getTotalExpenses(String planId, LocalDate startDate, LocalDate endDate);
+    List<Transaction> getRecentTransactions(String planId, int limit);
 }

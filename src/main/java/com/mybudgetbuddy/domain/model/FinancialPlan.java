@@ -202,23 +202,3 @@ public class FinancialPlan implements Serializable {
     public String getLastModifiedBy() { return lastModifiedBy; }
     public void setLastModifiedBy(String lastModifiedBy) { this.lastModifiedBy = lastModifiedBy; }
 }
-
-enum PlanType {
-    PERSONAL,
-    FAMILY,
-    BUSINESS,
-    RETIREMENT,
-    DEBT_MANAGEMENT,
-    INVESTMENT,
-    SHORT_TERM,
-    LONG_TERM
-}
-
-enum PlanStatus {
-    DRAFT,
-    ACTIVE,
-    COMPLETED,
-    PAUSED,
-    ARCHIVED,
-    CANCELLED
-}
