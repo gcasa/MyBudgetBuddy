@@ -7,20 +7,24 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 import com.mybudgetbuddy.controller.MainController;
-import com.mybudgetbuddy.service.BudgetService;
+import com.mybudgetbuddy.application.service.TransactionService;
+import com.mybudgetbuddy.application.service.impl.TransactionServiceImpl;
+import com.mybudgetbuddy.viewmodel.MainViewModel;
 
 public class App extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        BudgetService budgetService = new BudgetService();
+        // Create services and repositories
+        TransactionService transactionService = new TransactionServiceImpl();
+        MainViewModel mainViewModel = new MainViewModel(transactionService);
 
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/mybudgetbuddy/main.fxml"));
         Parent root = loader.load();
 
         MainController controller = loader.getController();
-        controller.setBudgetService(budgetService);
-        controller.initialize();
+        controller.setTransactionService(transactionService);
+        controller.setViewModel(mainViewModel);
 
         Scene scene = new Scene(root, 900, 600);
         scene.getStylesheets().add(getClass().getResource("/com/mybudgetbuddy/styles.css").toExternalForm());
