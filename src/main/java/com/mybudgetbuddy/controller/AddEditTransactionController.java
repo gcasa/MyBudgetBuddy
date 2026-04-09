@@ -102,6 +102,8 @@ public class AddEditTransactionController {
 
         if (datePicker.getValue() == null) {
             errors.append("- Date is required.\n");
+        } else if (datePicker.getValue().isAfter(LocalDate.now())) {
+            errors.append("- Date cannot be in the future.\n");
         }
 
         if (errors.length() > 0) {

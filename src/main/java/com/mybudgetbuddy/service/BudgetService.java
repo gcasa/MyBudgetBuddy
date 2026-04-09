@@ -81,7 +81,7 @@ public class BudgetService {
         try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(DATA_FILE))) {
             oos.writeObject(transactions);
         } catch (IOException e) {
-            System.err.println("Failed to save data: " + e.getMessage());
+            throw new RuntimeException("Failed to save budget data: " + e.getMessage(), e);
         }
     }
 }
