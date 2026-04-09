@@ -12,7 +12,8 @@ import java.math.BigDecimal;
 import java.sql.*;
 import java.time.LocalDate;
 import java.util.*;
-import java.util.stream.Collectors;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * SQLite implementation of TransactionService for MVVM architecture.
@@ -20,6 +21,7 @@ import java.util.stream.Collectors;
  */
 public class TransactionServiceImpl implements TransactionService {
 
+    private static final Logger LOGGER = Logger.getLogger(TransactionServiceImpl.class.getName());
     private final DatabaseManager databaseManager;
 
     public TransactionServiceImpl() {
@@ -32,6 +34,10 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     public Transaction createTransaction(Transaction transaction) {
+        if (transaction == null) {
+            throw new IllegalArgumentException("Transaction cannot be null");
+        }
+        
         if (transaction.getId() == null || transaction.getId().isEmpty()) {
             transaction.setId(UUID.randomUUID().toString());
         }
@@ -54,12 +60,17 @@ public class TransactionServiceImpl implements TransactionService {
             return transaction;
             
         } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Failed to create transaction with ID: " + transaction.getId(), e);
             throw new RuntimeException("Failed to create transaction", e);
         }
     }
 
     @Override
     public Transaction updateTransaction(Transaction transaction) {
+        if (transaction == null) {
+            throw new IllegalArgumentException("Transaction cannot be null");
+        }
+        
         if (transaction.getId() == null) {
             throw new IllegalArgumentException("Transaction ID is required for update");
         }
@@ -87,12 +98,17 @@ public class TransactionServiceImpl implements TransactionService {
             return transaction;
             
         } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Failed to update transaction with ID: " + transaction.getId(), e);
             throw new RuntimeException("Failed to update transaction", e);
         }
     }
 
     @Override
     public void deleteTransaction(String transactionId) {
+        if (transactionId == null || transactionId.trim().isEmpty()) {
+            throw new IllegalArgumentException("Transaction ID cannot be null or empty");
+        }
+        
         String sql = "DELETE FROM transactions WHERE id = ?";
         
         try (Connection conn = databaseManager.getConnection();
@@ -102,27 +118,33 @@ public class TransactionServiceImpl implements TransactionService {
             stmt.executeUpdate();
             
         } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Failed to delete transaction with ID: " + transactionId, e);
             throw new RuntimeException("Failed to delete transaction", e);
         }
     }
 
     @Override
     public Optional<Transaction> getTransactionById(String transactionId) {
+        if (transactionId == null || transactionId.trim().isEmpty()) {
+            return Optional.empty();
+        }
+        
         String sql = "SELECT * FROM transactions WHERE id = ?";
         
         try (Connection conn = databaseManager.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             
             stmt.setString(1, transactionId);
-            ResultSet rs = stmt.executeQuery();
-            
-            if (rs.next()) {
-                return Optional.of(mapResultSetToTransaction(rs));
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return Optional.of(mapResultSetToTransaction(rs));
+                }
             }
             
             return Optional.empty();
             
         } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Failed to get transaction by ID: " + transactionId, e);
             throw new RuntimeException("Failed to get transaction by ID", e);
         }
     }

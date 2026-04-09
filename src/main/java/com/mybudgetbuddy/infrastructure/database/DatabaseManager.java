@@ -4,31 +4,35 @@ import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Manages SQLite database connections for the application.
  * Provides singleton connection management and database initialization.
  */
 public class DatabaseManager {
+    private static final Logger LOGGER = Logger.getLogger(DatabaseManager.class.getName());
     private static final String DB_FILE = Paths.get(System.getProperty("user.home"), ".mybudgetbuddy.db").toString();
     private static final String DB_URL = "jdbc:sqlite:" + DB_FILE;
     
-    private static DatabaseManager instance;
-    private Connection connection;
+    private static volatile DatabaseManager instance;
+    private volatile Connection connection;
     
     private DatabaseManager() {
         try {
-            // Load SQLite JDBC driver
-            Class.forName("org.sqlite.JDBC");
-            
-            // Create connection
+            // Create connection (JDBC 4.0+ auto-loads drivers)
             connection = DriverManager.getConnection(DB_URL);
             
             // Enable foreign keys
-            connection.createStatement().execute("PRAGMA foreign_keys = ON");
+            try (Statement stmt = connection.createStatement()) {
+                stmt.execute("PRAGMA foreign_keys = ON");
+            }
             
-            System.out.println("Database connection established: " + DB_FILE);
-        } catch (ClassNotFoundException | SQLException e) {
+            LOGGER.info("Database connection established: " + DB_FILE);
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Failed to initialize database connection", e);
             throw new RuntimeException("Failed to initialize database connection", e);
         }
     }
@@ -50,11 +54,19 @@ public class DatabaseManager {
         try {
             // Check if connection is still valid
             if (connection == null || connection.isClosed()) {
-                connection = DriverManager.getConnection(DB_URL);
-                connection.createStatement().execute("PRAGMA foreign_keys = ON");
+                synchronized (this) {
+                    // Double-check locking
+                    if (connection == null || connection.isClosed()) {
+                        connection = DriverManager.getConnection(DB_URL);
+                        try (Statement stmt = connection.createStatement()) {
+                            stmt.execute("PRAGMA foreign_keys = ON");
+                        }
+                    }
+                }
             }
             return connection;
         } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Failed to get database connection", e);
             throw new RuntimeException("Failed to get database connection", e);
         }
     }
@@ -62,14 +74,15 @@ public class DatabaseManager {
     /**
      * Close the database connection
      */
-    public void close() {
+    public synchronized void close() {
         try {
             if (connection != null && !connection.isClosed()) {
                 connection.close();
-                System.out.println("Database connection closed");
+                connection = null;
+                LOGGER.info("Database connection closed");
             }
         } catch (SQLException e) {
-            System.err.println("Error closing database connection: " + e.getMessage());
+            LOGGER.log(Level.WARNING, "Error closing database connection", e);
         }
     }
     

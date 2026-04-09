@@ -10,12 +10,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * SQLite implementation of CategoryService.
  */
 public class CategoryServiceImpl implements CategoryService {
     
+    private static final Logger LOGGER = Logger.getLogger(CategoryServiceImpl.class.getName());
     private final DatabaseManager databaseManager;
     
     public CategoryServiceImpl() {
@@ -24,6 +27,10 @@ public class CategoryServiceImpl implements CategoryService {
     
     @Override
     public Category createCategory(Category category) {
+        if (category == null) {
+            throw new IllegalArgumentException("Category cannot be null");
+        }
+        
         if (category.getId() == null || category.getId().isEmpty()) {
             category.setId(UUID.randomUUID().toString());
         }
@@ -46,12 +53,17 @@ public class CategoryServiceImpl implements CategoryService {
             return category;
             
         } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Failed to create category: " + category.getName(), e);
             throw new RuntimeException("Failed to create category", e);
         }
     }
     
     @Override
     public Category updateCategory(Category category) {
+        if (category == null) {
+            throw new IllegalArgumentException("Category cannot be null");
+        }
+        
         if (category.getId() == null) {
             throw new IllegalArgumentException("Category ID is required for update");
         }

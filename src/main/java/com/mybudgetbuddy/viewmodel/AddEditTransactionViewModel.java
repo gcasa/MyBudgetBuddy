@@ -11,6 +11,8 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.Alert;
 
+import static java.util.List.of;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
@@ -18,12 +20,13 @@ import java.util.function.Consumer;
 
 public class AddEditTransactionViewModel {
     
+    private static final String OTHER = "Other";
     private final TransactionService transactionService;
     private Transaction transaction;
 
-    private static final List<String> DEFAULT_CATEGORIES = List.of(
+    private static final List<String> DEFAULT_CATEGORIES = of(
             "Food", "Housing", "Transportation", "Entertainment",
-            "Healthcare", "Education", "Income", "Other"
+            "Healthcare", "Education", "Income", OTHER
     );
     
     // Form properties
@@ -53,7 +56,7 @@ public class AddEditTransactionViewModel {
         // Initialize form properties
         this.description = new SimpleStringProperty("");
         this.amount = new SimpleStringProperty("");
-        this.selectedCategory = new SimpleObjectProperty<>("Other");
+        this.selectedCategory = new SimpleObjectProperty<>(OTHER);
         this.selectedType = new SimpleObjectProperty<>(TransactionType.EXPENSE);
         this.selectedDate = new SimpleObjectProperty<>(LocalDate.now());
         
@@ -106,7 +109,7 @@ public class AddEditTransactionViewModel {
             // Reset to defaults for new transaction
             description.set("");
             amount.set("");
-            selectedCategory.set("Other");
+            selectedCategory.set(OTHER);
             selectedType.set(TransactionType.EXPENSE);
             selectedDate.set(LocalDate.now());
         }

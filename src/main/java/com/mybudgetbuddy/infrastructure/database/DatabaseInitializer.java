@@ -3,6 +3,8 @@ package com.mybudgetbuddy.infrastructure.database;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Initializes the SQLite database schema.
@@ -10,6 +12,7 @@ import java.sql.Statement;
  */
 public class DatabaseInitializer {
     
+    private static final Logger LOGGER = Logger.getLogger(DatabaseInitializer.class.getName());
     private final DatabaseManager databaseManager;
     
     public DatabaseInitializer(DatabaseManager databaseManager) {
@@ -34,9 +37,10 @@ public class DatabaseInitializer {
             createRecommendationsTable(stmt);
             createReportsTable(stmt);
             
-            System.out.println("Database schema initialized successfully");
+            LOGGER.info("Database schema initialized successfully");
             
         } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Failed to initialize database schema", e);
             throw new RuntimeException("Failed to initialize database schema", e);
         }
     }

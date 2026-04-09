@@ -11,9 +11,12 @@ import javafx.scene.control.Alert;
 
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class MainViewModel {
     
+    private static final Logger LOGGER = Logger.getLogger(MainViewModel.class.getName());
     private final TransactionService transactionService;
     
     // Observable properties for data binding
@@ -33,6 +36,10 @@ public class MainViewModel {
     private Supplier<Boolean> onConfirmDelete;
     
     public MainViewModel(TransactionService transactionService) {
+        if (transactionService == null) {
+            throw new IllegalArgumentException("TransactionService cannot be null");
+        }
+        
         this.transactionService = transactionService;
         
         // Initialize observable properties

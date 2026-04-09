@@ -12,7 +12,12 @@ import com.mybudgetbuddy.application.service.impl.TransactionServiceImpl;
 import com.mybudgetbuddy.infrastructure.database.DatabaseManager;
 import com.mybudgetbuddy.viewmodel.MainViewModel;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 public class App extends Application {
+
+    private static final Logger LOGGER = Logger.getLogger(App.class.getName());
 
     @Override
     public void start(Stage primaryStage) throws Exception {
@@ -36,12 +41,23 @@ public class App extends Application {
         
         // Handle clean database shutdown when application closes
         primaryStage.setOnCloseRequest(event -> {
-            DatabaseManager.getInstance().close();
-            System.exit(0);
+            try {
+                DatabaseManager.getInstance().close();
+                LOGGER.info("Application shutdown completed successfully");
+            } catch (Exception e) {
+                LOGGER.log(Level.WARNING, "Error during application shutdown", e);
+            } finally {
+                System.exit(0);
+            }
         });
     }
 
     public static void main(String[] args) {
-        launch(args);
+        try {
+            launch(args);
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Failed to start application", e);
+            System.exit(1);
+        }
     }
 }

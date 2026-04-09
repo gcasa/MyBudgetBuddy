@@ -84,20 +84,31 @@ public class Transaction implements Serializable {
     }
     
     public void addTag(String tag) {
+        if (tag == null || tag.trim().isEmpty()) {
+            return; // Don't add null or empty tags
+        }
+        
+        String trimmedTag = tag.trim();
         if (tags == null || tags.isEmpty()) {
-            tags = tag;
+            tags = trimmedTag;
         } else {
-            tags += "," + tag;
+            tags += "," + trimmedTag;
         }
         updateLastModified();
     }
 
-    // Getters and Setters
+    // Getters and Setters with validation
     public String getId() { return id; }
-    public void setId(String id) { this.id = id; }
+    public void setId(String id) { 
+        this.id = id; 
+        updateLastModified();
+    }
     
     public String getPlanId() { return planId; }
-    public void setPlanId(String planId) { this.planId = planId; }
+    public void setPlanId(String planId) { 
+        this.planId = planId;
+        updateLastModified();
+    }
     
     public String getBudgetId() { return budgetId; }
     public void setBudgetId(String budgetId) { this.budgetId = budgetId; }
