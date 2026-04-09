@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<DialogPane xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.mybudgetbuddy.controller.AddEditTransactionController"
+            prefWidth="420" prefHeight="340"
+            styleClass="dialog-pane">
+
+    <buttonTypes>
+        <ButtonType fx:constant="OK"/>
+        <ButtonType fx:constant="CANCEL"/>
+    </buttonTypes>
+
+    <content>
+        <GridPane hgap="12" vgap="14">
+            <padding><Insets top="16" right="16" bottom="8" left="16"/></padding>
+
+            <!-- Description -->
+            <Label text="Description:" GridPane.columnIndex="0" GridPane.rowIndex="0" styleClass="form-label"/>
+            <TextField fx:id="descriptionField" promptText="e.g. Grocery shopping"
+                       GridPane.columnIndex="1" GridPane.rowIndex="0"
+                       prefWidth="240" styleClass="form-field"/>
+
+            <!-- Amount -->
+            <Label text="Amount ($):" GridPane.columnIndex="0" GridPane.rowIndex="1" styleClass="form-label"/>
+            <TextField fx:id="amountField" promptText="e.g. 50.00"
+                       GridPane.columnIndex="1" GridPane.rowIndex="1"
+                       prefWidth="240" styleClass="form-field"/>
+
+            <!-- Category -->
+            <Label text="Category:" GridPane.columnIndex="0" GridPane.rowIndex="2" styleClass="form-label"/>
+            <ComboBox fx:id="categoryComboBox" prefWidth="240"
+                      GridPane.columnIndex="1" GridPane.rowIndex="2" styleClass="form-field"/>
+
+            <!-- Type -->
+            <Label text="Type:" GridPane.columnIndex="0" GridPane.rowIndex="3" styleClass="form-label"/>
+            <ComboBox fx:id="typeComboBox" prefWidth="240"
+                      GridPane.columnIndex="1" GridPane.rowIndex="3" styleClass="form-field"/>
+
+            <!-- Date -->
+            <Label text="Date:" GridPane.columnIndex="0" GridPane.rowIndex="4" styleClass="form-label"/>
+            <DatePicker fx:id="datePicker" prefWidth="240"
+                        GridPane.columnIndex="1" GridPane.rowIndex="4" styleClass="form-field"/>
+        </GridPane>
+    </content>
+</DialogPane>
