@@ -9,6 +9,7 @@ import javafx.stage.Stage;
 import com.mybudgetbuddy.controller.MainController;
 import com.mybudgetbuddy.application.service.TransactionService;
 import com.mybudgetbuddy.application.service.impl.TransactionServiceImpl;
+import com.mybudgetbuddy.infrastructure.database.DatabaseManager;
 import com.mybudgetbuddy.viewmodel.MainViewModel;
 
 public class App extends Application {
@@ -32,6 +33,12 @@ public class App extends Application {
         primaryStage.setTitle("MyBudgetBuddy");
         primaryStage.setScene(scene);
         primaryStage.show();
+        
+        // Handle clean database shutdown when application closes
+        primaryStage.setOnCloseRequest(event -> {
+            DatabaseManager.getInstance().close();
+            System.exit(0);
+        });
     }
 
     public static void main(String[] args) {

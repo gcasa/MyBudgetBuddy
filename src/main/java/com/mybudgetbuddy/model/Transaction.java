@@ -32,7 +32,13 @@ public class Transaction implements Serializable {
     private TransactionStatus status;
     private String tags; // Comma-separated tags for flexible categorization
     
+    // Recurring transaction fields
+    private String parentTransactionId;  // References parent transaction for recurring series
+    private LocalDate nextOccurrence;   // Next scheduled occurrence for recurring transactions
+    private LocalDate endDate;          // End date for recurring transactions
+    
     // For reconciliation
+    private String accountId;           // Account/wallet identifier
     private String accountNumber;
     private String referenceNumber;
     private boolean isReconciled;
@@ -198,6 +204,38 @@ public class Transaction implements Serializable {
     public boolean isReconciled() { return isReconciled; }
     public void setReconciled(boolean reconciled) { this.isReconciled = reconciled; }
     
+    // Recurring transaction getters/setters
+    public String getParentTransactionId() { return parentTransactionId; }
+    public void setParentTransactionId(String parentTransactionId) { 
+        this.parentTransactionId = parentTransactionId;
+        updateLastModified();
+    }
+    
+    public LocalDate getNextOccurrence() { return nextOccurrence; }
+    public void setNextOccurrence(LocalDate nextOccurrence) { 
+        this.nextOccurrence = nextOccurrence;
+        updateLastModified();
+    }
+    
+    public LocalDate getEndDate() { return endDate; }
+    public void setEndDate(LocalDate endDate) { 
+        this.endDate = endDate;
+        updateLastModified();
+    }
+    
+    public String getAccountId() { return accountId; }
+    public void setAccountId(String accountId) { 
+        this.accountId = accountId;
+        updateLastModified();
+    }
+    
+    // Added for compatibility with service layer
+    public Boolean getIsRecurring() { return isRecurring; }
+    public void setIsRecurring(Boolean isRecurring) { 
+        this.isRecurring = isRecurring != null ? isRecurring : false;
+        updateLastModified();
+    }
+    
     // Convenience methods for backward compatibility with ViewModels
     public LocalDate getDate() {
         return transactionDate;
@@ -216,7 +254,7 @@ public class Transaction implements Serializable {
     }
 }
 
-enum PaymentMethod {
+public enum PaymentMethod {
     CASH,
     CREDIT_CARD,
     DEBIT_CARD,
@@ -227,7 +265,7 @@ enum PaymentMethod {
     OTHER
 }
 
-enum RecurringFrequency {
+public enum RecurringFrequency {
     DAILY,
     WEEKLY,
     BI_WEEKLY,
@@ -238,7 +276,7 @@ enum RecurringFrequency {
     ANNUALLY
 }
 
-enum TransactionStatus {
+public enum TransactionStatus {
     PENDING,
     CONFIRMED,
     CANCELLED,
