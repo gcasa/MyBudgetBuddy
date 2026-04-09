@@ -11,7 +11,7 @@ import java.util.List;
 public class BudgetService {
 
     private static final String DATA_FILE =
-            Paths.get(System.getProperty("user.home"), "mybudgetbuddy_data.ser").toString();
+            Paths.get(System.getProperty("user.home"), ".mybudgetbuddy_data.ser").toString();
 
     private List<Transaction> transactions;
 

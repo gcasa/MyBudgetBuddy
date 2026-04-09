@@ -35,4 +35,4 @@ buildNumber.properties
 Thumbs.db
 
 # App data
-mybudgetbuddy_data.ser
+.mybudgetbuddy_data.ser

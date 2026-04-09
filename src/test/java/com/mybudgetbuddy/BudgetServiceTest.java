@@ -20,14 +20,14 @@ class BudgetServiceTest {
     void setUp() {
         // Use a test-specific data file to avoid touching real user data
         System.setProperty("user.home", System.getProperty("java.io.tmpdir"));
-        File dataFile = new File(System.getProperty("user.home"), "mybudgetbuddy_data.ser");
+        File dataFile = new File(System.getProperty("user.home"), ".mybudgetbuddy_data.ser");
         if (dataFile.exists()) dataFile.delete();
         service = new BudgetService();
     }
 
     @AfterEach
     void tearDown() {
-        File dataFile = new File(System.getProperty("user.home"), "mybudgetbuddy_data.ser");
+        File dataFile = new File(System.getProperty("user.home"), ".mybudgetbuddy_data.ser");
         if (dataFile.exists()) dataFile.delete();
     }
 
