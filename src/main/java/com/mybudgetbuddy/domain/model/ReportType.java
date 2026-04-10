@@ -1,0 +1,18 @@
+package com.mybudgetbuddy.domain.model;
+
+public enum ReportType {
+    FINANCIAL_SUMMARY,
+    BUDGET_ANALYSIS,
+    GOAL_PROGRESS,
+    CASH_FLOW,
+    EXPENSE_BREAKDOWN,
+    INCOME_ANALYSIS,
+    TREND_ANALYSIS,
+    FORECAST,
+    TAX_SUMMARY,
+    NET_WORTH,
+    CUSTOM,
+    ANNUAL_SUMMARY,
+    MONTHLY_SUMMARY,
+    COMPARATIVE_ANALYSIS
+}

@@ -1,302 +1,291 @@
+---
+config:
+  theme: forest
+---
 classDiagram
-    %% Core Model Layer
+direction LR
     class Transaction {
-        -String id
-        -String planId
-        -String budgetId
-        -BigDecimal amount
-        -TransactionType type
-        -PaymentMethod paymentMethod
-        -LocalDate date
-        -String description
-        -String categoryId
-        -String accountId
-        -RecurringFrequency recurringFrequency
-        -Boolean isRecurring
-        -String parentTransactionId
-        -LocalDate nextOccurrence
-        -LocalDate endDate
-        +getters/setters()
-        +isIncome()
-        +isExpense()
+	    -String id
+	    -String planId
+	    -String budgetId
+	    -BigDecimal amount
+	    -TransactionType type
+	    -PaymentMethod paymentMethod
+	    -LocalDate date
+	    -String description
+	    -String categoryId
+	    -String accountId
+	    -RecurringFrequency recurringFrequency
+	    -Boolean isRecurring
+	    -String parentTransactionId
+	    -LocalDate nextOccurrence
+	    -LocalDate endDate
+	    +getters/setters()
+	    +isIncome()
+	    +isExpense()
     }
 
     class Category {
-        -String id
-        -String name
-        -String description
-        -String color
-        -CategoryType type
-        +getters/setters()
+	    -String id
+	    -String name
+	    -String description
+	    -String color
+	    -CategoryType type
+	    +getters/setters()
     }
 
     class TransactionType {
-        <<enumeration>>
-        INCOME
-        EXPENSE
-        TRANSFER
-        INVESTMENT
-        REFUND
-        +getDisplayName()
+	    INCOME
+	    EXPENSE
+	    TRANSFER
+	    INVESTMENT
+	    REFUND
+	    +getDisplayName()
     }
 
     class CategoryType {
-        <<enumeration>>
-        INCOME
-        EXPENSE
+	    INCOME
+	    EXPENSE
     }
 
-    %% Domain Model Layer
     class FinancialPlan {
-        -String id
-        -String userId
-        -String name
-        -String description
-        -PlanType type
-        -LocalDate startDate
-        -LocalDate endDate
-        -PlanStatus status
-        -BigDecimal totalIncome
-        -BigDecimal totalExpenses
-        -BigDecimal targetSavings
-        -BigDecimal emergencyFundTarget
-        -List~String~ budgetIds
-        -List~String~ goalIds
-        +getters/setters()
+	    -String id
+	    -String userId
+	    -String name
+	    -String description
+	    -PlanType type
+	    -LocalDate startDate
+	    -LocalDate endDate
+	    -PlanStatus status
+	    -BigDecimal totalIncome
+	    -BigDecimal totalExpenses
+	    -BigDecimal targetSavings
+	    -BigDecimal emergencyFundTarget
+	    -List~String~ budgetIds
+	    -List~String~ goalIds
+	    +getters/setters()
     }
 
     class Budget {
-        -String id
-        -String name
-        -String description
-        -BigDecimal amount
-        -LocalDate startDate
-        -LocalDate endDate
-        +getters/setters()
+	    -String id
+	    -String name
+	    -String description
+	    -BigDecimal amount
+	    -LocalDate startDate
+	    -LocalDate endDate
+	    +getters/setters()
     }
 
     class Goal {
-        -String id
-        -String name
-        -String description
-        -BigDecimal targetAmount
-        -BigDecimal currentAmount
-        -LocalDate targetDate
-        +getters/setters()
+	    -String id
+	    -String name
+	    -String description
+	    -BigDecimal targetAmount
+	    -BigDecimal currentAmount
+	    -LocalDate targetDate
+	    +getters/setters()
     }
 
     class User {
-        -String id
-        -String username
-        -String email
-        -LocalDate createdDate
-        +getters/setters()
+	    -String id
+	    -String username
+	    -String email
+	    -LocalDate createdDate
+	    +getters/setters()
     }
 
     class Scenario {
-        -String id
-        -String name
-        -String description
-        -Map parameters
-        +getters/setters()
+	    -String id
+	    -String name
+	    -String description
+	    -Map parameters
+	    +getters/setters()
     }
 
     class Recommendation {
-        -String id
-        -String title
-        -String description
-        -RecommendationType type
-        -Priority priority
-        +getters/setters()
+	    -String id
+	    -String title
+	    -String description
+	    -RecommendationType type
+	    -Priority priority
+	    +getters/setters()
     }
 
     class Report {
-        -String id
-        -String title
-        -LocalDate generatedDate
-        -ReportType type
-        +getters/setters()
+	    -String id
+	    -String title
+	    -LocalDate generatedDate
+	    -ReportType type
+	    +getters/setters()
     }
 
-    %% Application Service Layer
     class TransactionService {
-        <<interface>>
-        +createTransaction(Transaction)
-        +updateTransaction(Transaction)
-        +deleteTransaction(String)
-        +getTransactionById(String)
-        +getAllTransactions()
-        +getTransactionsByDateRange(LocalDate, LocalDate)
-        +getTransactionsByCategory(String)
-        +getTransactionsByType(TransactionType)
-        +getTotalIncome()
-        +getTotalExpenses()
-        +getBalance()
-        +getTotalIncomeForPeriod(LocalDate, LocalDate)
-        +getTotalExpensesForPeriod(LocalDate, LocalDate)
-        +getBalanceForPeriod(LocalDate, LocalDate)
-        +getCategorySpending(LocalDate, LocalDate)
+	    +createTransaction(Transaction)
+	    +updateTransaction(Transaction)
+	    +deleteTransaction(String)
+	    +getTransactionById(String)
+	    +getAllTransactions()
+	    +getTransactionsByDateRange(LocalDate, LocalDate)
+	    +getTransactionsByCategory(String)
+	    +getTransactionsByType(TransactionType)
+	    +getTotalIncome()
+	    +getTotalExpenses()
+	    +getBalance()
+	    +getTotalIncomeForPeriod(LocalDate, LocalDate)
+	    +getTotalExpensesForPeriod(LocalDate, LocalDate)
+	    +getBalanceForPeriod(LocalDate, LocalDate)
+	    +getCategorySpending(LocalDate, LocalDate)
     }
 
     class TransactionServiceImpl {
-        -Map~String, Transaction~ transactions
-        +createTransaction(Transaction)
-        +updateTransaction(Transaction)
-        +deleteTransaction(String)
-        +getTransactionById(String)
-        +getAllTransactions()
-        +getTransactionsByDateRange(LocalDate, LocalDate)
-        +getTransactionsByCategory(String)
-        +getTransactionsByType(TransactionType)
-        +getTotalIncome()
-        +getTotalExpenses()
-        +getBalance()
-        +getTotalIncomeForPeriod(LocalDate, LocalDate)
-        +getTotalExpensesForPeriod(LocalDate, LocalDate)
-        +getBalanceForPeriod(LocalDate, LocalDate)
-        +getCategorySpending(LocalDate, LocalDate)
-        -loadTransactions()
-        -saveTransactions()
+	    -Map~String, Transaction~ transactions
+	    +createTransaction(Transaction)
+	    +updateTransaction(Transaction)
+	    +deleteTransaction(String)
+	    +getTransactionById(String)
+	    +getAllTransactions()
+	    +getTransactionsByDateRange(LocalDate, LocalDate)
+	    +getTransactionsByCategory(String)
+	    +getTransactionsByType(TransactionType)
+	    +getTotalIncome()
+	    +getTotalExpenses()
+	    +getBalance()
+	    +getTotalIncomeForPeriod(LocalDate, LocalDate)
+	    +getTotalExpensesForPeriod(LocalDate, LocalDate)
+	    +getBalanceForPeriod(LocalDate, LocalDate)
+	    +getCategorySpending(LocalDate, LocalDate)
+	    -loadTransactions()
+	    -saveTransactions()
     }
 
-    %% Planning Engine Layer
     class FinancialPlanningEngine {
-        <<interface>>
-        +calculateBudgets(FinancialPlan)
-        +runForecasts(String, int)
-        +projectGoals(String, LocalDate)
-        +analyzeScenario(Scenario)
-        +compareScenarios(List~String~)
-        +runBaselineScenario(String)
-        +projectFutureValue(BigDecimal, BigDecimal, int)
-        +calculateRequiredSavings(BigDecimal, BigDecimal, int, BigDecimal)
-        +projectNetWorth(String, int)
-        +calculateRetirementNeeds(String, int, int)
+	    +calculateBudgets(FinancialPlan)
+	    +runForecasts(String, int)
+	    +projectGoals(String, LocalDate)
+	    +analyzeScenario(Scenario)
+	    +compareScenarios(List~String~)
+	    +runBaselineScenario(String)
+	    +projectFutureValue(BigDecimal, BigDecimal, int)
+	    +calculateRequiredSavings(BigDecimal, BigDecimal, int, BigDecimal)
+	    +projectNetWorth(String, int)
+	    +calculateRetirementNeeds(String, int, int)
     }
 
     class RulesRecommendationEngine {
-        +analyzeSpendingPatterns(List~Transaction~)
-        +generateRecommendations(FinancialPlan)
-        +detectAnomalies(List~Transaction~)
-        +suggestBudgetAdjustments(Budget)
+	    +analyzeSpendingPatterns(List~Transaction~)
+	    +generateRecommendations(FinancialPlan)
+	    +detectAnomalies(List~Transaction~)
+	    +suggestBudgetAdjustments(Budget)
     }
 
-    %% Command Pattern
     class Command {
-        <<interface>>
-        +execute()
-        +canExecute()
+	    +execute()
+	    +canExecute()
     }
 
     class RelayCommand {
-        -Runnable action
-        -Supplier~Boolean~ canExecuteFunc
-        +execute()
-        +canExecute()
+	    -Runnable action
+	    -Supplier~Boolean~ canExecuteFunc
+	    +execute()
+	    +canExecute()
     }
 
-    %% Presentation Layer - ViewModels
     class MainViewModel {
-        -TransactionService transactionService
-        -ObservableList~Transaction~ transactions
-        -StringProperty totalIncome
-        -StringProperty totalExpenses
-        -StringProperty balance
-        -ObjectProperty~Transaction~ selectedTransaction
-        -Command addCommand
-        -Command editCommand
-        -Command deleteCommand
-        -Consumer~Transaction~ onOpenAddEditDialog
-        -Supplier~Boolean~ onConfirmDelete
-        +getters/setters()
-        -handleAdd()
-        -handleEdit()
-        -handleDelete()
-        -canEdit()
-        -canDelete()
-        +loadData()
-        +refreshFinancials()
+	    -TransactionService transactionService
+	    -ObservableList~Transaction~ transactions
+	    -StringProperty totalIncome
+	    -StringProperty totalExpenses
+	    -StringProperty balance
+	    -ObjectProperty~Transaction~ selectedTransaction
+	    -Command addCommand
+	    -Command editCommand
+	    -Command deleteCommand
+	    -Consumer~Transaction~ onOpenAddEditDialog
+	    -Supplier~Boolean~ onConfirmDelete
+	    +getters/setters()
+	    -handleAdd()
+	    -handleEdit()
+	    -handleDelete()
+	    -canEdit()
+	    -canDelete()
+	    +loadData()
+	    +refreshFinancials()
     }
 
     class AddEditTransactionViewModel {
-        -TransactionService transactionService
-        -ObjectProperty~Transaction~ transaction
-        -BooleanProperty isEditing
-        -Command saveCommand
-        -Command cancelCommand
-        +getters/setters()
-        -handleSave()
-        -handleCancel()
-        -canSave()
+	    -TransactionService transactionService
+	    -ObjectProperty~Transaction~ transaction
+	    -BooleanProperty isEditing
+	    -Command saveCommand
+	    -Command cancelCommand
+	    +getters/setters()
+	    -handleSave()
+	    -handleCancel()
+	    -canSave()
     }
 
     class BudgetViewModel {
-        -ObservableList~Budget~ budgets
-        -ObjectProperty~Budget~ selectedBudget
-        +getters/setters()
+	    -ObservableList~Budget~ budgets
+	    -ObjectProperty~Budget~ selectedBudget
+	    +getters/setters()
     }
 
     class DashboardViewModel {
-        -ObservableList~FinancialPlan~ plans
-        -ObjectProperty~FinancialPlan~ selectedPlan
-        +getters/setters()
+	    -ObservableList~FinancialPlan~ plans
+	    -ObjectProperty~FinancialPlan~ selectedPlan
+	    +getters/setters()
     }
 
-    %% Presentation Layer - Controllers
     class MainController {
-        -MainViewModel viewModel
-        +initialize()
-        +handleAddTransaction()
-        +handleEditTransaction()
-        +handleDeleteTransaction()
+	    -MainViewModel viewModel
+	    +initialize()
+	    +handleAddTransaction()
+	    +handleEditTransaction()
+	    +handleDeleteTransaction()
     }
 
     class AddEditTransactionController {
-        -AddEditTransactionViewModel viewModel
-        +initialize()
-        +handleSave()
-        +handleCancel()
+	    -AddEditTransactionViewModel viewModel
+	    +initialize()
+	    +handleSave()
+	    +handleCancel()
     }
 
     class App {
-        +main(String[])
-        +start(Stage)
+	    +main(String[])
+	    +start(Stage)
     }
 
-    %% Relationships
+	<<enumeration>> TransactionType
+	<<enumeration>> CategoryType
+	<<interface>> TransactionService
+	<<interface>> FinancialPlanningEngine
+	<<interface>> Command
+
     Transaction --> TransactionType
     Transaction --> CategoryType
     Category --> CategoryType
-    
     FinancialPlan --> Budget
     FinancialPlan --> Goal
     FinancialPlan --> User
-    
     TransactionServiceImpl ..|> TransactionService
     TransactionServiceImpl --> Transaction
-    
     RelayCommand ..|> Command
-    
     MainViewModel --> TransactionService
     MainViewModel --> Transaction
     MainViewModel --> Command
-    
     AddEditTransactionViewModel --> TransactionService
     AddEditTransactionViewModel --> Transaction
     AddEditTransactionViewModel --> Command
-    
     MainController --> MainViewModel
     AddEditTransactionController --> AddEditTransactionViewModel
-    
     FinancialPlanningEngine --> FinancialPlan
     FinancialPlanningEngine --> Scenario
     FinancialPlanningEngine --> Goal
     FinancialPlanningEngine --> Budget
-    
     RulesRecommendationEngine --> Transaction
     RulesRecommendationEngine --> FinancialPlan
     RulesRecommendationEngine --> Budget
     RulesRecommendationEngine --> Recommendation
-    
     BudgetViewModel --> Budget
     DashboardViewModel --> FinancialPlan
