@@ -1,0 +1,17 @@
+flowchart TB
+    A([Start]) --> B[Open Transaction Entry Form]
+    B --> C[Enter Transaction Details]
+    C --> D[Submit Transaction]
+
+    D --> E{Required Fields Valid?}
+    E -- No --> F[Display Validation Errors]
+    F --> C
+
+    E -- Yes --> G[Create Transaction Object]
+    G --> H[Send to Application Services]
+    H --> I[Process Transaction]
+    I --> J[Update Budget/Goal Data]
+    J --> K[Persist Transaction]
+    K --> L[Refresh Dashboard and Summaries]
+    L --> M[Display Confirmation]
+    M --> N([End])

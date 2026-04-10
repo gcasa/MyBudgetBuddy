@@ -1,0 +1,41 @@
+flowchart TB
+    AS["&lt&ltcomponent&gt&gt Application Services Layer"]
+
+    TE["&lt&ltcomponent&gt&gt Transaction Entry Module"]
+    BM["&lt&ltcomponent&gt&gt Budget Management Module"]
+    GT["&lt&ltcomponent&gt&gt Goal Tracking Module"]
+    FPE["&lt&ltcomponent&gt&gt Financial Planning Engine"]
+    RRE["&lt&ltcomponent&gt&gt Rules / Recommendation Engine"]
+    RPT["&lt&ltcomponent&gt&gt Reporting / Export Service"]
+
+    DAL["&lt&ltcomponent&gt&gt Data Access Layer"]
+    INT["&lt&ltcomponent&gt&gt Integration Client Layer"]
+
+    AS --> TE
+    AS --> BM
+    AS --> GT
+    AS --> FPE
+    AS --> RRE
+    AS --> RPT
+
+    TE --> DAL
+    BM --> DAL
+    GT --> DAL
+    FPE --> DAL
+    RPT --> DAL
+
+    TE -->|updates spending totals| BM
+    TE -->|updates goal progress| GT
+    TE -->|provides transaction data| FPE
+
+    BM -->|provides budget constraints| FPE
+    GT -->|provides goal targets| FPE
+
+    FPE -->|provides analysis inputs| RRE
+    FPE -->|provides projections| RPT
+    BM -->|provides budget status| RPT
+    GT -->|provides goal status| RPT
+    TE -->|provides transaction history| RPT
+
+    INT -->|external financial data| FPE
+    INT -->|external rules/data| RRE

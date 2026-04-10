@@ -1,0 +1,30 @@
+flowchart TB
+    subgraph PresentationLayer["Presentation Layer"]
+        UI["JavaFX User Interface"]
+        VM["ViewModel / Presentation Logic"]
+    end
+
+    subgraph ApplicationLayer["Application Services Layer"]
+        AS["Application Services"]
+        TE["Transaction Entry Module"]
+        FPE["Financial Planning Engine"]
+        RRE["Rules / Recommendation Engine"]
+        RES["Reporting / Export Service"]
+    end
+
+    subgraph PersistenceLayer["Persistence Layer"]
+        DAL["Data Access Layer"]
+        Repo["Repositories"]
+        DB["Local Database / File Storage"]
+    end
+
+    UI --> VM
+    VM --> AS
+    AS --> TE
+    AS --> FPE
+    AS --> RRE
+    AS --> RES
+    AS --> DAL
+    DAL --> Repo
+    Repo --> DB
+    

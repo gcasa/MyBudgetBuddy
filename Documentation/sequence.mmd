@@ -1,0 +1,29 @@
+sequenceDiagram
+    actor User
+    participant UI as JavaFX UI
+    participant VM as ViewModel
+    participant AS as Application Services
+    participant TE as Transaction Entry Module
+    participant DAL as Data Access Layer
+    participant DB as Local Database
+
+    User->>UI: Enter transaction details
+    User->>UI: Submit transaction
+    UI->>VM: Pass entered data
+    VM->>VM: Validate fields
+
+    alt Validation fails
+        VM-->>UI: Return validation errors
+        UI-->>User: Display error messages
+    else Validation succeeds
+        VM->>AS: Request transaction save
+        AS->>TE: Process transaction
+        TE-->>AS: Validated transaction object
+        AS->>DAL: Save transaction
+        DAL->>DB: Insert record
+        DB-->>DAL: Save confirmation
+        DAL-->>AS: Persistence successful
+        AS-->>VM: Return success/status
+        VM-->>UI: Update UI state
+        UI-->>User: Show confirmation and refresh summary
+    end

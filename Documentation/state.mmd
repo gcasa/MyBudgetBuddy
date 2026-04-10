@@ -1,0 +1,14 @@
+stateDiagram-v2
+    [*] --> Idle
+
+    Idle --> EnteringData : Start Transaction Entry
+    EnteringData --> Validating : Submit Transaction
+
+    Validating --> Error : Validation Failed
+    Error --> EnteringData : Correct Input
+
+    Validating --> Saving : Validation Successful
+    Saving --> Stored : Data Persisted
+
+    Stored --> UpdatingUI : Refresh Dashboard
+    UpdatingUI --> Idle : Complete

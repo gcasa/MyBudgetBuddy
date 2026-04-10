@@ -1,0 +1,67 @@
+classDiagram
+direction TB
+
+class ApplicationServicesLayer {
+  <<component>>
+}
+
+class TransactionEntryModule {
+  <<component>>
+}
+
+class BudgetManagementModule {
+  <<component>>
+}
+
+class GoalTrackingModule {
+  <<component>>
+}
+
+class FinancialPlanningEngine {
+  <<component>>
+}
+
+class RulesRecommendationEngine {
+  <<component>>
+}
+
+class ReportingExportService {
+  <<component>>
+}
+
+class DataAccessLayer {
+  <<component>>
+}
+
+class IntegrationClientLayer {
+  <<component>>
+}
+
+ApplicationServicesLayer --> TransactionEntryModule : coordinates
+ApplicationServicesLayer --> BudgetManagementModule : coordinates
+ApplicationServicesLayer --> GoalTrackingModule : coordinates
+ApplicationServicesLayer --> FinancialPlanningEngine : invokes
+ApplicationServicesLayer --> RulesRecommendationEngine : invokes
+ApplicationServicesLayer --> ReportingExportService : invokes
+
+TransactionEntryModule --> DataAccessLayer : persists through
+BudgetManagementModule --> DataAccessLayer : persists through
+GoalTrackingModule --> DataAccessLayer : persists through
+FinancialPlanningEngine --> DataAccessLayer : reads/writes
+ReportingExportService --> DataAccessLayer : reads from
+
+TransactionEntryModule --> BudgetManagementModule : updates spending totals
+TransactionEntryModule --> GoalTrackingModule : updates goal progress
+TransactionEntryModule --> FinancialPlanningEngine : supplies transaction data
+
+BudgetManagementModule --> FinancialPlanningEngine : supplies budget constraints
+GoalTrackingModule --> FinancialPlanningEngine : supplies goal targets
+
+FinancialPlanningEngine --> RulesRecommendationEngine : supplies analysis inputs
+FinancialPlanningEngine --> ReportingExportService : supplies projections
+BudgetManagementModule --> ReportingExportService : supplies budget status
+GoalTrackingModule --> ReportingExportService : supplies goal status
+TransactionEntryModule --> ReportingExportService : supplies transaction history
+
+IntegrationClientLayer --> FinancialPlanningEngine : supplies external data
+IntegrationClientLayer --> RulesRecommendationEngine : supplies external rules/data

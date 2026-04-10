@@ -1,0 +1,16 @@
+flowchart TB
+    User["<actor> User"]
+
+    subgraph Device["<device> Desktop Computer"]
+        OS["<executionEnvironment> Windows / macOS / Linux"]
+        JRE["<executionEnvironment> OpenJDK / JVM"]
+        App["<artifact> Financial and Expense Tracking Application\n(JavaFX Desktop App)"]
+        DB["<artifact> SQLite Database"]
+        Docs["<artifact> Config Files / Exported Reports"]
+    end
+
+    User --> App
+    OS --> JRE
+    JRE --> App
+    App --> DB
+    App --> Docs
