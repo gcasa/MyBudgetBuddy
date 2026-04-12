@@ -36,3 +36,5 @@ Thumbs.db
 
 # App data
 .mybudgetbuddy_data.ser
+*.log
+*.class
