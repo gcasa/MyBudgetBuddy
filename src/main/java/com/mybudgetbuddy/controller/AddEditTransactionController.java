@@ -2,6 +2,7 @@ package com.mybudgetbuddy.controller;
 
 import com.mybudgetbuddy.model.Transaction;
 import com.mybudgetbuddy.model.TransactionType;
+import com.mybudgetbuddy.model.Category;
 import com.mybudgetbuddy.viewmodel.AddEditTransactionViewModel;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
@@ -10,7 +11,7 @@ public class AddEditTransactionController {
 
     @FXML private TextField descriptionField;
     @FXML private TextField amountField;
-    @FXML private ComboBox<String> categoryComboBox;
+    @FXML private ComboBox<Category> categoryComboBox;
     @FXML private ComboBox<TransactionType> typeComboBox;
     @FXML private DatePicker datePicker;
     @FXML private Button saveButton;

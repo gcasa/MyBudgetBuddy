@@ -4,14 +4,16 @@ import com.mybudgetbuddy.command.Command;
 import com.mybudgetbuddy.command.RelayCommand;
 import com.mybudgetbuddy.model.Transaction;
 import com.mybudgetbuddy.model.TransactionType;
+import com.mybudgetbuddy.model.Category;
+import com.mybudgetbuddy.model.CategoryType;
 import com.mybudgetbuddy.application.service.TransactionService;
+import com.mybudgetbuddy.application.service.CategoryService;
+import com.mybudgetbuddy.application.service.impl.CategoryServiceImpl;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.Alert;
-
-import static java.util.List.of;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -20,24 +22,20 @@ import java.util.function.Consumer;
 
 public class AddEditTransactionViewModel {
     
-    private static final String OTHER = "Other";
     private final TransactionService transactionService;
+    private final CategoryService categoryService;
     private Transaction transaction;
-
-    private static final List<String> DEFAULT_CATEGORIES = of(
-            "Food", "Housing", "Transportation", "Entertainment",
-            "Healthcare", "Education", "Income", OTHER
-    );
+    private List<Category> allCategories;
     
     // Form properties
     private final StringProperty description;
     private final StringProperty amount;
-    private final ObjectProperty<String> selectedCategory;
+    private final ObjectProperty<Category> selectedCategory;
     private final ObjectProperty<TransactionType> selectedType;
     private final ObjectProperty<LocalDate> selectedDate;
     
     // Available options
-    private final ObservableList<String> categories;
+    private ObservableList<Category> categories; // Remove final since it's assigned in different methods
     private final ObservableList<TransactionType> transactionTypes;
     
     // Validation
@@ -52,16 +50,19 @@ public class AddEditTransactionViewModel {
     
     public AddEditTransactionViewModel(TransactionService transactionService) {
         this.transactionService = transactionService;
+        this.categoryService = new CategoryServiceImpl();
         
         // Initialize form properties
         this.description = new SimpleStringProperty("");
         this.amount = new SimpleStringProperty("");
-        this.selectedCategory = new SimpleObjectProperty<>(OTHER);
+        this.selectedCategory = new SimpleObjectProperty<>();
         this.selectedType = new SimpleObjectProperty<>(TransactionType.EXPENSE);
         this.selectedDate = new SimpleObjectProperty<>(LocalDate.now());
         
-        // Initialize available options
-        this.categories = FXCollections.observableArrayList(DEFAULT_CATEGORIES);
+        // Load categories from database
+        loadCategories();
+        
+        // Initialize transaction types
         this.transactionTypes = FXCollections.observableArrayList(TransactionType.values());
         
         // Initialize validation properties
@@ -75,14 +76,31 @@ public class AddEditTransactionViewModel {
         this.saveCommand = new RelayCommand(this::handleSave, isValid::get);
     }
     
+    private void loadCategories() {
+        try {
+            allCategories = categoryService.getAllCategories();
+            categories = FXCollections.observableArrayList(allCategories);
+            
+            // Set default selection to first expense category
+            Category defaultCategory = allCategories.stream()
+                .filter(cat -> cat.getType() == CategoryType.EXPENSE)
+                .findFirst()
+                .orElse(!allCategories.isEmpty() ? allCategories.get(0) : null);
+            selectedCategory.set(defaultCategory);
+        } catch (Exception e) {
+            // Fallback to empty list if database is not ready
+            categories = FXCollections.observableArrayList();
+        }
+    }
+    
     // Property getters for binding
     public StringProperty descriptionProperty() { return description; }
     public StringProperty amountProperty() { return amount; }
-    public ObjectProperty<String> selectedCategoryProperty() { return selectedCategory; }
+    public ObjectProperty<Category> selectedCategoryProperty() { return selectedCategory; }
     public ObjectProperty<TransactionType> selectedTypeProperty() { return selectedType; }
     public ObjectProperty<LocalDate> selectedDateProperty() { return selectedDate; }
     
-    public ObservableList<String> getCategories() { return categories; }
+    public ObservableList<Category> getCategories() { return categories; }
     public ObservableList<TransactionType> getTransactionTypes() { return transactionTypes; }
     
     public BooleanProperty isValidProperty() { return isValid; }
@@ -102,14 +120,22 @@ public class AddEditTransactionViewModel {
         if (transaction != null) {
             description.set(transaction.getDescription());
             amount.set(String.valueOf(transaction.getAmount()));
-            selectedCategory.set(transaction.getCategory());
+            
+            // Find category by ID
+            String categoryId = transaction.getCategoryId();
+            Category category = allCategories.stream()
+                .filter(cat -> cat.getId().equals(categoryId))
+                .findFirst()
+                .orElse(null);
+            selectedCategory.set(category);
+            
             selectedType.set(transaction.getType());
-            selectedDate.set(transaction.getDate());
+            selectedDate.set(transaction.getTransactionDate());
         } else {
             // Reset to defaults for new transaction
             description.set("");
             amount.set("");
-            selectedCategory.set(OTHER);
+            selectedCategory.set(categories.isEmpty() ? null : categories.get(0));
             selectedType.set(TransactionType.EXPENSE);
             selectedDate.set(LocalDate.now());
         }
@@ -168,21 +194,22 @@ public class AddEditTransactionViewModel {
             String desc = description.get().trim();
             double amt = Double.parseDouble(amount.get().trim());
             BigDecimal amountDecimal = BigDecimal.valueOf(amt);
-            String category = selectedCategory.get();
+            Category category = selectedCategory.get();
             TransactionType type = selectedType.get();
             LocalDate date = selectedDate.get();
             
             if (transaction == null) {
                 // Create new transaction
-                Transaction newTransaction = new Transaction(desc, amountDecimal, type, category, date);
+                Transaction newTransaction = new Transaction(desc, amountDecimal, type, 
+                    category != null ? category.getId() : null, date);
                 transactionService.createTransaction(newTransaction);
             } else {
                 // Update existing transaction
                 transaction.setDescription(desc);
                 transaction.setAmount(amountDecimal);
-                transaction.setCategory(category);
+                transaction.setCategoryId(category != null ? category.getId() : null);
                 transaction.setType(type);
-                transaction.setDate(date);
+                transaction.setTransactionDate(date);
                 transactionService.updateTransaction(transaction);
             }
             

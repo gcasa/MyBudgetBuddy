@@ -11,12 +11,9 @@ import javafx.scene.control.Alert;
 
 import java.util.function.Consumer;
 import java.util.function.Supplier;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class MainViewModel {
     
-    private static final Logger LOGGER = Logger.getLogger(MainViewModel.class.getName());
     private final TransactionService transactionService;
     
     // Observable properties for data binding
