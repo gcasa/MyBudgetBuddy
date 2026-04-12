@@ -43,6 +43,11 @@ public class TransactionServiceImpl implements TransactionService {
             throw new IllegalArgumentException("Transaction cannot be null");
         }
         
+        // Validate required fields
+        if (transaction.getType() == null) {
+            throw new IllegalArgumentException("Transaction type cannot be null");
+        }
+        
         if (transaction.getId() == null || transaction.getId().isEmpty()) {
             transaction.setId(UUID.randomUUID().toString());
         }
@@ -469,20 +474,21 @@ public class TransactionServiceImpl implements TransactionService {
      * Helper method to set transaction parameters in prepared statements
      */
     private void setTransactionParameters(PreparedStatement stmt, Transaction transaction) throws SQLException {
-        stmt.setString(1, transaction.getPlanId());
-        stmt.setString(2, transaction.getBudgetId());
-        stmt.setBigDecimal(3, transaction.getAmount());
-        stmt.setString(4, transaction.getType() != null ? transaction.getType().name() : null);
-        stmt.setString(5, transaction.getPaymentMethod() != null ? transaction.getPaymentMethod().name() : null);
-        stmt.setDate(6, transaction.getTransactionDate() != null ? Date.valueOf(transaction.getTransactionDate()) : null);
-        stmt.setString(7, transaction.getDescription());
-        stmt.setString(8, transaction.getCategoryId());
-        stmt.setString(9, transaction.getAccountId());
-        stmt.setString(10, transaction.getRecurringFrequency() != null ? transaction.getRecurringFrequency().name() : null);
-        stmt.setBoolean(11, transaction.getIsRecurring() != null ? transaction.getIsRecurring() : false);
-        stmt.setString(12, transaction.getParentTransactionId());
-        stmt.setDate(13, transaction.getNextOccurrence() != null ? Date.valueOf(transaction.getNextOccurrence()) : null);
-        stmt.setDate(14, transaction.getEndDate() != null ? Date.valueOf(transaction.getEndDate()) : null);
+        stmt.setString(1, transaction.getId());  // id
+        stmt.setString(2, transaction.getPlanId());  // plan_id
+        stmt.setString(3, transaction.getBudgetId());  // budget_id
+        stmt.setBigDecimal(4, transaction.getAmount());  // amount
+        stmt.setString(5, transaction.getType() != null ? transaction.getType().name() : null);  // type
+        stmt.setString(6, transaction.getPaymentMethod() != null ? transaction.getPaymentMethod().name() : null);  // payment_method
+        stmt.setDate(7, transaction.getTransactionDate() != null ? Date.valueOf(transaction.getTransactionDate()) : null);  // transaction_date
+        stmt.setString(8, transaction.getDescription());  // description
+        stmt.setString(9, transaction.getCategoryId());  // category_id
+        stmt.setString(10, transaction.getAccountId());  // account_id
+        stmt.setString(11, transaction.getRecurringFrequency() != null ? transaction.getRecurringFrequency().name() : null);  // recurring_frequency
+        stmt.setBoolean(12, transaction.getIsRecurring() != null ? transaction.getIsRecurring() : false);  // is_recurring
+        stmt.setString(13, transaction.getParentTransactionId());  // parent_transaction_id
+        stmt.setDate(14, transaction.getNextOccurrence() != null ? Date.valueOf(transaction.getNextOccurrence()) : null);  // next_occurrence
+        stmt.setDate(15, transaction.getEndDate() != null ? Date.valueOf(transaction.getEndDate()) : null);  // end_date
     }
 
     /**

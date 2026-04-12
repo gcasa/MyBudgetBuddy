@@ -56,7 +56,7 @@ public class Transaction implements Serializable {
         this();
         this.description = description;
         this.amount = amount;
-        this.type = type;
+        this.type = type != null ? type : TransactionType.EXPENSE; // Default to EXPENSE if null
         this.categoryId = categoryId;
         this.transactionDate = transactionDate;
     }
