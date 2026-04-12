@@ -1,0 +1,85 @@
+erDiagram
+    CATEGORY ||--o{ TRANSACTION : classifies
+    CATEGORY ||--o{ BUDGET : applies_to
+    TRANSACTION ||--o{ GOAL_PROGRESS : contributes_to
+    GOAL ||--o{ GOAL_PROGRESS : tracked_by
+    REPORT ||--o{ REPORT_SOURCE : includes
+    TRANSACTION ||--o{ REPORT_SOURCE : summarized_in
+    BUDGET ||--o{ REPORT_SOURCE : summarized_in
+    GOAL ||--o{ REPORT_SOURCE : summarized_in
+    USER_PREFERENCES ||--|| USER_ACCOUNT : belongs_to
+
+    USER_ACCOUNT {
+        string user_id PK
+        string name
+        string email
+        date created_date
+    }
+
+    CATEGORY {
+        string category_id PK
+        string name
+        string type
+    }
+
+    TRANSACTION {
+        string transaction_id PK
+        string user_id FK
+        string category_id FK
+        decimal amount
+        date transaction_date
+        string description
+        string transaction_type
+        string payment_method
+    }
+
+    BUDGET {
+        string budget_id PK
+        string user_id FK
+        string category_id FK
+        decimal limit_amount
+        string period
+        date start_date
+        date end_date
+    }
+
+    GOAL {
+        string goal_id PK
+        string user_id FK
+        string goal_type
+        decimal target_amount
+        decimal current_progress
+        date target_date
+        string status
+    }
+
+    GOAL_PROGRESS {
+        string progress_id PK
+        string goal_id FK
+        string transaction_id FK
+        decimal contribution_amount
+        date contribution_date
+    }
+
+    REPORT {
+        string report_id PK
+        string user_id FK
+        string report_type
+        date generated_date
+        string file_path
+    }
+
+    REPORT_SOURCE {
+        string report_source_id PK
+        string report_id FK
+        string source_type
+        string source_id
+    }
+
+    USER_PREFERENCES {
+        string preference_id PK
+        string user_id FK
+        string currency
+        string theme
+        boolean notification_enabled
+    }

@@ -1,0 +1,99 @@
+classDiagram
+direction TB
+
+class PresentationLayer {
+  <<component>>
+  +submitTransaction()
+  +requestDashboard()
+  +requestReport()
+}
+
+class ViewModelPresentationLogic {
+  <<component>>
+  +validateInput()
+  +formatData()
+  +bindUIState()
+}
+
+class ApplicationServicesLayer {
+  <<component>>
+  +createTransaction()
+  +updateBudget()
+  +generateReport()
+  +trackGoal()
+}
+
+class TransactionEntryModule {
+  <<component>>
+  +validateTransaction()
+  +mapTransactionData()
+}
+
+class BudgetManagementModule {
+  <<component>>
+  +calculateBudgetUsage()
+  +checkThreshold()
+}
+
+class GoalTrackingModule {
+  <<component>>
+  +updateGoalProgress()
+  +evaluateGoalStatus()
+}
+
+class FinancialPlanningEngine {
+  <<component>>
+  +calculateForecast()
+  +analyzeSpending()
+}
+
+class RulesRecommendationEngine {
+  <<component>>
+  +generateAdvice()
+  +detectOverspending()
+}
+
+class ReportingExportService {
+  <<component>>
+  +buildReport()
+  +exportPDF()
+  +exportSpreadsheet()
+}
+
+class DataAccessLayer {
+  <<component>>
+  +saveData()
+  +loadData()
+  +queryData()
+}
+
+class IntegrationClientLayer {
+  <<component>>
+  +importCSV()
+  +fetchExternalData()
+}
+
+class LocalDatabase {
+  <<database>>
+}
+
+class ExternalServices {
+  <<external system>>
+}
+
+PresentationLayer ..> ViewModelPresentationLogic : UI events / formatted data
+ViewModelPresentationLogic ..> ApplicationServicesLayer : service requests
+ApplicationServicesLayer ..> TransactionEntryModule : transaction data
+ApplicationServicesLayer ..> BudgetManagementModule : budget requests
+ApplicationServicesLayer ..> GoalTrackingModule : goal requests
+ApplicationServicesLayer ..> FinancialPlanningEngine : analysis requests
+ApplicationServicesLayer ..> RulesRecommendationEngine : rule evaluation requests
+ApplicationServicesLayer ..> ReportingExportService : report requests
+TransactionEntryModule ..> DataAccessLayer : transaction records
+BudgetManagementModule ..> DataAccessLayer : budget records
+GoalTrackingModule ..> DataAccessLayer : goal records
+FinancialPlanningEngine ..> DataAccessLayer : historical financial data
+ReportingExportService ..> DataAccessLayer : report source data
+DataAccessLayer ..> LocalDatabase : SQL / persistence operations
+IntegrationClientLayer ..> ExternalServices : API / import data
+ApplicationServicesLayer ..> IntegrationClientLayer : external data requests
