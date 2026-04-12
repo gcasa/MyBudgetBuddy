@@ -11,6 +11,7 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Optional;
@@ -22,7 +23,7 @@ public class MainController {
     @FXML private TableColumn<Transaction, String> descriptionColumn;
     @FXML private TableColumn<Transaction, String> categoryColumn;
     @FXML private TableColumn<Transaction, TransactionType> typeColumn;
-    @FXML private TableColumn<Transaction, Double> amountColumn;
+    @FXML private TableColumn<Transaction, BigDecimal> amountColumn;
 
     @FXML private Label totalIncomeLabel;
     @FXML private Label totalExpensesLabel;
@@ -98,16 +99,16 @@ public class MainController {
         typeColumn.setCellValueFactory(new PropertyValueFactory<>("type"));
 
         amountColumn.setCellValueFactory(new PropertyValueFactory<>("amount"));
-        amountColumn.setCellFactory(col -> new TableCell<>() {
+        amountColumn.setCellFactory(col -> new TableCell<Transaction, BigDecimal>() {
             @Override
-            protected void updateItem(Double item, boolean empty) {
+            protected void updateItem(BigDecimal item, boolean empty) {
                 super.updateItem(item, empty);
                 if (empty || item == null) {
                     setText(null);
                     setStyle("");
                 } else {
                     Transaction t = getTableView().getItems().get(getIndex());
-                    setText(String.format("$%.2f", item));
+                    setText(String.format("$%.2f", item.doubleValue()));
                     if (t.getType() == TransactionType.INCOME) {
                         setStyle("-fx-text-fill: #2e7d32; -fx-font-weight: bold;");
                     } else {
