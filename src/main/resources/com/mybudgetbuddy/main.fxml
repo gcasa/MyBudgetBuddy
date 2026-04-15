@@ -54,6 +54,9 @@
                 <Tab text="📊 Reports" fx:id="reportsTab" styleClass="main-tab">
                     <!-- Reports content will be loaded dynamically -->
                 </Tab>
+                <Tab text="🎯 Goals" fx:id="goalsTab" styleClass="main-tab">
+                    <!-- Goals content will be loaded dynamically -->
+                </Tab>
             </TabPane>
         </VBox>
     </top>

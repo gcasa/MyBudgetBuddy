@@ -393,6 +393,155 @@
     -fx-background-color: #e0e0e0;
 }
 
+/* ===== Goals Interface ===== */
+.goals-container {
+    -fx-background-color: #f5f7fa;
+}
+
+.page-title {
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #1565c0;
+}
+
+.header-section {
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 6;
+    -fx-border-color: #e0e0e0;
+    -fx-border-radius: 6;
+    -fx-border-width: 1;
+    -fx-padding: 15;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.1), 4, 0, 0, 2);
+}
+
+.status-label {
+    -fx-font-size: 13px;
+    -fx-text-fill: #37474f;
+}
+
+/* Success button style */
+.success-button {
+    -fx-background-color: #4caf50;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-background-radius: 4;
+    -fx-padding: 7 16 7 16;
+    -fx-cursor: hand;
+}
+
+.success-button:hover {
+    -fx-background-color: #2e7d32;
+}
+
+/* Primary button style (used in forms) */
+.primary-button {
+    -fx-background-color: #1976d2;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-background-radius: 4;
+    -fx-padding: 7 16 7 16;
+    -fx-cursor: hand;
+}
+
+.primary-button:hover {
+    -fx-background-color: #1565c0;
+}
+
+/* Icon button style */
+.icon-button {
+    -fx-background-color: #e3f2fd;
+    -fx-text-fill: #1565c0;
+    -fx-font-weight: bold;
+    -fx-background-radius: 4;
+    -fx-padding: 7 16 7 16;
+    -fx-cursor: hand;
+    -fx-border-color: #1976d2;
+    -fx-border-width: 1;
+    -fx-border-radius: 4;
+}
+
+.icon-button:hover {
+    -fx-background-color: #bbdefb;
+}
+
+/* Statistics Section */
+.statistics-section {
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 6;
+    -fx-border-color: #e0e0e0;
+    -fx-border-radius: 6;
+    -fx-border-width: 1;
+    -fx-padding: 15;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.1), 4, 0, 0, 2);
+}
+
+.stat-card {
+    -fx-background-color: #f8f9fa;
+    -fx-background-radius: 4;
+    -fx-border-color: #dee2e6;
+    -fx-border-radius: 4;
+    -fx-border-width: 1;
+    -fx-padding: 15;
+    -fx-spacing: 5;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.05), 2, 0, 0, 1);
+}
+
+.stat-label {
+    -fx-font-size: 12px;
+    -fx-font-weight: normal;
+    -fx-text-fill: #6c757d;
+}
+
+.stat-value {
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #1976d2;
+}
+
+/* Filters Section */
+.filters-section {
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 6;
+    -fx-border-color: #e0e0e0;
+    -fx-border-radius: 6;
+    -fx-border-width: 1;
+    -fx-padding: 15;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.1), 4, 0, 0, 2);
+}
+
+/* Details Panel */
+.details-panel {
+    -fx-background-color: #f8f9fa;
+    -fx-background-radius: 6;
+    -fx-border-color: #dee2e6;
+    -fx-border-radius: 6;
+    -fx-border-width: 1;
+    -fx-padding: 15;
+    -fx-spacing: 8;
+}
+
+.detail-label {
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #6c757d;
+}
+
+.detail-value {
+    -fx-font-size: 13px;
+    -fx-text-fill: #37474f;
+}
+
+/* Form Panel */
+.form-panel {
+    -fx-background-color: #e8f5e8;
+    -fx-background-radius: 6;
+    -fx-border-color: #4caf50;
+    -fx-border-radius: 6;
+    -fx-border-width: 2;
+    -fx-padding: 15;
+    -fx-spacing: 10;
+}
+
 .selected-report-details {
     -fx-spacing: 10;
 }

@@ -4,10 +4,13 @@ import com.mybudgetbuddy.model.Transaction;
 import com.mybudgetbuddy.model.TransactionType;
 import com.mybudgetbuddy.application.service.TransactionService;
 import com.mybudgetbuddy.application.service.ReportService;
+import com.mybudgetbuddy.application.service.GoalService;
 import com.mybudgetbuddy.application.service.impl.ReportServiceImpl;
+import com.mybudgetbuddy.application.service.impl.GoalServiceImpl;
 import com.mybudgetbuddy.viewmodel.MainViewModel;
 import com.mybudgetbuddy.viewmodel.AddEditTransactionViewModel;
 import com.mybudgetbuddy.viewmodel.ReportsViewModel;
+import com.mybudgetbuddy.viewmodel.GoalsViewModel;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.*;
@@ -42,13 +45,18 @@ public class MainController {
     @FXML private TabPane mainTabPane;
     @FXML private Tab transactionsTab;
     @FXML private Tab reportsTab;
+    @FXML private Tab goalsTab;
 
     private MainViewModel viewModel;
     private TransactionService transactionService;
     private ReportService reportService;
+    private GoalService goalService;
     private ReportsViewModel reportsViewModel;
+    private GoalsViewModel goalsViewModel;
     private ReportsController reportsController;
+    private GoalsController goalsController;
     private boolean reportsTabInitialized = false;
+    private boolean goalsTabInitialized = false;
 
     public void setViewModel(MainViewModel viewModel) {
         this.viewModel = viewModel;
@@ -58,9 +66,13 @@ public class MainController {
     public void setTransactionService(TransactionService transactionService) {
         this.transactionService = transactionService;
         
-        // Initialize report service
+        // Initialize report service and viewmodel
         this.reportService = new ReportServiceImpl();
         this.reportsViewModel = new ReportsViewModel(reportService);
+        
+        // Initialize goal service and viewmodel
+        this.goalService = new GoalServiceImpl(); 
+        this.goalsViewModel = new GoalsViewModel(goalService);
     }
 
     @FXML
@@ -75,6 +87,8 @@ public class MainController {
             (obs, oldTab, newTab) -> {
                 if (newTab == reportsTab && !reportsTabInitialized) {
                     initializeReportsTab();
+                } else if (newTab == goalsTab && !goalsTabInitialized) {
+                    initializeGoalsTab();
                 }
             }
         );
@@ -95,6 +109,25 @@ public class MainController {
             e.printStackTrace();
             showError("Failed to load Reports", 
                      "Could not initialize the Reports tab: " + e.getMessage());
+        }
+    }
+    
+    private void initializeGoalsTab() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/mybudgetbuddy/goals.fxml"));
+            ScrollPane goalsContent = loader.load();
+            
+            goalsController = loader.getController();
+            goalsController.setViewModel(goalsViewModel);
+            goalsController.setGoalService(goalService);
+            
+            goalsTab.setContent(goalsContent);
+            goalsTabInitialized = true;
+            
+        } catch (IOException e) {
+            e.printStackTrace();
+            showError("Failed to load Goals", 
+                     "Could not initialize the Goals tab: " + e.getMessage());
         }
     }
     
