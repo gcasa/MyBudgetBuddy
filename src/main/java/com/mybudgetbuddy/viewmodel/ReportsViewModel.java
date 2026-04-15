@@ -101,7 +101,7 @@ public class ReportsViewModel {
         this.selectedTemplate = new SimpleStringProperty();
         
         this.reportName = new SimpleStringProperty();
-        this.planId = new SimpleStringProperty("default-plan");
+        this.planId = new SimpleStringProperty(null);
         this.startDate = new SimpleObjectProperty<>(LocalDate.now().minusDays(30));
         this.endDate = new SimpleObjectProperty<>(LocalDate.now());
         this.filterText = new SimpleStringProperty();
