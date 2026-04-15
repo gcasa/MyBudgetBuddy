@@ -3,12 +3,16 @@ package com.mybudgetbuddy.controller;
 import com.mybudgetbuddy.model.Transaction;
 import com.mybudgetbuddy.model.TransactionType;
 import com.mybudgetbuddy.application.service.TransactionService;
+import com.mybudgetbuddy.application.service.ReportService;
+import com.mybudgetbuddy.application.service.impl.ReportServiceImpl;
 import com.mybudgetbuddy.viewmodel.MainViewModel;
 import com.mybudgetbuddy.viewmodel.AddEditTransactionViewModel;
+import com.mybudgetbuddy.viewmodel.ReportsViewModel;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.layout.BorderPane;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -32,9 +36,19 @@ public class MainController {
     @FXML private Button addButton;
     @FXML private Button editButton;
     @FXML private Button deleteButton;
+    @FXML private Button reportsButton;
+    
+    // Tab management
+    @FXML private TabPane mainTabPane;
+    @FXML private Tab transactionsTab;
+    @FXML private Tab reportsTab;
 
     private MainViewModel viewModel;
     private TransactionService transactionService;
+    private ReportService reportService;
+    private ReportsViewModel reportsViewModel;
+    private ReportsController reportsController;
+    private boolean reportsTabInitialized = false;
 
     public void setViewModel(MainViewModel viewModel) {
         this.viewModel = viewModel;
@@ -43,11 +57,45 @@ public class MainController {
     
     public void setTransactionService(TransactionService transactionService) {
         this.transactionService = transactionService;
+        
+        // Initialize report service
+        this.reportService = new ReportServiceImpl();
+        this.reportsViewModel = new ReportsViewModel(reportService);
     }
 
     @FXML
     public void initialize() {
         setupTableColumns();
+        setupTabNavigation();
+    }
+    
+    private void setupTabNavigation() {
+        // Initialize tabs
+        mainTabPane.getSelectionModel().selectedItemProperty().addListener(
+            (obs, oldTab, newTab) -> {
+                if (newTab == reportsTab && !reportsTabInitialized) {
+                    initializeReportsTab();
+                }
+            }
+        );
+    }
+    
+    private void initializeReportsTab() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/mybudgetbuddy/reports.fxml"));
+            BorderPane reportsContent = loader.load();
+            
+            reportsController = loader.getController();
+            reportsController.setViewModel(reportsViewModel);
+            
+            reportsTab.setContent(reportsContent);
+            reportsTabInitialized = true;
+            
+        } catch (IOException e) {
+            e.printStackTrace();
+            showError("Failed to load Reports", 
+                     "Could not initialize the Reports tab: " + e.getMessage());
+        }
     }
     
     private void bindToViewModel() {
@@ -159,6 +207,17 @@ public class MainController {
         }
     }
     
+    @FXML
+    private void handleReports() {
+        // Switch to reports tab
+        mainTabPane.getSelectionModel().select(reportsTab);
+        
+        // Initialize reports tab if not already done
+        if (!reportsTabInitialized) {
+            initializeReportsTab();
+        }
+    }
+    
     private boolean confirmDelete() {
         Transaction selected = transactionTable.getSelectionModel().getSelectedItem();
         if (selected == null) return false;
@@ -204,6 +263,14 @@ public class MainController {
 
     private void showAlert(String title, String message) {
         Alert alert = new Alert(Alert.AlertType.WARNING);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
+    
+    private void showError(String title, String message) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle(title);
         alert.setHeaderText(null);
         alert.setContentText(message);

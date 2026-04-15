@@ -190,7 +190,7 @@ public class BudgetViewModel {
         totalRemaining.set(String.format("$%,.2f", totalRemainingAmount));
         
         if (totalAllocatedAmount.compareTo(BigDecimal.ZERO) > 0) {
-            BigDecimal progressPercent = totalSpentAmount.divide(totalAllocatedAmount, 2, BigDecimal.ROUND_HALF_UP)
+            BigDecimal progressPercent = totalSpentAmount.divide(totalAllocatedAmount, 2, java.math.RoundingMode.HALF_UP)
                     .multiply(new BigDecimal("100"));
             overallProgress.set(String.format("%.1f%%", progressPercent));
         } else {

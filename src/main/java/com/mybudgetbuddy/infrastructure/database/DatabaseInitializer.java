@@ -195,11 +195,38 @@ public class DatabaseInitializer {
         String sql = """
             CREATE TABLE IF NOT EXISTS reports (
                 id TEXT PRIMARY KEY,
-                title TEXT NOT NULL,
-                generated_date DATE NOT NULL,
+                plan_id TEXT,
+                user_id TEXT,
+                name TEXT NOT NULL,
+                description TEXT,
                 type TEXT,
+                format TEXT,
+                start_date DATE,
+                end_date DATE,
+                included_categories TEXT,
+                included_goals TEXT,
+                included_budgets TEXT,
+                include_graphs BOOLEAN DEFAULT TRUE,
+                include_recommendations BOOLEAN DEFAULT TRUE,
+                include_forecast BOOLEAN DEFAULT FALSE,
                 content TEXT,
-                created_date DATETIME DEFAULT CURRENT_TIMESTAMP
+                data_json TEXT,
+                chart_urls TEXT,
+                pdf_content BLOB,
+                file_path TEXT,
+                summary_stats TEXT,
+                key_insights TEXT,
+                action_items TEXT,
+                status TEXT DEFAULT 'PENDING',
+                generated_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+                last_accessed_date DATETIME,
+                expiry_date DATETIME,
+                file_size_bytes INTEGER DEFAULT 0,
+                generated_by TEXT,
+                page_count INTEGER DEFAULT 0,
+                template_version TEXT,
+                FOREIGN KEY (plan_id) REFERENCES financial_plans(id),
+                FOREIGN KEY (user_id) REFERENCES users(id)
             )
         """;
         stmt.execute(sql);

@@ -1,52 +1,64 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.geometry.Insets?>
-
 <BorderPane xmlns="http://javafx.com/javafx/17"
             xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="com.mybudgetbuddy.controller.MainController"
             styleClass="root-pane">
-
     <!-- Top Toolbar -->
     <top>
-        <HBox styleClass="toolbar" alignment="CENTER_LEFT" spacing="10">
-            <padding><Insets top="12" right="16" bottom="12" left="16"/></padding>
-            <Label text="MyBudgetBuddy" styleClass="app-title"/>
-            <Region HBox.hgrow="ALWAYS"/>
-            <Button fx:id="addButton" text="＋ Add" styleClass="btn-primary" onAction="#handleAdd"/>
-            <Button fx:id="editButton" text="✎ Edit" styleClass="btn-secondary" onAction="#handleEdit"/>
-            <Button fx:id="deleteButton" text="✕ Delete" styleClass="btn-danger" onAction="#handleDelete"/>
-        </HBox>
+        <VBox>
+            <HBox styleClass="toolbar" alignment="CENTER_LEFT" spacing="10">
+                <padding>
+                    <Insets top="12" right="16" bottom="12" left="16"/>
+                </padding>
+                <Label text="MyBudgetBuddy" styleClass="app-title"/>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Button fx:id="reportsButton" text="📊 Reports" styleClass="btn-secondary" onAction="#handleReports"/>
+                <Separator orientation="VERTICAL"/>
+                <Button fx:id="addButton" text="＋ Add" styleClass="btn-primary" onAction="#handleAdd"/>
+                <Button fx:id="editButton" text="✎ Edit" styleClass="btn-secondary" onAction="#handleEdit"/>
+                <Button fx:id="deleteButton" text="✕ Delete" styleClass="btn-danger" onAction="#handleDelete"/>
+            </HBox>
+            <!-- Navigation Tabs -->
+            <TabPane fx:id="mainTabPane" styleClass="main-tabs" tabClosingPolicy="UNAVAILABLE">
+                <Tab text="💳 Transactions" fx:id="transactionsTab" styleClass="main-tab">
+                    <VBox>
+                        <!-- Transaction Table -->
+                        <TableView fx:id="transactionTable" styleClass="transaction-table" VBox.vgrow="ALWAYS">
+                            <columns>
+                                <TableColumn fx:id="dateColumn" text="Date" prefWidth="110"/>
+                                <TableColumn fx:id="descriptionColumn" text="Description" prefWidth="250"/>
+                                <TableColumn fx:id="categoryColumn" text="Category" prefWidth="140"/>
+                                <TableColumn fx:id="typeColumn" text="Type" prefWidth="100"/>
+                                <TableColumn fx:id="amountColumn" text="Amount" prefWidth="120"/>
+                            </columns>
+                            <placeholder>
+                                <Label text="No transactions yet. Click '＋ Add' to get started." styleClass="placeholder-label"/>
+                            </placeholder>
+                        </TableView>
+                        <!-- Transaction Summary Bar -->
+                        <HBox styleClass="summary-bar" alignment="CENTER" spacing="40">
+                            <padding>
+                                <Insets top="12" right="16" bottom="12" left="16"/>
+                            </padding>
+                            <Label fx:id="totalIncomeLabel" text="Income: $0.00" styleClass="summary-income"/>
+                            <Separator orientation="VERTICAL"/>
+                            <Label fx:id="totalExpensesLabel" text="Expenses: $0.00" styleClass="summary-expense"/>
+                            <Separator orientation="VERTICAL"/>
+                            <Label fx:id="balanceLabel" text="Balance: $0.00" styleClass="summary-balance"/>
+                        </HBox>
+                    </VBox>
+                </Tab>
+                <Tab text="📊 Reports" fx:id="reportsTab" styleClass="main-tab">
+                    <!-- Reports content will be loaded dynamically -->
+                </Tab>
+            </TabPane>
+        </VBox>
     </top>
-
-    <!-- Center: Transaction Table -->
+    <!-- Center: Main Content (handled by tabs) -->
     <center>
-        <TableView fx:id="transactionTable" styleClass="transaction-table">
-            <columns>
-                <TableColumn fx:id="dateColumn" text="Date" prefWidth="110"/>
-                <TableColumn fx:id="descriptionColumn" text="Description" prefWidth="250"/>
-                <TableColumn fx:id="categoryColumn" text="Category" prefWidth="140"/>
-                <TableColumn fx:id="typeColumn" text="Type" prefWidth="100"/>
-                <TableColumn fx:id="amountColumn" text="Amount" prefWidth="120"/>
-            </columns>
-            <placeholder>
-                <Label text="No transactions yet. Click '＋ Add' to get started." styleClass="placeholder-label"/>
-            </placeholder>
-        </TableView>
+        <!-- Content managed by TabPane above -->
     </center>
-
-    <!-- Bottom Summary Bar -->
-    <bottom>
-        <HBox styleClass="summary-bar" alignment="CENTER" spacing="40">
-            <padding><Insets top="12" right="16" bottom="12" left="16"/></padding>
-            <Label fx:id="totalIncomeLabel" text="Income: $0.00" styleClass="summary-income"/>
-            <Separator orientation="VERTICAL"/>
-            <Label fx:id="totalExpensesLabel" text="Expenses: $0.00" styleClass="summary-expense"/>
-            <Separator orientation="VERTICAL"/>
-            <Label fx:id="balanceLabel" text="Balance: $0.00" styleClass="summary-balance"/>
-        </HBox>
-    </bottom>
-
 </BorderPane>

@@ -1,7 +1,6 @@
 package com.mybudgetbuddy.application.service;
 
 import com.mybudgetbuddy.domain.model.Budget;
-import com.mybudgetbuddy.domain.model.BudgetType;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.Period;

@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+<BorderPane xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.mybudgetbuddy.controller.ReportsController"
+            styleClass="reports-pane">
+    <!-- Top: Report Generation Section -->
+    <top>
+        <VBox styleClass="report-generation-section" spacing="15">
+            <padding>
+                <Insets top="20" right="20" bottom="20" left="20"/>
+            </padding>
+            <!-- Title and Main Actions -->
+            <HBox alignment="CENTER_LEFT" spacing="15">
+                <Label text="Reports Dashboard" styleClass="section-title"/>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Button fx:id="generateButton" text="📊 Generate Report" styleClass="btn-primary" onAction="#handleGenerate"/>
+                <Button fx:id="templateButton" text="📋 From Template" styleClass="btn-secondary" onAction="#handleGenerateFromTemplate"/>
+                <Button fx:id="refreshButton" text="🔄 Refresh" styleClass="btn-secondary" onAction="#handleRefresh"/>
+            </HBox>
+            <!-- Report Generation Form -->
+            <GridPane hgap="15" vgap="10" styleClass="generation-form">
+                <columnConstraints>
+                    <ColumnConstraints percentWidth="20"/>
+                    <ColumnConstraints percentWidth="30"/>
+                    <ColumnConstraints percentWidth="20"/>
+                    <ColumnConstraints percentWidth="30"/>
+                </columnConstraints>
+                <!-- Row 1 -->
+                <Label text="Report Name:" GridPane.columnIndex="0" GridPane.rowIndex="0" styleClass="form-label"/>
+                <TextField fx:id="reportNameField" promptText="Enter report name..." GridPane.columnIndex="1" GridPane.rowIndex="0" styleClass="form-field"/>
+                <Label text="Report Type:" GridPane.columnIndex="2" GridPane.rowIndex="0" styleClass="form-label"/>
+                <ComboBox fx:id="reportTypeCombo" GridPane.columnIndex="3" GridPane.rowIndex="0" styleClass="form-field" maxWidth="Infinity"/>
+                <!-- Row 2 -->
+                <Label text="Format:" GridPane.columnIndex="0" GridPane.rowIndex="1" styleClass="form-label"/>
+                <ComboBox fx:id="formatCombo" GridPane.columnIndex="1" GridPane.rowIndex="1" styleClass="form-field" maxWidth="Infinity"/>
+                <Label text="Template:" GridPane.columnIndex="2" GridPane.rowIndex="1" styleClass="form-label"/>
+                <ComboBox fx:id="templateCombo" GridPane.columnIndex="3" GridPane.rowIndex="1" styleClass="form-field" maxWidth="Infinity"/>
+                <!-- Row 3 -->
+                <Label text="Start Date:" GridPane.columnIndex="0" GridPane.rowIndex="2" styleClass="form-label"/>
+                <DatePicker fx:id="startDatePicker" GridPane.columnIndex="1" GridPane.rowIndex="2" styleClass="form-field" maxWidth="Infinity"/>
+                <Label text="End Date:" GridPane.columnIndex="2" GridPane.rowIndex="2" styleClass="form-label"/>
+                <DatePicker fx:id="endDatePicker" GridPane.columnIndex="3" GridPane.rowIndex="2" styleClass="form-field" maxWidth="Infinity"/>
+            </GridPane>
+            <!-- Quick Actions -->
+            <HBox alignment="CENTER_LEFT" spacing="10" styleClass="quick-actions">
+                <Label text="Quick Generate:" styleClass="quick-label"/>
+                <Button text="📈 Financial Summary" styleClass="btn-quick" onAction="#handleQuickFinancialSummary"/>
+                <Button text="💰 Budget Analysis" styleClass="btn-quick" onAction="#handleQuickBudgetAnalysis"/>
+                <Button text="🎯 Goal Progress" styleClass="btn-quick" onAction="#handleQuickGoalProgress"/>
+            </HBox>
+            <!-- Progress Bar -->
+            <HBox alignment="CENTER" spacing="10" styleClass="progress-section">
+                <ProgressBar fx:id="progressBar" prefWidth="300" styleClass="generation-progress"/>
+                <Label fx:id="progressLabel" text="Generating..." styleClass="progress-text"/>
+            </HBox>
+        </VBox>
+    </top>
+    <!-- Center: Reports Table and Filters -->
+    <center>
+        <VBox styleClass="reports-table-section" spacing="10">
+            <padding>
+                <Insets top="10" right="20" bottom="10" left="20"/>
+            </padding>
+            <!-- Filters and Table Actions -->
+            <HBox alignment="CENTER_LEFT" spacing="15" styleClass="table-toolbar">
+                <Label text="Existing Reports" styleClass="table-title"/>
+                <Region HBox.hgrow="ALWAYS"/>
+                <!-- Filter Controls -->
+                <Label text="Filter:" styleClass="filter-label"/>
+                <TextField fx:id="filterField" promptText="Search reports..." styleClass="filter-field" prefWidth="200"/>
+                <ComboBox fx:id="statusFilterCombo" promptText="All Status" styleClass="filter-combo" prefWidth="120"/>
+                <Button fx:id="clearFiltersButton" text="✕ Clear" styleClass="btn-clear" onAction="#handleClearFilters"/>
+                <!-- Table Actions -->
+                <Separator orientation="VERTICAL"/>
+                <Button fx:id="viewButton" text="👁 View" styleClass="btn-secondary" onAction="#handleView"/>
+                <Button fx:id="downloadButton" text="⬇ Download" styleClass="btn-secondary" onAction="#handleDownload"/>
+                <Button fx:id="shareButton" text="🔗 Share" styleClass="btn-secondary" onAction="#handleShare"/>
+                <Button fx:id="deleteButton" text="🗑 Delete" styleClass="btn-danger" onAction="#handleDelete"/>
+            </HBox>
+            <!-- Reports Table -->
+            <TableView fx:id="reportsTable" styleClass="reports-table" VBox.vgrow="ALWAYS">
+                <columns>
+                    <TableColumn fx:id="nameColumn" text="Report Name" prefWidth="200" minWidth="150"/>
+                    <TableColumn fx:id="typeColumn" text="Type" prefWidth="150" minWidth="100"/>
+                    <TableColumn fx:id="statusColumn" text="Status" prefWidth="100" minWidth="80"/>
+                    <TableColumn fx:id="formatColumn" text="Format" prefWidth="80" minWidth="60"/>
+                    <TableColumn fx:id="generatedColumn" text="Generated" prefWidth="140" minWidth="120"/>
+                    <TableColumn fx:id="sizeColumn" text="Size" prefWidth="80" minWidth="60"/>
+                </columns>
+                <placeholder>
+                    <VBox alignment="CENTER" spacing="10" styleClass="table-placeholder">
+                        <Label text="📄" styleClass="placeholder-icon"/>
+                        <Label text="No reports found" styleClass="placeholder-title"/>
+                        <Label text="Generate your first report using the form above" styleClass="placeholder-text"/>
+                    </VBox>
+                </placeholder>
+            </TableView>
+        </VBox>
+    </center>
+    <!-- Right: Report Details and Actions -->
+    <right>
+        <VBox styleClass="report-details-section" spacing="15" prefWidth="300" minWidth="250">
+            <padding>
+                <Insets top="20" right="20" bottom="20" left="20"/>
+            </padding>
+            <!-- Summary Statistics -->
+            <VBox styleClass="summary-stats" spacing="10">
+                <Label text="Statistics" styleClass="stats-title"/>
+                <GridPane hgap="10" vgap="5" styleClass="stats-grid">
+                    <columnConstraints>
+                        <ColumnConstraints percentWidth="60"/>
+                        <ColumnConstraints percentWidth="40"/>
+                    </columnConstraints>
+                    <Label text="Total Reports:" GridPane.columnIndex="0" GridPane.rowIndex="0" styleClass="stats-label"/>
+                    <Label fx:id="totalReportsLabel" GridPane.columnIndex="1" GridPane.rowIndex="0" styleClass="stats-value"/>
+                    <Label text="Completed:" GridPane.columnIndex="0" GridPane.rowIndex="1" styleClass="stats-label"/>
+                    <Label fx:id="completedReportsLabel" GridPane.columnIndex="1" GridPane.rowIndex="1" styleClass="stats-value-success"/>
+                    <Label text="Pending:" GridPane.columnIndex="0" GridPane.rowIndex="2" styleClass="stats-label"/>
+                    <Label fx:id="pendingReportsLabel" GridPane.columnIndex="1" GridPane.rowIndex="2" styleClass="stats-value-warning"/>
+                    <Label text="Last Generated:" GridPane.columnIndex="0" GridPane.rowIndex="3" styleClass="stats-label"/>
+                    <Label fx:id="lastGeneratedLabel" GridPane.columnIndex="1" GridPane.rowIndex="3" styleClass="stats-value" wrapText="true"/>
+                </GridPane>
+            </VBox>
+            <Separator styleClass="section-separator"/>
+            <!-- Selected Report Details -->
+            <VBox styleClass="selected-report-details" spacing="10" VBox.vgrow="ALWAYS">
+                <Label text="Report Details" styleClass="details-title"/>
+                <Label fx:id="reportDetailsLabel" wrapText="true" styleClass="details-info" VBox.vgrow="NEVER"/>
+                <!-- Content Preview -->
+                <Label text="Preview" styleClass="preview-title"/>
+                <TextArea fx:id="reportPreviewArea" editable="false" wrapText="true" 
+                         styleClass="content-preview" prefRowCount="8" VBox.vgrow="SOMETIMES"/>
+                <!-- Key Insights -->
+                <Label text="Key Insights" styleClass="insights-title"/>
+                <ListView fx:id="keyInsightsList" prefHeight="100" styleClass="insights-list" VBox.vgrow="NEVER"/>
+                <!-- Action Items -->
+                <Label text="Action Items" styleClass="actions-title"/>
+                <ListView fx:id="actionItemsList" prefHeight="100" styleClass="actions-list" VBox.vgrow="NEVER"/>
+            </VBox>
+        </VBox>
+    </right>
+    <!-- Bottom: Status Bar -->
+    <bottom>
+        <HBox alignment="CENTER_LEFT" styleClass="status-bar" spacing="20">
+            <padding>
+                <Insets top="10" right="20" bottom="10" left="20"/>
+            </padding>
+            <Label fx:id="statusLabel" text="Ready" styleClass="status-text"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Label text="Reports Module v1.0" styleClass="version-text"/>
+        </HBox>
+    </bottom>
+</BorderPane>

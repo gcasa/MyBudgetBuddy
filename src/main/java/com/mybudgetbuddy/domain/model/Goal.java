@@ -44,7 +44,7 @@ public class Goal implements Serializable {
         if (targetAmount.compareTo(BigDecimal.ZERO) == 0) {
             return BigDecimal.ZERO;
         }
-        return currentAmount.divide(targetAmount, 4, BigDecimal.ROUND_HALF_UP).multiply(new BigDecimal("100"));
+        return currentAmount.divide(targetAmount, 4, java.math.RoundingMode.HALF_UP).multiply(new BigDecimal("100"));
     }
     
     public BigDecimal getRemainingAmount() {
@@ -63,7 +63,7 @@ public class Goal implements Serializable {
     public BigDecimal getRequiredMonthlyContribution() {
         long monthsRemaining = LocalDate.now().until(targetDate).toTotalMonths();
         if (monthsRemaining <= 0) return getRemainingAmount();
-        return getRemainingAmount().divide(new BigDecimal(monthsRemaining), 2, BigDecimal.ROUND_UP);
+        return getRemainingAmount().divide(new BigDecimal(monthsRemaining), 2, java.math.RoundingMode.UP);
     }
     
     // Methods
