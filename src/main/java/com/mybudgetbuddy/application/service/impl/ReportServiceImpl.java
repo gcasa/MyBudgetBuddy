@@ -523,8 +523,9 @@ public class ReportServiceImpl implements ReportService {
     
     private void generateFinancialSummaryContent(Report report) {
         StringBuilder content = new StringBuilder();
-        content.append("<h1>Financial Summary Report</h1>");
-        content.append("<p>Period: ").append(report.getDateRangeString()).append("</p>");
+        content.append("FINANCIAL SUMMARY REPORT\n");
+        content.append("========================\n\n");
+        content.append("Period: ").append(report.getDateRangeString()).append("\n\n");
         
         // Add summary statistics
         report.addSummaryStats("Total Income", "$5,240.00");
@@ -540,9 +541,22 @@ public class ReportServiceImpl implements ReportService {
         report.addActionItem("Consider reviewing your transportation budget");
         report.addActionItem("You're on track to meet your annual savings goal");
         
-        content.append("<h2>Summary Statistics</h2>");
+        content.append("SUMMARY STATISTICS\n");
+        content.append("------------------\n");
         for (Map.Entry<String, String> stat : report.getSummaryStats().entrySet()) {
-            content.append("<p><strong>").append(stat.getKey()).append(":</strong> ").append(stat.getValue()).append("</p>");
+            content.append(stat.getKey()).append(": ").append(stat.getValue()).append("\n");
+        }
+        
+        content.append("\nKEY INSIGHTS\n");
+        content.append("------------\n");
+        for (String insight : report.getKeyInsights()) {
+            content.append("• ").append(insight).append("\n");
+        }
+        
+        content.append("\nACTION ITEMS\n");
+        content.append("------------\n");
+        for (String action : report.getActionItems()) {
+            content.append("• ").append(action).append("\n");
         }
         
         report.setContent(content.toString());
@@ -550,8 +564,9 @@ public class ReportServiceImpl implements ReportService {
     
     private void generateBudgetAnalysisContent(Report report) {
         StringBuilder content = new StringBuilder();
-        content.append("<h1>Budget Analysis Report</h1>");
-        content.append("<p>Analysis Period: ").append(report.getDateRangeString()).append("</p>");
+        content.append("BUDGET ANALYSIS REPORT\n");
+        content.append("======================\n\n");
+        content.append("Analysis Period: ").append(report.getDateRangeString()).append("\n\n");
         
         report.addSummaryStats("Budget Adherence", "85%");
         report.addSummaryStats("Categories Over Budget", "2");
@@ -560,12 +575,32 @@ public class ReportServiceImpl implements ReportService {
         report.addKeyInsight("Overall budget performance is good at 85% adherence");
         report.addActionItem("Review transportation and dining out budgets");
         
+        content.append("BUDGET PERFORMANCE\n");
+        content.append("------------------\n");
+        for (Map.Entry<String, String> stat : report.getSummaryStats().entrySet()) {
+            content.append(stat.getKey()).append(": ").append(stat.getValue()).append("\n");
+        }
+        
+        content.append("\nKEY INSIGHTS\n");
+        content.append("------------\n");
+        for (String insight : report.getKeyInsights()) {
+            content.append("• ").append(insight).append("\n");
+        }
+        
+        content.append("\nRECOMMENDATIONS\n");
+        content.append("--------------\n");
+        for (String action : report.getActionItems()) {
+            content.append("• ").append(action).append("\n");
+        }
+        
         report.setContent(content.toString());
     }
     
     private void generateGoalProgressContent(Report report) {
         StringBuilder content = new StringBuilder();
-        content.append("<h1>Goal Progress Report</h1>");
+        content.append("GOAL PROGRESS REPORT\n");
+        content.append("====================\n\n");
+        content.append("Reporting Period: ").append(report.getDateRangeString()).append("\n\n");
         
         report.addSummaryStats("Active Goals", "4");
         report.addSummaryStats("On Track Goals", "3");
@@ -574,42 +609,112 @@ public class ReportServiceImpl implements ReportService {
         report.addKeyInsight("Emergency fund goal is 75% complete");
         report.addActionItem("Increase vacation fund contributions by $100/month");
         
+        content.append("GOAL SUMMARY\n");
+        content.append("------------\n");
+        for (Map.Entry<String, String> stat : report.getSummaryStats().entrySet()) {
+            content.append(stat.getKey()).append(": ").append(stat.getValue()).append("\n");
+        }
+        
+        content.append("\nPROGRESS INSIGHTS\n");
+        content.append("-----------------\n");
+        for (String insight : report.getKeyInsights()) {
+            content.append("• ").append(insight).append("\n");
+        }
+        
+        content.append("\nNEXT ACTIONS\n");
+        content.append("------------\n");
+        for (String action : report.getActionItems()) {
+            content.append("• ").append(action).append("\n");
+        }
+        
         report.setContent(content.toString());
     }
     
     private void generateCashFlowContent(Report report) {
         StringBuilder content = new StringBuilder();
-        content.append("<h1>Cash Flow Report</h1>");
-        content.append("<p>Cash Flow Analysis: ").append(report.getDateRangeString()).append("</p>");
+        content.append("CASH FLOW REPORT\n");
+        content.append("================\n\n");
+        content.append("Cash Flow Analysis: ").append(report.getDateRangeString()).append("\n\n");
         
         report.addSummaryStats("Average Monthly Income", "$5,200");
         report.addSummaryStats("Average Monthly Expenses", "$4,100");
         report.addSummaryStats("Net Cash Flow", "+$1,100");
+        
+        content.append("CASH FLOW SUMMARY\n");
+        content.append("-----------------\n");
+        for (Map.Entry<String, String> stat : report.getSummaryStats().entrySet()) {
+            content.append(stat.getKey()).append(": ").append(stat.getValue()).append("\n");
+        }
+        
+        if (!report.getKeyInsights().isEmpty()) {
+            content.append("\nINSIGHTS\n");
+            content.append("--------\n");
+            for (String insight : report.getKeyInsights()) {
+                content.append("• ").append(insight).append("\n");
+            }
+        }
+        
+        if (!report.getActionItems().isEmpty()) {
+            content.append("\nACTION ITEMS\n");
+            content.append("------------\n");
+            for (String action : report.getActionItems()) {
+                content.append("• ").append(action).append("\n");
+            }
+        }
         
         report.setContent(content.toString());
     }
     
     private void generateExpenseBreakdownContent(Report report) {
         StringBuilder content = new StringBuilder();
-        content.append("<h1>Expense Breakdown Report</h1>");
+        content.append("EXPENSE BREAKDOWN REPORT\n");
+        content.append("========================\n\n");
+        content.append("Analysis Period: ").append(report.getDateRangeString()).append("\n\n");
         
         report.addSummaryStats("Housing", "35%");
         report.addSummaryStats("Transportation", "18%");
         report.addSummaryStats("Food", "15%");
         report.addSummaryStats("Other", "32%");
         
+        content.append("EXPENSE CATEGORIES\n");
+        content.append("------------------\n");
+        for (Map.Entry<String, String> stat : report.getSummaryStats().entrySet()) {
+            content.append(stat.getKey()).append(": ").append(stat.getValue()).append("\n");
+        }
+        
+        if (!report.getKeyInsights().isEmpty()) {
+            content.append("\nINSIGHTS\n");
+            content.append("--------\n");
+            for (String insight : report.getKeyInsights()) {
+                content.append("• ").append(insight).append("\n");
+            }
+        }
+        
+        if (!report.getActionItems().isEmpty()) {
+            content.append("\nRECOMMENDATIONS\n");
+            content.append("--------------\n");
+            for (String action : report.getActionItems()) {
+                content.append("• ").append(action).append("\n");
+            }
+        }
+        
         report.setContent(content.toString());
     }
     
     private void generateGenericReportContent(Report report) {
         StringBuilder content = new StringBuilder();
-        content.append("<h1>").append(report.getName()).append("</h1>");
-        content.append("<p>Report Type: ").append(report.getType().getDisplayName()).append("</p>");
-        content.append("<p>Generated: ").append(report.getGeneratedDate()).append("</p>");
+        content.append(report.getName().toUpperCase()).append("\n");
+        content.append("=".repeat(report.getName().length())).append("\n\n");
+        content.append("Report Type: ").append(report.getType().getDisplayName()).append("\n");
+        content.append("Generated: ").append(report.getGeneratedDate()).append("\n");
         
         if (report.getStartDate() != null || report.getEndDate() != null) {
-            content.append("<p>Period: ").append(report.getDateRangeString()).append("</p>");
+            content.append("Period: ").append(report.getDateRangeString()).append("\n");
         }
+        
+        content.append("\n");
+        content.append("This is a generic report with basic information.\n");
+        content.append("For detailed analysis, please use specific report types.\n");
         
         report.setContent(content.toString());
     }

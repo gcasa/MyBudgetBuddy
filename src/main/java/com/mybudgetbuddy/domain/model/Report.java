@@ -67,7 +67,7 @@ public class Report implements Serializable {
         this.includeGraphs = true;
         this.includeRecommendations = true;
         this.includeForecast = false;
-        this.format = ReportFormat.PDF;
+        this.format = ReportFormat.TEXT;
     }
     
     public Report(String name, ReportType type, LocalDate startDate, LocalDate endDate) {

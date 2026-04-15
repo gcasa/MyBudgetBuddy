@@ -1,6 +1,7 @@
 package com.mybudgetbuddy.domain.model;
 
 public enum ReportFormat {
+    TEXT("Plain Text", "text/plain", ".txt"),
     PDF("PDF", "application/pdf", ".pdf"),
     HTML("HTML", "text/html", ".html"),
     EXCEL("Excel", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", ".xlsx"),

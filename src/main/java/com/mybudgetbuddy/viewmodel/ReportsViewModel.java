@@ -97,7 +97,7 @@ public class ReportsViewModel {
         // Initialize properties
         this.selectedReport = new SimpleObjectProperty<>();
         this.selectedReportType = new SimpleObjectProperty<>(ReportType.FINANCIAL_SUMMARY);
-        this.selectedFormat = new SimpleObjectProperty<>(ReportFormat.PDF);
+        this.selectedFormat = new SimpleObjectProperty<>(ReportFormat.TEXT);
         this.selectedTemplate = new SimpleStringProperty();
         
         this.reportName = new SimpleStringProperty();
