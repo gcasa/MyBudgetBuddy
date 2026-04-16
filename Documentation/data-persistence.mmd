@@ -1,0 +1,67 @@
+---
+title: MyBudgetBuddy Data Persistence Layer
+description: Architecture diagram showing the data access and persistence components
+---
+
+graph TB
+    %% Application Services Layer
+    subgraph "🏗️ Application Services"
+        TS[TransactionService]
+        GS[GoalService] 
+        RS[ReportService]
+        CS[CategoryService]
+    end
+
+    %% Infrastructure Layer
+    subgraph "🛠️ Infrastructure Layer"
+        DM[DatabaseManager<br/>SQLite Connection<br/>Singleton Pattern]
+        DI[DatabaseInitializer<br/>Schema Management]
+    end
+
+    %% Database Layer
+    subgraph "🗄️ SQLite Database"
+        T1[(transactions)]
+        T2[(goals)]
+        T3[(reports)]
+        T4[(categories)]
+        T5[(users)]
+        T6[(budgets)]
+    end
+
+    %% Data Flow Connections
+    TS --> DM
+    GS --> DM
+    RS --> DM
+    CS --> DM
+    
+    DM --> T1
+    DM --> T2
+    DM --> T3
+    DM --> T4
+    DM --> T5
+    DM --> T6
+
+    %% Schema Initialization
+    DI -.-> DM
+    DI -.-> T1
+    DI -.-> T2
+    DI -.-> T3
+    DI -.-> T4
+    DI -.-> T5
+    DI -.-> T6
+
+    %% Component Styling
+    classDef service fill:#e1f5fe,stroke:#01579b,stroke-width:2px
+    classDef infra fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    classDef database fill:#e8f5e8,stroke:#2e7d32,stroke-width:2px
+
+    class TS,GS,RS,CS service
+    class DM,DI infra
+    class T1,T2,T3,T4,T5,T6 database
+
+%% Architecture Notes:
+%% - Services communicate directly with DatabaseManager (no ORM layer)
+%% - DatabaseManager uses singleton pattern for connection management
+%% - SQLite provides ACID compliance and referential integrity
+%% - Schema is code-first, initialized at application startup
+%% - Connection pooling handled by single persistent connection
