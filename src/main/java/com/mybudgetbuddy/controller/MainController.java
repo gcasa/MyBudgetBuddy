@@ -8,7 +8,7 @@ import com.mybudgetbuddy.application.service.GoalService;
 import com.mybudgetbuddy.application.service.impl.ReportServiceImpl;
 import com.mybudgetbuddy.application.service.impl.GoalServiceImpl;
 import com.mybudgetbuddy.viewmodel.MainViewModel;
-import com.mybudgetbuddy.viewmodel.TransactionEntryViewModel;
+import com.mybudgetbuddy.viewmodel.TransactionViewModel;
 import com.mybudgetbuddy.viewmodel.ReportsViewModel;
 import com.mybudgetbuddy.viewmodel.GoalsViewModel;
 import javafx.fxml.FXML;
@@ -269,10 +269,10 @@ public class MainController {
             FXMLLoader loader = new FXMLLoader(
                     getClass().getResource("/com/mybudgetbuddy/add-edit-transaction.fxml"));
             DialogPane dialogPane = loader.load();
-            AddEditTransactionController controller = loader.getController();
+            TransactionController controller = loader.getController();
             
             // Create ViewModel for the dialog
-            TransactionEntryViewModel dialogViewModel = new TransactionEntryViewModel(transactionService);
+            TransactionViewModel dialogViewModel = new TransactionViewModel(transactionService);
             
             controller.setViewModel(dialogViewModel);
             controller.setTransaction(transaction);

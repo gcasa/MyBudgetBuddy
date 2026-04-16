@@ -212,7 +212,7 @@ direction LR
 	    +refreshFinancials()
     }
 
-    class TransactionEntryViewModel {
+    class TransactionViewModel {
 	    -TransactionService transactionService
 	    -ObjectProperty~Transaction~ transaction
 	    -BooleanProperty isEditing
@@ -244,8 +244,8 @@ direction LR
 	    +handleDeleteTransaction()
     }
 
-    class AddEditTransactionController {
-	    -TransactionEntryViewModel viewModel
+    class TransactionController {
+	    -TransactionViewModel viewModel
 	    +initialize()
 	    +handleSave()
 	    +handleCancel()
@@ -274,11 +274,11 @@ direction LR
     MainViewModel --> TransactionService
     MainViewModel --> Transaction
     MainViewModel --> Command
-    TransactionEntryViewModel --> TransactionService
-    TransactionEntryViewModel --> Transaction
-    TransactionEntryViewModel --> Command
+    TransactionViewModel --> TransactionService
+    TransactionViewModel --> Transaction
+    TransactionViewModel --> Command
     MainController --> MainViewModel
-    AddEditTransactionController --> TransactionEntryViewModel
+    TransactionController --> TransactionViewModel
     FinancialPlanningEngine --> FinancialPlan
     FinancialPlanningEngine --> Scenario
     FinancialPlanningEngine --> Goal
