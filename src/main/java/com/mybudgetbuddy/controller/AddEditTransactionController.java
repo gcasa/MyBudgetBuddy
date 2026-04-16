@@ -3,7 +3,7 @@ package com.mybudgetbuddy.controller;
 import com.mybudgetbuddy.model.Transaction;
 import com.mybudgetbuddy.model.TransactionType;
 import com.mybudgetbuddy.model.Category;
-import com.mybudgetbuddy.viewmodel.AddEditTransactionViewModel;
+import com.mybudgetbuddy.viewmodel.TransactionEntryViewModel;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 
@@ -16,9 +16,9 @@ public class AddEditTransactionController {
     @FXML private DatePicker datePicker;
     @FXML private Button saveButton;
 
-    private AddEditTransactionViewModel viewModel;
+    private TransactionEntryViewModel viewModel;
 
-    public void setViewModel(AddEditTransactionViewModel viewModel) {
+    public void setViewModel(TransactionEntryViewModel viewModel) {
         this.viewModel = viewModel;
         bindToViewModel();
     }

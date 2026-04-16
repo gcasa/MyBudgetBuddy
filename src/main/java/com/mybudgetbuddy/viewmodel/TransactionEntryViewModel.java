@@ -20,7 +20,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.function.Consumer;
 
-public class AddEditTransactionViewModel {
+public class TransactionEntryViewModel {
     
     private final TransactionService transactionService;
     private final CategoryService categoryService;
@@ -48,7 +48,7 @@ public class AddEditTransactionViewModel {
     // Callback for successful save
     private Consumer<Boolean> onSaveCompleted;
     
-    public AddEditTransactionViewModel(TransactionService transactionService) {
+    public TransactionEntryViewModel(TransactionService transactionService) {
         this.transactionService = transactionService;
         this.categoryService = new CategoryServiceImpl();
         
