@@ -296,6 +296,15 @@ public class ReportsViewModel {
                 updateMessage("Generating report...");
                 updateProgress(0.1, 1.0);
                 
+                // Log report generation parameters for debugging
+                LOGGER.info("Generating report with parameters:");
+                LOGGER.info("  Name: " + reportName.get());
+                LOGGER.info("  Type: " + selectedReportType.get()); 
+                LOGGER.info("  Format: " + selectedFormat.get());
+                LOGGER.info("  Plan ID: " + planId.get());
+                LOGGER.info("  Start Date: " + startDate.get());
+                LOGGER.info("  End Date: " + endDate.get());
+                
                 Report report = reportService.generateReport(
                     reportName.get(),
                     selectedReportType.get(),

@@ -4,8 +4,6 @@ import com.mybudgetbuddy.application.service.ReportService;
 import com.mybudgetbuddy.application.service.GoalService;
 import com.mybudgetbuddy.application.service.TransactionService;
 import com.mybudgetbuddy.application.service.BudgetService;
-import com.mybudgetbuddy.application.service.impl.GoalServiceImpl;
-import com.mybudgetbuddy.application.service.impl.TransactionServiceImpl;
 import com.mybudgetbuddy.domain.model.Report;
 import com.mybudgetbuddy.domain.model.ReportFormat;
 import com.mybudgetbuddy.domain.model.ReportStatus;
@@ -50,6 +48,9 @@ public class ReportServiceImpl implements ReportService {
         this.goalService = goalService;
         this.transactionService = transactionService;
         this.budgetService = budgetService;
+        
+        LOGGER.info("ReportServiceImpl initialized with TransactionService: " + (transactionService != null ? "YES" : "NULL"));
+        
         DatabaseManager databaseManager = DatabaseManager.getInstance();
         DatabaseInitializer initializer = new DatabaseInitializer(databaseManager);
         initializer.initializeDatabase();
@@ -68,16 +69,31 @@ public class ReportServiceImpl implements ReportService {
     
     @Override
     public Report generateReport(String name, ReportType type, ReportFormat format, String planId, LocalDate startDate, LocalDate endDate) {
-        LOGGER.info("Generating report: " + name + " of type: " + type);
+        // Use a default planId if none provided
+        if (planId == null || planId.trim().isEmpty()) {
+            planId = "default-plan";
+            LOGGER.warning("No planId provided, using default: " + planId);
+        }
+        
+        LOGGER.info("Generating report: " + name + " of type: " + type + " for plan: " + planId);
         
         Report report = new Report(name, type, startDate, endDate);
         report.setFormat(format);
         report.setPlanId(planId);
         report.setStatus(ReportStatus.GENERATING);
         report.setGeneratedBy("System");
+        // Don't set user_id to avoid foreign key constraint issues
+        
+        LOGGER.info("Creating report with ID: " + report.getId() + ", planId: " + planId + ", name: " + name);
         
         // Save initial report
-        report = reportRepository.save(report);
+        try {
+            report = reportRepository.save(report);
+            LOGGER.info("Initial report saved successfully: " + report.getId());
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Failed to save initial report: " + report.getId(), e);
+            throw e;
+        }
         
         try {
             // Generate report content based on type
@@ -91,9 +107,12 @@ public class ReportServiceImpl implements ReportService {
             report.markAsGenerated(filePath);
             report.setFileSizeBytes(file.length());
             
-            reportRepository.save(report);
+            LOGGER.info("About to save final report: " + report.getId() + " with content length: " + 
+                       (report.getContent() != null ? report.getContent().length() : "null"));
             
-            LOGGER.info("Report generated successfully: " + report.getId());
+            report = reportRepository.save(report);
+            LOGGER.info("Final report saved successfully: " + report.getId());
+            
             return report;
             
         } catch (Exception e) {
@@ -106,6 +125,11 @@ public class ReportServiceImpl implements ReportService {
 
     @Override
     public Report generateCustomReport(String name, Map<String, Object> parameters, String planId) {
+        // Use consistent default planId handling
+        if (planId == null || planId.trim().isEmpty()) {
+            planId = "default-plan";
+            LOGGER.warning("No planId provided for custom report, using default: " + planId);
+        }
         Report report = new Report();
         report.setName(name);
         report.setType(ReportType.CUSTOM);
@@ -164,12 +188,25 @@ public class ReportServiceImpl implements ReportService {
 
     @Override
     public List<Report> getReportsByPlanId(String planId) {
+        // Use consistent default planId handling
+        if (planId == null || planId.trim().isEmpty()) {
+            planId = "default-plan";
+            LOGGER.info("No planId provided for report retrieval, using default: " + planId);
+        }
+        
         LOGGER.info("Getting reports for plan: " + planId);
-        return reportRepository.findByPlanId(planId);
+        List<Report> reports = reportRepository.findByPlanId(planId);
+        LOGGER.info("Found " + reports.size() + " reports for plan: " + planId);
+        return reports;
     }
     
     @Override
     public Report generateGoalProgressReport(String planId) {
+        // Use consistent default planId handling  
+        if (planId == null || planId.trim().isEmpty()) {
+            planId = "default-plan";
+            LOGGER.warning("No planId provided for goal progress report, using default: " + planId);
+        }
         LOGGER.info("Generating goal progress report for plan: " + planId);
         
         Report report = new Report("Goal Progress Report", ReportType.GOAL_PROGRESS, 
@@ -207,9 +244,9 @@ public class ReportServiceImpl implements ReportService {
     
     private void generateGoalProgressContent(Report report) {
         StringBuilder content = new StringBuilder();
-        content.append("=== GOAL PROGRESS REPORT ===\\n\\n");
+        content.append("=== GOAL PROGRESS REPORT ===\n\n");
         content.append("Report Period: ").append(report.getStartDate())
-               .append(" to ").append(report.getEndDate()).append("\\n\\n");
+               .append(" to ").append(report.getEndDate()).append("\n\n");
         
         if (goalService != null) {
             try {
@@ -219,35 +256,35 @@ public class ReportServiceImpl implements ReportService {
                 List<Goal> goalsAtRisk = goalService.getGoalsAtRisk(planId);
                 BigDecimal overallProgress = goalService.getOverallGoalProgress(planId);
                 
-                content.append("Goals Summary:\\n");
-                content.append("- Active Goals: ").append(activeGoals.size()).append("\\n");
-                content.append("- Completed Goals: ").append(completedGoals.size()).append("\\n");
-                content.append("- Goals at Risk: ").append(goalsAtRisk.size()).append("\\n");
-                content.append("- Overall Progress: ").append(overallProgress).append("%\\n\\n");
+                content.append("Goals Summary:\n");
+                content.append("- Active Goals: ").append(activeGoals.size()).append("\n");
+                content.append("- Completed Goals: ").append(completedGoals.size()).append("\n");
+                content.append("- Goals at Risk: ").append(goalsAtRisk.size()).append("\n");
+                content.append("- Overall Progress: ").append(overallProgress).append("%\n\n");
                 
-                content.append("Progress Details:\\n");
+                content.append("Progress Details:\n");
                 for (Goal goal : activeGoals) {
                     content.append("• ").append(goal.getName()).append(": ");
                     content.append(goal.getProgressPercentage()).append("% complete");
                     if (goal.getTargetDate() != null) {
                         content.append(" (target: ").append(goal.getTargetDate()).append(")");
                     }
-                    content.append("\\n");
+                    content.append("\n");
                 }
                 
                 if (!goalsAtRisk.isEmpty()) {
-                    content.append("\\nGoals Requiring Attention:\\n");
+                    content.append("\nGoals Requiring Attention:\n");
                     for (Goal goal : goalsAtRisk) {
                         content.append("⚠️ ").append(goal.getName()).append(" - ");
-                        content.append("Progress: ").append(goal.getProgressPercentage()).append("%\\n");
+                        content.append("Progress: ").append(goal.getProgressPercentage()).append("%\n");
                     }
                 }
             } catch (Exception e) {
                 LOGGER.log(Level.WARNING, "Failed to get goal data: " + e.getMessage());
-                content.append("Goal data temporarily unavailable\\n");
+                content.append("Goal data temporarily unavailable\n");
             }
         } else {
-            content.append("GoalService not available for detailed analysis\\n");
+            content.append("GoalService not available for detailed analysis\n");
         }
         
         report.setContent(content.toString());
@@ -618,6 +655,19 @@ public class ReportServiceImpl implements ReportService {
             default:
                 generateGenericReportContent(report);
         }
+        
+        // Ensure content is persisted after generation
+        LOGGER.info("Report content generated, saving report: " + report.getId() + 
+                   " with content length: " + (report.getContent() != null ? report.getContent().length() : "null") + 
+                   " and planId: " + report.getPlanId());
+        
+        try {
+            reportRepository.save(report);
+            LOGGER.info("Report content successfully saved for report: " + report.getId());
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Failed to save report content for: " + report.getId(), e);
+            throw e;
+        }
     }
     
     private void generateFinancialSummaryContent(Report report) {
@@ -626,19 +676,65 @@ public class ReportServiceImpl implements ReportService {
         content.append("========================\n\n");
         content.append("Period: ").append(report.getDateRangeString()).append("\n\n");
         
-        // Add summary statistics
-        report.addSummaryStats("Total Income", "$5,240.00");
-        report.addSummaryStats("Total Expenses", "$4,180.00");
-        report.addSummaryStats("Net Income", "$1,060.00");
-        report.addSummaryStats("Savings Rate", "20.2%");
+        LocalDate startDate = report.getStartDate();
+        LocalDate endDate = report.getEndDate();
         
-        // Add key insights
-        report.addKeyInsight("Your savings rate increased by 3% compared to last month");
-        report.addKeyInsight("Transportation costs are 15% higher than budgeted");
-        
-        // Add action items
-        report.addActionItem("Consider reviewing your transportation budget");
-        report.addActionItem("You're on track to meet your annual savings goal");
+        // Use actual transaction data for financial summary
+        if (transactionService != null) {
+            try {
+                LOGGER.info("Generating financial summary with actual transaction data for period: " + startDate + " to " + endDate);
+                
+                BigDecimal totalIncome = transactionService.getTotalIncomeForPeriod(startDate, endDate);
+                BigDecimal totalExpenses = transactionService.getTotalExpensesForPeriod(startDate, endDate);
+                BigDecimal netIncome = totalIncome.subtract(totalExpenses);
+                int transactionCount = transactionService.getTransactionsByDateRange(startDate, endDate).size();
+                
+                // Calculate savings rate
+                BigDecimal savingsRate = totalIncome.compareTo(BigDecimal.ZERO) > 0 ? 
+                    netIncome.divide(totalIncome, 4, java.math.RoundingMode.HALF_UP).multiply(BigDecimal.valueOf(100)) :
+                    BigDecimal.ZERO;
+                
+                // Add actual summary statistics
+                report.addSummaryStats("Total Income", "$" + totalIncome.toString());
+                report.addSummaryStats("Total Expenses", "$" + totalExpenses.toString());
+                report.addSummaryStats("Net Income", "$" + netIncome.toString());
+                report.addSummaryStats("Savings Rate", savingsRate.setScale(1, java.math.RoundingMode.HALF_UP) + "%");
+                report.addSummaryStats("Transaction Count", String.valueOf(transactionCount));
+                
+                // Generate insights based on actual data
+                if (savingsRate.compareTo(BigDecimal.valueOf(20)) >= 0) {
+                    report.addKeyInsight("Excellent savings rate of " + savingsRate.setScale(1, java.math.RoundingMode.HALF_UP) + "% - you're building wealth effectively");
+                } else if (savingsRate.compareTo(BigDecimal.valueOf(10)) >= 0) {
+                    report.addKeyInsight("Good savings rate of " + savingsRate.setScale(1, java.math.RoundingMode.HALF_UP) + "% - consider increasing to 20%");
+                } else {
+                    report.addKeyInsight("Low savings rate of " + savingsRate.setScale(1, java.math.RoundingMode.HALF_UP) + "% - focus on reducing expenses");
+                }
+                
+                if (netIncome.compareTo(BigDecimal.ZERO) > 0) {
+                    report.addKeyInsight("Positive net income indicates healthy financial management");
+                } else {
+                    report.addKeyInsight("Negative net income requires immediate budget adjustments");
+                }
+                
+                // Add action items based on data
+                if (savingsRate.compareTo(BigDecimal.valueOf(15)) < 0) {
+                    report.addActionItem("Increase savings rate by reducing discretionary spending");
+                }
+                if (netIncome.compareTo(BigDecimal.ZERO) > 0) {
+                    report.addActionItem("Consider investing surplus funds for long-term growth");
+                } else {
+                    report.addActionItem("Review and cut unnecessary expenses to improve cash flow");
+                }
+                
+            } catch (Exception e) {
+                LOGGER.log(Level.WARNING, "Failed to get transaction data for financial summary: " + e.getMessage(), e);
+                report.addSummaryStats("Data Status", "Transaction data temporarily unavailable");
+                report.addActionItem("Retry financial summary when transaction service is available");
+            }
+        } else {
+            report.addSummaryStats("Data Status", "TransactionService not available");
+            report.addActionItem("Configure transaction service for detailed financial summary");
+        }
         
         content.append("SUMMARY STATISTICS\n");
         content.append("------------------\n");
@@ -667,12 +763,55 @@ public class ReportServiceImpl implements ReportService {
         content.append("======================\n\n");
         content.append("Analysis Period: ").append(report.getDateRangeString()).append("\n\n");
         
-        report.addSummaryStats("Budget Adherence", "85%");
-        report.addSummaryStats("Categories Over Budget", "2");
-        report.addSummaryStats("Largest Variance", "Transportation: +$240");
+        LocalDate startDate = report.getStartDate();
+        LocalDate endDate = report.getEndDate();
         
-        report.addKeyInsight("Overall budget performance is good at 85% adherence");
-        report.addActionItem("Review transportation and dining out budgets");
+        // Get actual transaction totals
+        if (transactionService != null) {
+            try {
+                LOGGER.info("Generating budget analysis with transaction data for period: " + startDate + " to " + endDate);
+                
+                BigDecimal totalIncome = transactionService.getTotalIncomeForPeriod(startDate, endDate);
+                BigDecimal totalExpenses = transactionService.getTotalExpensesForPeriod(startDate, endDate);
+                BigDecimal netFlow = totalIncome.subtract(totalExpenses);
+                List<?> transactions = transactionService.getTransactionsByDateRange(startDate, endDate);
+                
+                // Calculate budget performance (using actual data)
+                report.addSummaryStats("Total Income", "$" + totalIncome.toString());
+                report.addSummaryStats("Total Expenses", "$" + totalExpenses.toString());
+                report.addSummaryStats("Net Cash Flow", "$" + netFlow.toString());
+                report.addSummaryStats("Transaction Count", String.valueOf(transactions.size()));
+                report.addSummaryStats("Average Transaction", transactions.size() > 0 ? 
+                    "$" + totalExpenses.divide(BigDecimal.valueOf(transactions.size()), 2, java.math.RoundingMode.HALF_UP).toString() : "$0.00");
+                
+                // Generate insights based on actual data
+                if (netFlow.compareTo(BigDecimal.ZERO) > 0) {
+                    report.addKeyInsight("Positive cash flow of $" + netFlow + " indicates good financial health");
+                } else {
+                    report.addKeyInsight("Negative cash flow of $" + netFlow + " requires attention");
+                }
+                
+                if (transactions.size() > 0) {
+                    report.addKeyInsight("Recorded " + transactions.size() + " transactions during this period");
+                }
+                
+                // Generate recommendations based on data
+                if (totalExpenses.compareTo(totalIncome) > 0) {
+                    report.addActionItem("Expenses exceed income - review spending categories");
+                }
+                if (transactions.size() > 50) {
+                    report.addActionItem("High transaction volume - consider consolidating payments");
+                }
+                
+            } catch (Exception e) {
+                LOGGER.log(Level.WARNING, "Failed to get transaction data for budget analysis: " + e.getMessage(), e);
+                report.addSummaryStats("Data Status", "Transaction data temporarily unavailable");
+                report.addActionItem("Retry report generation when transaction service is available");
+            }
+        } else {
+            report.addSummaryStats("Data Status", "TransactionService not available");
+            report.addActionItem("Configure transaction service for detailed budget analysis");
+        }
         
         content.append("BUDGET PERFORMANCE\n");
         content.append("------------------\n");
@@ -701,9 +840,64 @@ public class ReportServiceImpl implements ReportService {
         content.append("================\n\n");
         content.append("Cash Flow Analysis: ").append(report.getDateRangeString()).append("\n\n");
         
-        report.addSummaryStats("Average Monthly Income", "$5,200");
-        report.addSummaryStats("Average Monthly Expenses", "$4,100");
-        report.addSummaryStats("Net Cash Flow", "+$1,100");
+        LocalDate startDate = report.getStartDate();
+        LocalDate endDate = report.getEndDate();
+        
+        // Use actual transaction data for cash flow analysis
+        if (transactionService != null) {
+            try {
+                LOGGER.info("Generating cash flow report with actual transaction data for period: " + startDate + " to " + endDate);
+                
+                BigDecimal totalIncome = transactionService.getTotalIncomeForPeriod(startDate, endDate);
+                BigDecimal totalExpenses = transactionService.getTotalExpensesForPeriod(startDate, endDate);
+                BigDecimal netCashFlow = totalIncome.subtract(totalExpenses);
+                List<?> transactions = transactionService.getTransactionsByDateRange(startDate, endDate);
+                
+                // Calculate period length for averaging
+                long daysBetween = java.time.temporal.ChronoUnit.DAYS.between(startDate, endDate) + 1;
+                BigDecimal monthlyMultiplier = BigDecimal.valueOf(30.0 / daysBetween);
+                
+                BigDecimal avgMonthlyIncome = totalIncome.multiply(monthlyMultiplier);
+                BigDecimal avgMonthlyExpenses = totalExpenses.multiply(monthlyMultiplier);
+                BigDecimal avgMonthlyCashFlow = netCashFlow.multiply(monthlyMultiplier);
+                
+                report.addSummaryStats("Period Income", "$" + totalIncome.toString());
+                report.addSummaryStats("Period Expenses", "$" + totalExpenses.toString());
+                report.addSummaryStats("Period Net Cash Flow", "$" + netCashFlow.toString());
+                report.addSummaryStats("Estimated Monthly Income", "$" + avgMonthlyIncome.setScale(0, java.math.RoundingMode.HALF_UP).toString());
+                report.addSummaryStats("Estimated Monthly Expenses", "$" + avgMonthlyExpenses.setScale(0, java.math.RoundingMode.HALF_UP).toString());
+                report.addSummaryStats("Estimated Monthly Net Flow", "$" + avgMonthlyCashFlow.setScale(0, java.math.RoundingMode.HALF_UP).toString());
+                
+                // Generate insights based on actual data
+                if (netCashFlow.compareTo(BigDecimal.ZERO) > 0) {
+                    report.addKeyInsight("Positive cash flow indicates healthy financial position");
+                    report.addActionItem("Consider investing surplus funds for growth");
+                } else {
+                    report.addKeyInsight("Negative cash flow requires immediate attention");
+                    report.addActionItem("Review and reduce unnecessary expenses");
+                }
+                
+                // Income vs expense ratio insights
+                if (totalIncome.compareTo(BigDecimal.ZERO) > 0) {
+                    BigDecimal expenseRatio = totalExpenses.divide(totalIncome, 2, java.math.RoundingMode.HALF_UP).multiply(BigDecimal.valueOf(100));
+                    report.addKeyInsight("Expense ratio: " + expenseRatio + "% of income");
+                    
+                    if (expenseRatio.compareTo(BigDecimal.valueOf(80)) > 0) {
+                        report.addActionItem("High expense ratio - focus on reducing costs");
+                    }
+                }
+                
+                report.addKeyInsight("Analysis based on " + transactions.size() + " transactions");
+                
+            } catch (Exception e) {
+                LOGGER.log(Level.WARNING, "Failed to get transaction data for cash flow analysis: " + e.getMessage(), e);
+                report.addSummaryStats("Data Status", "Transaction data temporarily unavailable");
+                report.addActionItem("Retry cash flow report when transaction service is available");
+            }
+        } else {
+            report.addSummaryStats("Data Status", "TransactionService not available");
+            report.addActionItem("Configure transaction service for detailed cash flow analysis");
+        }
         
         content.append("CASH FLOW SUMMARY\n");
         content.append("-----------------\n");
@@ -736,10 +930,67 @@ public class ReportServiceImpl implements ReportService {
         content.append("========================\n\n");
         content.append("Analysis Period: ").append(report.getDateRangeString()).append("\n\n");
         
-        report.addSummaryStats("Housing", "35%");
-        report.addSummaryStats("Transportation", "18%");
-        report.addSummaryStats("Food", "15%");
-        report.addSummaryStats("Other", "32%");
+        LocalDate startDate = report.getStartDate();
+        LocalDate endDate = report.getEndDate();
+        
+        // Use actual transaction data for expense breakdown
+        if (transactionService != null) {
+            try {
+                LOGGER.info("Generating expense breakdown with actual transaction data for period: " + startDate + " to " + endDate);
+                
+                BigDecimal totalExpenses = transactionService.getTotalExpensesForPeriod(startDate, endDate);
+                Map<String, BigDecimal> categorySpending = transactionService.getCategorySpending(startDate, endDate);
+                int transactionCount = transactionService.getTransactionsByDateRange(startDate, endDate).size();
+                
+                if (totalExpenses.compareTo(BigDecimal.ZERO) > 0 && !categorySpending.isEmpty()) {
+                    // Calculate actual category percentages
+                    for (Map.Entry<String, BigDecimal> entry : categorySpending.entrySet()) {
+                        BigDecimal percentage = entry.getValue()
+                            .divide(totalExpenses, 4, java.math.RoundingMode.HALF_UP)
+                            .multiply(BigDecimal.valueOf(100));
+                        report.addSummaryStats(entry.getKey(), 
+                            percentage.setScale(1, java.math.RoundingMode.HALF_UP) + "% ($" + entry.getValue() + ")");
+                    }
+                    
+                    // Find top spending category
+                    String topCategory = categorySpending.entrySet().stream()
+                        .max(Map.Entry.comparingByValue())
+                        .map(Map.Entry::getKey)
+                        .orElse("Unknown");
+                    
+                    BigDecimal topAmount = categorySpending.get(topCategory);
+                    BigDecimal topPercentage = topAmount.divide(totalExpenses, 4, java.math.RoundingMode.HALF_UP)
+                        .multiply(BigDecimal.valueOf(100));
+                    
+                    // Generate insights based on actual data
+                    report.addKeyInsight("Highest spending category: " + topCategory + " (" + 
+                        topPercentage.setScale(1, java.math.RoundingMode.HALF_UP) + "% of expenses)");
+                    
+                    if (topPercentage.compareTo(BigDecimal.valueOf(40)) > 0) {
+                        report.addKeyInsight(topCategory + " represents a large portion of expenses - review for optimization");
+                        report.addActionItem("Analyze " + topCategory + " spending for potential savings");
+                    }
+                    
+                    report.addKeyInsight("Total categorized expenses: $" + totalExpenses + " across " + categorySpending.size() + " categories");
+                    report.addActionItem("Monitor spending in your top 3 categories for better budget control");
+                    
+                } else {
+                    report.addSummaryStats("Total Expenses", "$" + totalExpenses.toString());
+                    report.addSummaryStats("Categories Found", String.valueOf(categorySpending.size()));
+                    report.addSummaryStats("Transaction Count", String.valueOf(transactionCount));
+                    report.addKeyInsight("Limited category data available for detailed breakdown");
+                    report.addActionItem("Ensure transactions have proper category assignments for better analysis");
+                }
+                
+            } catch (Exception e) {
+                LOGGER.log(Level.WARNING, "Failed to get transaction data for expense breakdown: " + e.getMessage(), e);
+                report.addSummaryStats("Data Status", "Transaction data temporarily unavailable");
+                report.addActionItem("Retry expense breakdown when transaction service is available");
+            }
+        } else {
+            report.addSummaryStats("Data Status", "TransactionService not available");
+            report.addActionItem("Configure transaction service for detailed expense breakdown");
+        }
         
         content.append("EXPENSE CATEGORIES\n");
         content.append("------------------\n");
@@ -908,28 +1159,48 @@ public class ReportServiceImpl implements ReportService {
     
     private void generateIntegratedFinancialContent(Report report, String planId, LocalDate startDate, LocalDate endDate) {
         StringBuilder content = new StringBuilder();
-        content.append("=== INTEGRATED FINANCIAL SUMMARY ===\\n\\n");
-        content.append("Report Period: ").append(startDate).append(" to ").append(endDate).append("\\n");
-        content.append("Plan ID: ").append(planId).append("\\n\\n");
+        content.append("=== INTEGRATED FINANCIAL SUMMARY ===\n\n");
+        content.append("Report Period: ").append(startDate).append(" to ").append(endDate).append("\n");
+        content.append("Plan ID: ").append(planId).append("\n\n");
         
         // Transaction Summary Section
         content.append("--- TRANSACTION ANALYSIS ---\\n");
         if (transactionService != null) {
             try {
+                LOGGER.info("Attempting to get transaction data for period: " + startDate + " to " + endDate);
                 BigDecimal totalIncome = transactionService.getTotalIncomeForPeriod(startDate, endDate);
                 BigDecimal totalExpenses = transactionService.getTotalExpensesForPeriod(startDate, endDate);
                 BigDecimal netFlow = totalIncome.subtract(totalExpenses);
                 List<?> transactions = transactionService.getTransactionsByDateRange(startDate, endDate);
                 
+                LOGGER.info("Transaction data retrieved successfully - Income: " + totalIncome + ", Expenses: " + totalExpenses + ", Count: " + transactions.size());
+                
                 content.append("Total Income: $").append(totalIncome).append("\\n");
                 content.append("Total Expenses: $").append(totalExpenses).append("\\n");
                 content.append("Net Cash Flow: $").append(netFlow).append("\\n");
                 content.append("Transaction Count: ").append(transactions.size()).append("\\n\\n");
+                
+                // Add detailed transaction list if available
+                if (!transactions.isEmpty()) {
+                    content.append("Recent Transactions:\\n");
+                    int count = 0;
+                    for (Object obj : transactions) {
+                        if (obj instanceof com.mybudgetbuddy.model.Transaction && count < 10) {
+                            com.mybudgetbuddy.model.Transaction t = (com.mybudgetbuddy.model.Transaction) obj;
+                            content.append("- ").append(t.getTransactionDate()).append(": ")
+                                   .append(t.getDescription()).append(" $").append(t.getAmount()).append("\\n");
+                            count++;
+                        }
+                    }
+                    content.append("\\n");
+                }
+                
             } catch (Exception e) {
-                LOGGER.log(Level.WARNING, "Failed to get transaction data: " + e.getMessage());
-                content.append("Transaction data temporarily unavailable\\n\\n");
+                LOGGER.log(Level.WARNING, "Failed to get transaction data: " + e.getMessage(), e);
+                content.append("Transaction data temporarily unavailable: ").append(e.getMessage()).append("\\n\\n");
             }
         } else {
+            LOGGER.warning("TransactionService is null in ReportServiceImpl");
             content.append("TransactionService not available\\n\\n");
         }
         

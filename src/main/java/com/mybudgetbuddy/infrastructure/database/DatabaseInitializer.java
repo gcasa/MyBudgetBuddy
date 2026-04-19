@@ -224,9 +224,7 @@ public class DatabaseInitializer {
                 file_size_bytes INTEGER DEFAULT 0,
                 generated_by TEXT,
                 page_count INTEGER DEFAULT 0,
-                template_version TEXT,
-                FOREIGN KEY (plan_id) REFERENCES financial_plans(id),
-                FOREIGN KEY (user_id) REFERENCES users(id)
+                template_version TEXT
             )
         """;
         stmt.execute(sql);
