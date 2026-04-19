@@ -4,6 +4,7 @@ import com.mybudgetbuddy.domain.model.Report;
 import com.mybudgetbuddy.domain.model.ReportFormat;
 import com.mybudgetbuddy.domain.model.ReportStatus;
 import com.mybudgetbuddy.domain.model.ReportType;
+import com.mybudgetbuddy.application.service.ReportService;
 import com.mybudgetbuddy.viewmodel.ReportsViewModel;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
@@ -68,10 +69,17 @@ public class ReportsController {
     @FXML private Label reportDetailsLabel;
     
     private ReportsViewModel viewModel;
+    private ReportService reportService;
 
     public void setViewModel(ReportsViewModel viewModel) {
         this.viewModel = viewModel;
-        bindToViewModel();
+        if (viewModel != null) {
+            bindToViewModel();
+        }
+    }
+    
+    public void setReportService(ReportService reportService) {
+        this.reportService = reportService;
     }
 
     @FXML

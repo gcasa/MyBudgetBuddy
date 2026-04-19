@@ -66,12 +66,14 @@ public class MainController {
     public void setTransactionService(TransactionService transactionService) {
         this.transactionService = transactionService;
         
-        // Initialize report service and viewmodel
-        this.reportService = new ReportServiceImpl();
+        // Initialize goal service
+        this.goalService = new GoalServiceImpl(); 
+        
+        // Initialize report service with the transaction service so it can access transaction data
+        this.reportService = new ReportServiceImpl(goalService, transactionService, null);
         this.reportsViewModel = new ReportsViewModel(reportService);
         
-        // Initialize goal service and viewmodel
-        this.goalService = new GoalServiceImpl(); 
+        // Initialize goals viewmodel 
         this.goalsViewModel = new GoalsViewModel(goalService);
     }
 
@@ -103,6 +105,7 @@ public class MainController {
             
             reportsController = loader.getController();
             reportsController.setViewModel(reportsViewModel);
+            reportsController.setReportService(reportService);
             
             reportsTab.setContent(reportsContent);
             reportsTabInitialized = true;
