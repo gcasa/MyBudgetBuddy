@@ -32,10 +32,15 @@ public class App extends Application {
         controller.setTransactionService(transactionService);
         controller.setViewModel(mainViewModel);
 
-        Scene scene = new Scene(root, 900, 600);
+        Scene scene = new Scene(root, 1800, 1200);
         scene.getStylesheets().add(getClass().getResource("/com/mybudgetbuddy/styles.css").toExternalForm());
 
         primaryStage.setTitle("MyBudgetBuddy");
+        primaryStage.setResizable(true);
+        primaryStage.setMinWidth(1400);
+        primaryStage.setMinHeight(900);
+        primaryStage.setMaximized(false);
+        
         primaryStage.setScene(scene);
         primaryStage.show();
         

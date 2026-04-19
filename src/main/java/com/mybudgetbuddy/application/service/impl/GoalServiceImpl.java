@@ -38,8 +38,8 @@ public class GoalServiceImpl implements GoalService {
         
         String sql = """
             INSERT INTO goals (id, name, description, type, target_amount, current_amount, 
-                             target_date, created_date, priority, monthly_contribution, status)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                             target_date, created_date, priority, monthly_contribution, status, last_updated)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """;
         
         try (Connection conn = databaseManager.getConnection();
@@ -56,6 +56,7 @@ public class GoalServiceImpl implements GoalService {
             stmt.setString(9, goal.getPriority() != null ? goal.getPriority().name() : null);
             stmt.setBigDecimal(10, goal.getMonthlyContribution());
             stmt.setString(11, goal.getStatus() != null ? goal.getStatus().name() : GoalStatus.ACTIVE.name());
+            stmt.setDate(12, goal.getLastUpdated() != null ? java.sql.Date.valueOf(goal.getLastUpdated()) : java.sql.Date.valueOf(LocalDate.now()));
             
             stmt.executeUpdate();
             LOGGER.log(Level.INFO, "Created goal: {0}", goal.getName());
@@ -174,7 +175,7 @@ public class GoalServiceImpl implements GoalService {
         String sql = """
             UPDATE goals SET name = ?, description = ?, type = ?, target_amount = ?, 
                            current_amount = ?, target_date = ?, priority = ?, 
-                           monthly_contribution = ?, status = ?, updated_date = CURRENT_TIMESTAMP
+                           monthly_contribution = ?, status = ?, last_updated = CURRENT_DATE
             WHERE id = ?
         """;
         
@@ -245,7 +246,7 @@ public class GoalServiceImpl implements GoalService {
                                WHEN target_date < CURRENT_DATE AND current_amount < target_amount THEN 'OVERDUE'
                                ELSE status 
                            END,
-                           updated_date = CURRENT_TIMESTAMP
+                           last_updated = CURRENT_DATE
             WHERE id = ?
         """;
         
@@ -282,7 +283,7 @@ public class GoalServiceImpl implements GoalService {
                                WHEN target_date < CURRENT_DATE AND (current_amount + ?) < target_amount THEN 'OVERDUE'
                                ELSE status 
                            END,
-                           updated_date = CURRENT_TIMESTAMP
+                           last_updated = CURRENT_DATE
             WHERE id = ?
         """;
         
@@ -381,7 +382,7 @@ public class GoalServiceImpl implements GoalService {
         String sql = """
             SELECT id, name, description, type, target_amount, current_amount, 
                    target_date, created_date, priority, monthly_contribution, status
-            FROM goals WHERE plan_id = ? AND status = 'COMPLETED' ORDER BY updated_date DESC
+            FROM goals WHERE plan_id = ? AND status = 'COMPLETED' ORDER BY last_updated DESC
         """;
         
         List<Goal> goals = new ArrayList<>();

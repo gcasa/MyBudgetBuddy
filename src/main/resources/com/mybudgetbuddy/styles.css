@@ -5,6 +5,74 @@
     -fx-font-size: 13px;
 }
 
+/* ===== Goals Specific Styles ===== */
+.goals-scroll-pane {
+    -fx-background-color: transparent;
+    -fx-hbar-policy: as-needed;
+    -fx-vbar-policy: as-needed;
+}
+
+.goals-container {
+    -fx-background-color: #f5f7fa;
+    -fx-padding: 0;
+}
+
+.form-container {
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 8;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.1), 5, 0, 0, 2);
+    -fx-border-color: #e0e0e0;
+    -fx-border-radius: 8;
+    -fx-border-width: 1;
+}
+
+/* ===== TableView Responsive Design ===== */
+.table-view {
+    -fx-min-height: 200px;
+    -fx-pref-height: 400px;
+    -fx-background-color: white;
+    -fx-border-color: #e0e0e0;
+    -fx-border-radius: 4;
+}
+
+.table-view .column-header {
+    -fx-background-color: #f8f9fa;
+    -fx-text-fill: #333;
+    -fx-font-weight: bold;
+}
+
+.table-view .table-row-cell:filled:hover {
+    -fx-background-color: #e3f2fd;
+}
+
+.table-view .table-row-cell:filled:selected {
+    -fx-background-color: #1976d2;
+    -fx-text-fill: white;
+}
+
+/* ===== Responsive Layout ===== */
+.vbox,
+.hbox,
+.border-pane {
+    -fx-max-width: infinity;
+    -fx-max-height: infinity;
+}
+
+/* Ensure ScrollPane adapts to content */
+.scroll-pane>.viewport {
+    -fx-background-color: transparent;
+}
+
+.scroll-pane>.scroll-bar:horizontal,
+.scroll-pane>.scroll-bar:vertical {
+    -fx-background-color: transparent;
+}
+
+.scroll-pane>.scroll-bar>.increment-button,
+.scroll-pane>.scroll-bar>.decrement-button {
+    -fx-background-color: transparent;
+}
+
 /* ===== Toolbar ===== */
 .toolbar {
     -fx-background-color: #1565c0;

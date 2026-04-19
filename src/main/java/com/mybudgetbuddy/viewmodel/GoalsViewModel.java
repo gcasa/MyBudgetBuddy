@@ -339,11 +339,10 @@ public class GoalsViewModel {
     
     // Async operations
     private void loadGoalsAsync() {
-        if (planId.get() == null) return;
-        
         Task<List<Goal>> task = new Task<>() {
             @Override
             protected List<Goal> call() throws Exception {
+                // GoalService handles null planId by returning all goals
                 return goalService.getGoalsByPlanId(planId.get());
             }
             
@@ -373,10 +372,10 @@ public class GoalsViewModel {
     
     // Helper methods
     private void clearForm() {
-        goalName.set("");
+        goalName.set("New Goal");  // Set default name instead of empty string
         goalDescription.set("");
         selectedGoalType.set(GoalType.SAVINGS);
-        targetAmountText.set("0.00");
+        targetAmountText.set("100.00");  // Set default target amount
         currentAmountText.set("0.00");
         targetDate.set(LocalDate.now().plusMonths(12));
         selectedPriority.set(Priority.MEDIUM);
@@ -411,6 +410,7 @@ public class GoalsViewModel {
         goal.setTargetDate(targetDate.get());
         goal.setPriority(selectedPriority.get());
         goal.setPlanId(planId.get());
+        goal.setLastUpdated(LocalDate.now()); // Ensure last_updated is set
         
         if (!monthlyContributionText.get().trim().isEmpty()) {
             goal.setMonthlyContribution(new BigDecimal(monthlyContributionText.get()));

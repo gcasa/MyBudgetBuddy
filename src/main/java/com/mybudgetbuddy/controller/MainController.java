@@ -90,6 +90,8 @@ public class MainController {
                 } else if (newTab == goalsTab && !goalsTabInitialized) {
                     initializeGoalsTab();
                 }
+                // Update toolbar button labels based on active tab
+                updateToolbarLabels(newTab);
             }
         );
     }
@@ -115,7 +117,7 @@ public class MainController {
     private void initializeGoalsTab() {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/mybudgetbuddy/goals.fxml"));
-            ScrollPane goalsContent = loader.load();
+            BorderPane goalsContent = loader.load();
             
             goalsController = loader.getController();
             goalsController.setViewModel(goalsViewModel);
@@ -128,6 +130,20 @@ public class MainController {
             e.printStackTrace();
             showError("Failed to load Goals", 
                      "Could not initialize the Goals tab: " + e.getMessage());
+        }
+    }
+    
+    private void updateToolbarLabels(Tab activeTab) {
+        if (activeTab == goalsTab) {
+            // Goals context
+            addButton.setText("＋ Add Goal");
+            editButton.setText("✎ Edit Goal");
+            deleteButton.setText("✕ Delete Goal");
+        } else {
+            // Transaction context (default)
+            addButton.setText("＋ Add");
+            editButton.setText("✎ Edit");
+            deleteButton.setText("✕ Delete");
         }
     }
     
@@ -221,22 +237,49 @@ public class MainController {
 
     @FXML
     private void handleAdd() {
-        if (viewModel != null) {
-            viewModel.getAddCommand().execute();
+        // Context-aware Add button based on active tab
+        if (mainTabPane.getSelectionModel().getSelectedItem() == goalsTab) {
+            // Add Goal via dialog
+            if (goalsController != null) {
+                goalsController.handleCreateGoal();
+            }
+        } else {
+            // Add Transaction (default)
+            if (viewModel != null) {
+                viewModel.getAddCommand().execute();
+            }
         }
     }
 
     @FXML
     private void handleEdit() {
-        if (viewModel != null) {
-            viewModel.getEditCommand().execute();
+        // Context-aware Edit button based on active tab
+        if (mainTabPane.getSelectionModel().getSelectedItem() == goalsTab) {
+            // Edit Goal via dialog
+            if (goalsController != null) {
+                goalsController.handleEditGoal();
+            }
+        } else {
+            // Edit Transaction (default)
+            if (viewModel != null) {
+                viewModel.getEditCommand().execute();
+            }
         }
     }
 
     @FXML
     private void handleDelete() {
-        if (viewModel != null) {
-            viewModel.getDeleteCommand().execute();
+        // Context-aware Delete button based on active tab
+        if (mainTabPane.getSelectionModel().getSelectedItem() == goalsTab) {
+            // Delete Goal
+            if (goalsController != null) {
+                goalsController.handleDeleteGoal();
+            }
+        } else {
+            // Delete Transaction (default)
+            if (viewModel != null) {
+                viewModel.getDeleteCommand().execute();
+            }
         }
     }
     

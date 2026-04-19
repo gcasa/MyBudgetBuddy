@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<DialogPane xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" 
+           fx:controller="com.mybudgetbuddy.controller.GoalDialogController">
+    <content>
+        <VBox spacing="15.0" prefWidth="500.0" prefHeight="400.0">
+            <padding>
+                <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+            </padding>
+            <Label text="Goal Information" style="-fx-font-size: 16px; -fx-font-weight: bold;" />
+            <GridPane hgap="15.0" vgap="15.0">
+                <columnConstraints>
+                    <ColumnConstraints hgrow="NEVER" minWidth="120.0" prefWidth="120.0" />
+                    <ColumnConstraints hgrow="ALWAYS" minWidth="200.0" prefWidth="300.0" />
+                </columnConstraints>
+                <rowConstraints>
+                    <RowConstraints minHeight="30.0" prefHeight="35.0" vgrow="SOMETIMES" />
+                    <RowConstraints minHeight="30.0" prefHeight="35.0" vgrow="SOMETIMES" />
+                    <RowConstraints minHeight="30.0" prefHeight="35.0" vgrow="SOMETIMES" />
+                    <RowConstraints minHeight="30.0" prefHeight="35.0" vgrow="SOMETIMES" />
+                    <RowConstraints minHeight="30.0" prefHeight="35.0" vgrow="SOMETIMES" />
+                    <RowConstraints minHeight="30.0" prefHeight="35.0" vgrow="SOMETIMES" />
+                    <RowConstraints minHeight="80.0" prefHeight="100.0" vgrow="ALWAYS" />
+                </rowConstraints>
+                <Label text="Name *" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+                <TextField fx:id="goalNameField" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+                <Label text="Type *" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+                <ComboBox fx:id="goalTypeCombo" GridPane.columnIndex="1" GridPane.rowIndex="1" maxWidth="Infinity" />
+                <Label text="Target Amount *" GridPane.columnIndex="0" GridPane.rowIndex="2" />
+                <TextField fx:id="targetAmountField" GridPane.columnIndex="1" GridPane.rowIndex="2" 
+                          promptText="e.g., 1000.00" />
+                <Label text="Current Amount" GridPane.columnIndex="0" GridPane.rowIndex="3" />
+                <TextField fx:id="currentAmountField" GridPane.columnIndex="1" GridPane.rowIndex="3" 
+                          promptText="e.g., 250.00" />
+                <Label text="Target Date" GridPane.columnIndex="0" GridPane.rowIndex="4" />
+                <DatePicker fx:id="targetDatePicker" GridPane.columnIndex="1" GridPane.rowIndex="4" 
+                           maxWidth="Infinity" />
+                <Label text="Priority" GridPane.columnIndex="0" GridPane.rowIndex="5" />
+                <ComboBox fx:id="priorityCombo" GridPane.columnIndex="1" GridPane.rowIndex="5" maxWidth="Infinity" />
+                <Label text="Description" GridPane.columnIndex="0" GridPane.rowIndex="6" />
+                <TextArea fx:id="goalDescriptionArea" GridPane.columnIndex="1" GridPane.rowIndex="6" 
+                         prefRowCount="4" wrapText="true" />
+            </GridPane>
+            <!-- Status and validation message -->
+            <HBox spacing="10.0" alignment="CENTER_LEFT">
+                <Label fx:id="statusLabel" textFill="#666666" />
+                <Region HBox.hgrow="ALWAYS" />
+                <ProgressIndicator fx:id="loadingIndicator" visible="false" maxWidth="20.0" maxHeight="20.0" />
+            </HBox>
+        </VBox>
+    </content>
+    <buttonTypes>
+        <ButtonType fx:constant="OK" />
+        <ButtonType fx:constant="CANCEL" />
+    </buttonTypes>
+</DialogPane>

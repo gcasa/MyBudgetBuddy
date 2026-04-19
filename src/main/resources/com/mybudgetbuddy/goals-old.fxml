@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+<ScrollPane xmlns="http://javafx.com/javafx/10.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.mybudgetbuddy.controller.GoalsController">
+    <VBox spacing="10" styleClass="goals-container">
+        <padding>
+            <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+        </padding>
+        <!-- Header Section -->
+        <VBox spacing="10" styleClass="header-section">
+            <HBox alignment="CENTER_LEFT" spacing="10">
+                <Label styleClass="page-title" text="Goals Management">
+                    <font>
+                        <Font size="24.0" />
+                    </font>
+                </Label>
+                <Region HBox.hgrow="ALWAYS" />
+                <Button fx:id="refreshButton" onAction="#handleRefresh" styleClass="icon-button" text="↻ Refresh" />
+                <Button fx:id="createButton" onAction="#handleCreateGoal" styleClass="primary-button" text="+ Create Goal" />
+            </HBox>
+            <!-- Status and Loading -->
+            <HBox alignment="CENTER_LEFT" spacing="10">
+                <Label fx:id="statusLabel" styleClass="status-label" />
+                <Region HBox.hgrow="ALWAYS" />
+                <ProgressIndicator fx:id="loadingIndicator" maxHeight="20.0" maxWidth="20.0" visible="false" />
+            </HBox>
+        </VBox>
+        <Separator />
+        <!-- Overall Statistics Section -->
+        <VBox spacing="10" styleClass="statistics-section">
+            <Label styleClass="section-title" text="Overall Statistics">
+                <font>
+                    <Font size="16.0" />
+                </font>
+            </Label>
+            <GridPane hgap="20.0" vgap="10.0">
+                <columnConstraints>
+                    <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                    <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                    <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                </columnConstraints>
+                <rowConstraints>
+                    <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                    <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                    <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                </rowConstraints>
+                <VBox alignment="CENTER" styleClass="stat-card" GridPane.columnIndex="0" GridPane.rowIndex="0">
+                    <Label styleClass="stat-label" text="Total Goals" />
+                    <Label fx:id="totalGoalsLabel" styleClass="stat-value" text="0" />
+                </VBox>
+                <VBox alignment="CENTER" styleClass="stat-card" GridPane.columnIndex="1" GridPane.rowIndex="0">
+                    <Label styleClass="stat-label" text="Active Goals" />
+                    <Label fx:id="activeGoalsLabel" styleClass="stat-value" text="0" />
+                </VBox>
+                <VBox alignment="CENTER" styleClass="stat-card" GridPane.columnIndex="2" GridPane.rowIndex="0">
+                    <Label styleClass="stat-label" text="Completed Goals" />
+                    <Label fx:id="completedGoalsLabel" styleClass="stat-value" text="0" />
+                </VBox>
+                <VBox alignment="CENTER" styleClass="stat-card" GridPane.columnIndex="0" GridPane.rowIndex="1">
+                    <Label styleClass="stat-label" text="Total Target" />
+                    <Label fx:id="totalTargetAmountLabel" styleClass="stat-value" text="\$0.00" />
+                </VBox>
+                <VBox alignment="CENTER" styleClass="stat-card" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                    <Label styleClass="stat-label" text="Total Saved" />
+                    <Label fx:id="totalCurrentAmountLabel" styleClass="stat-value" text="\$0.00" />
+                </VBox>
+                <VBox alignment="CENTER" styleClass="stat-card" GridPane.columnIndex="2" GridPane.rowIndex="1">
+                    <VBox alignment="CENTER" spacing="5">
+                        <Label styleClass="stat-label" text="Overall Progress" />
+                        <Label fx:id="overallProgressLabel" styleClass="stat-value" text="0%" />
+                        <ProgressBar fx:id="overallProgressBar" prefWidth="150.0" progress="0.0" />
+                    </VBox>
+                </VBox>
+            </GridPane>
+        </VBox>
+        <Separator />
+        <!-- Filters Section -->
+        <VBox spacing="10" styleClass="filters-section">
+            <Label styleClass="section-title" text="Filters">
+                <font>
+                    <Font size="16.0" />
+                </font>
+            </Label>
+            <HBox spacing="15.0">
+                <VBox spacing="5">
+                    <Label text="Type:" />
+                    <ComboBox fx:id="filterTypeCombo" promptText="All Types" />
+                </VBox>
+                <VBox spacing="5">
+                    <Label text="Status:" />
+                    <ComboBox fx:id="filterStatusCombo" promptText="All Statuses" />
+                </VBox>
+                <VBox spacing="5">
+                    <Label text="Priority:" />
+                    <ComboBox fx:id="filterPriorityCombo" promptText="All Priorities" />
+                </VBox>
+                <VBox spacing="5">
+                    <Label text="Show Completed:" />
+                    <CheckBox fx:id="showCompletedCheckBox" selected="true" />
+                </VBox>
+            </HBox>
+        </VBox>
+        <Separator />
+        <!-- Goals Table and Details Section -->
+        <HBox spacing="20.0" VBox.vgrow="ALWAYS">
+            <!-- Left Panel: Table and Actions -->
+            <VBox spacing="10" HBox.hgrow="ALWAYS">
+                <Label styleClass="section-title" text="Goals List">
+                    <font>
+                        <Font size="16.0" />
+                    </font>
+                </Label>
+                <!-- Goals Table -->
+                <TableView fx:id="goalsTable" VBox.vgrow="ALWAYS">
+                    <columns>
+                        <TableColumn fx:id="nameColumn" minWidth="150.0" prefWidth="200.0" text="Name" />
+                        <TableColumn fx:id="typeColumn" minWidth="100.0" prefWidth="120.0" text="Type" />
+                        <TableColumn fx:id="targetAmountColumn" minWidth="100.0" prefWidth="120.0" text="Target" />
+                        <TableColumn fx:id="currentAmountColumn" minWidth="100.0" prefWidth="120.0" text="Current" />
+                        <TableColumn fx:id="progressColumn" minWidth="80.0" prefWidth="100.0" text="Progress" />
+                        <TableColumn fx:id="targetDateColumn" minWidth="100.0" prefWidth="120.0" text="Target Date" />
+                        <TableColumn fx:id="priorityColumn" minWidth="80.0" prefWidth="100.0" text="Priority" />
+                        <TableColumn fx:id="statusColumn" minWidth="80.0" prefWidth="100.0" text="Status" />
+                    </columns>
+                </TableView>
+                <!-- Action Buttons -->
+                <HBox spacing="10">
+                    <Button fx:id="editButton" onAction="#handleEditGoal" text="Edit" />
+                    <Button fx:id="deleteButton" onAction="#handleDeleteGoal" styleClass="danger-button" text="Delete" />
+                    <Button fx:id="addContributionButton" onAction="#handleAddContribution" text="Add Contribution" />
+                    <Button fx:id="markCompleteButton" onAction="#handleMarkComplete" styleClass="success-button" text="Mark Complete" />
+                    <Button fx:id="pauseButton" onAction="#handlePauseGoal" text="Pause" />
+                    <Button fx:id="resumeButton" onAction="#handleResumeGoal" text="Resume" />
+                    <Button fx:id="duplicateButton" onAction="#handleDuplicateGoal" text="Duplicate" />
+                </HBox>
+            </VBox>
+            <!-- Right Panel: Details and Form -->
+            <VBox spacing="15.0" minWidth="300.0" maxWidth="400.0">
+                <!-- Selected Goal Details -->
+                <VBox fx:id="detailsContainer" spacing="10" styleClass="details-panel">
+                    <Label styleClass="section-title" text="Goal Details">
+                        <font>
+                            <Font size="16.0" />
+                        </font>
+                    </Label>
+                    <VBox spacing="8">
+                        <VBox spacing="3">
+                            <Label styleClass="detail-label" text="Name:" />
+                            <Label fx:id="selectedGoalNameLabel" styleClass="detail-value" text="No goal selected" wrapText="true" />
+                        </VBox>
+                        <VBox spacing="3">
+                            <Label styleClass="detail-label" text="Description:" />
+                            <Label fx:id="selectedGoalDescriptionLabel" styleClass="detail-value" text="-" wrapText="true" />
+                        </VBox>
+                        <VBox spacing="3">
+                            <Label styleClass="detail-label" text="Progress:" />
+                            <Label fx:id="selectedGoalProgressLabel" styleClass="detail-value" text="-" />
+                            <ProgressBar fx:id="selectedGoalProgressBar" prefWidth="250.0" progress="0.0" />
+                        </VBox>
+                        <VBox spacing="3">
+                            <Label styleClass="detail-label" text="Remaining Amount:" />
+                            <Label fx:id="selectedGoalRemainingLabel" styleClass="detail-value" text="-" />
+                        </VBox>
+                        <VBox spacing="3">
+                            <Label styleClass="detail-label" text="Days Remaining:" />
+                            <Label fx:id="selectedGoalDaysRemainingLabel" styleClass="detail-value" text="-" />
+                        </VBox>
+                        <VBox spacing="3">
+                            <Label styleClass="detail-label" text="Required Monthly Contribution:" />
+                            <Label fx:id="selectedGoalRequiredMonthlyLabel" styleClass="detail-value" text="-" />
+                        </VBox>
+                    </VBox>
+                </VBox>
+                <Separator />
+                <!-- Goal Form -->
+                <VBox fx:id="formContainer" spacing="10" styleClass="form-panel" visible="false">
+                    <Label styleClass="section-title" text="Goal Form">
+                        <font>
+                            <Font size="16.0" />
+                        </font>
+                    </Label>
+                    <GridPane hgap="10.0" vgap="8.0">
+                        <columnConstraints>
+                            <ColumnConstraints hgrow="NEVER" minWidth="80.0" prefWidth="80.0" />
+                            <ColumnConstraints hgrow="ALWAYS" minWidth="10.0" prefWidth="200.0" />
+                        </columnConstraints>
+                        <Label text="Name:" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+                        <TextField fx:id="goalNameField" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+                        <Label text="Type:" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+                        <ComboBox fx:id="goalTypeCombo" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                        <Label text="Target:" GridPane.columnIndex="0" GridPane.rowIndex="2" />
+                        <TextField fx:id="targetAmountField" promptText="0.00" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                        <Label text="Current:" GridPane.columnIndex="0" GridPane.rowIndex="3" />
+                        <TextField fx:id="currentAmountField" promptText="0.00" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                        <Label text="Target Date:" GridPane.columnIndex="0" GridPane.rowIndex="4" />
+                        <DatePicker fx:id="targetDatePicker" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+                        <Label text="Priority:" GridPane.columnIndex="0" GridPane.rowIndex="5" />
+                        <ComboBox fx:id="priorityCombo" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.rowIndex="5" />
+                        <Label text="Monthly:" GridPane.columnIndex="0" GridPane.rowIndex="6" />
+                        <TextField fx:id="monthlyContributionField" promptText="0.00" GridPane.columnIndex="1" GridPane.rowIndex="6" />
+                        <Label text="Description:" GridPane.valignment="TOP" GridPane.columnIndex="0" GridPane.rowIndex="7" />
+                        <TextArea fx:id="goalDescriptionArea" maxHeight="80.0" prefRowCount="3" wrapText="true" GridPane.columnIndex="1" GridPane.rowIndex="7" />
+                    </GridPane>
+                    <!-- Form Action Buttons -->
+                    <HBox spacing="10" alignment="CENTER">
+                        <Button fx:id="saveButton" onAction="#handleSaveGoal" styleClass="primary-button" text="Save" />
+                        <Button fx:id="cancelButton" onAction="#handleCancelEdit" text="Cancel" />
+                    </HBox>
+                </VBox>
+            </VBox>
+        </HBox>
+    </VBox>
+</ScrollPane>
