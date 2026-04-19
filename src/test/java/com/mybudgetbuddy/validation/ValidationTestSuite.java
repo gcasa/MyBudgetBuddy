@@ -16,7 +16,7 @@ import java.time.Period;
  * Covers TC-006 in detail and extends validation testing across all entities.
  */
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-class ValidationTestSuite {
+class ValidationTests {
 
     @Test
     @Order(1)

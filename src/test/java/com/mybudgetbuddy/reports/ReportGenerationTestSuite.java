@@ -1,9 +1,9 @@
 package com.mybudgetbuddy.reports;
 
 import com.mybudgetbuddy.application.service.TransactionService;
-import com.mybudgetbuddy.application.service.ReportService;
+
 import com.mybudgetbuddy.application.service.impl.TransactionServiceImpl;
-import com.mybudgetbuddy.application.service.impl.ReportServiceImpl;
+
 import com.mybudgetbuddy.model.Transaction;
 import com.mybudgetbuddy.model.TransactionType;
 
@@ -12,6 +12,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.File;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -23,10 +24,10 @@ import java.util.UUID;
  * Tests report accuracy, formatting, data aggregation, and chart data preparation.
  */
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-class ReportGenerationTestSuite {
+class ReportGenerationTests {
 
     private TransactionService transactionService;
-    private ReportService reportService;
+
     private String testPlanId;
 
     @BeforeEach
@@ -37,7 +38,6 @@ class ReportGenerationTestSuite {
         if (dataFile.exists()) dataFile.delete();
         
         transactionService = new TransactionServiceImpl();
-        reportService = new ReportServiceImpl();
         testPlanId = UUID.randomUUID().toString();
         
         setupTestTransactions();
@@ -141,12 +141,11 @@ class ReportGenerationTestSuite {
 
         // Calculate spending percentages
         BigDecimal totalExpenses = transactionService.getTotalExpensesForPeriod(startOfMonth, endOfMonth);
-        BigDecimal foodPercentage = foodSpending.divide(totalExpenses, 4, BigDecimal.ROUND_HALF_UP).multiply(new BigDecimal("100"));
         
         System.out.println("✓ Category Spending Breakdown:");
         categorySpending.forEach((category, amount) -> {
-            BigDecimal percentage = amount.divide(totalExpenses, 4, BigDecimal.ROUND_HALF_UP).multiply(new BigDecimal("100"));
-            System.out.println("  " + category + ": $" + amount + " (" + percentage.setScale(1, BigDecimal.ROUND_HALF_UP) + "%)");
+            BigDecimal percentage = amount.divide(totalExpenses, 4, RoundingMode.HALF_UP).multiply(new BigDecimal("100"));
+            System.out.println("  " + category + ": $" + amount + " (" + percentage.setScale(1, RoundingMode.HALF_UP) + "%)");
         });
     }
 
@@ -173,16 +172,16 @@ class ReportGenerationTestSuite {
         assertEquals(new BigDecimal("1780.00"), previousExpenses);
 
         // Calculate growth rates
-        BigDecimal incomeGrowth = currentIncome.subtract(previousIncome).divide(previousIncome, 4, BigDecimal.ROUND_HALF_UP).multiply(new BigDecimal("100"));
-        BigDecimal expenseGrowth = currentExpenses.subtract(previousExpenses).divide(previousExpenses, 4, BigDecimal.ROUND_HALF_UP).multiply(new BigDecimal("100"));
+        BigDecimal incomeGrowth = currentIncome.subtract(previousIncome).divide(previousIncome, 4, RoundingMode.HALF_UP).multiply(new BigDecimal("100"));
+        BigDecimal expenseGrowth = currentExpenses.subtract(previousExpenses).divide(previousExpenses, 4, RoundingMode.HALF_UP).multiply(new BigDecimal("100"));
 
         System.out.println("✓ Income vs Expenses Trend:");
         System.out.println("  Current Month Income: $" + currentIncome);
         System.out.println("  Previous Month Income: $" + previousIncome);
-        System.out.println("  Income Growth: " + incomeGrowth.setScale(1, BigDecimal.ROUND_HALF_UP) + "%");
+        System.out.println("  Income Growth: " + incomeGrowth.setScale(1, RoundingMode.HALF_UP) + "%");
         System.out.println("  Current Month Expenses: $" + currentExpenses);
         System.out.println("  Previous Month Expenses: $" + previousExpenses);
-        System.out.println("  Expense Growth: " + expenseGrowth.setScale(1, BigDecimal.ROUND_HALF_UP) + "%");
+        System.out.println("  Expense Growth: " + expenseGrowth.setScale(1, RoundingMode.HALF_UP) + "%");
     }
 
     @Test
@@ -354,7 +353,6 @@ class ReportGenerationTestSuite {
         data.summary = new ReportSummary();
         data.summary.totalIncome = transactionService.getTotalIncomeForPeriod(startDate, endDate);
         data.summary.totalExpenses = transactionService.getTotalExpensesForPeriod(startDate, endDate);
-        data.summary.netIncome = data.summary.totalIncome.subtract(data.summary.totalExpenses);
         
         data.transactions = transactionService.getTransactionsByDateRange(startDate, endDate);
         data.categoryBreakdown = transactionService.getCategorySpending(startDate, endDate);
@@ -374,6 +372,5 @@ class ReportGenerationTestSuite {
     private static class ReportSummary {
         BigDecimal totalIncome;
         BigDecimal totalExpenses;
-        BigDecimal netIncome;
     }
 }

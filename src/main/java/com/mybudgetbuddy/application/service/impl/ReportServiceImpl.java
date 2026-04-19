@@ -34,6 +34,12 @@ import java.util.stream.Collectors;
 public class ReportServiceImpl implements ReportService {
     
     private static final Logger LOGGER = Logger.getLogger(ReportServiceImpl.class.getName());
+    
+    // Constants for duplicate literals
+    private static final String DEFAULT_PLAN_ID = "default-plan";
+    private static final String START_DATE_KEY = "startDate";
+    private static final String END_DATE_KEY = "endDate";
+    
     private final ReportRepository reportRepository;
     private final Path reportsDirectory;
     private final GoalService goalService;
@@ -49,7 +55,7 @@ public class ReportServiceImpl implements ReportService {
         this.transactionService = transactionService;
         this.budgetService = budgetService;
         
-        LOGGER.info("ReportServiceImpl initialized with TransactionService: " + (transactionService != null ? "YES" : "NULL"));
+        LOGGER.info(() -> "ReportServiceImpl initialized with TransactionService: " + (transactionService != null ? "YES" : "NULL"));
         
         DatabaseManager databaseManager = DatabaseManager.getInstance();
         DatabaseInitializer initializer = new DatabaseInitializer(databaseManager);
@@ -63,28 +69,32 @@ public class ReportServiceImpl implements ReportService {
             Files.createDirectories(reportsDirectory);
         } catch (IOException e) {
             LOGGER.log(Level.SEVERE, "Failed to create reports directory", e);
-            throw new RuntimeException("Failed to create reports directory", e);
+            throw new IllegalStateException("Failed to create reports directory", e);
         }
     }
     
     @Override
     public Report generateReport(String name, ReportType type, ReportFormat format, String planId, LocalDate startDate, LocalDate endDate) {
         // Use a default planId if none provided
+        final String effectivePlanId;
         if (planId == null || planId.trim().isEmpty()) {
-            planId = "default-plan";
-            LOGGER.warning("No planId provided, using default: " + planId);
+            effectivePlanId = DEFAULT_PLAN_ID;
+            LOGGER.warning(() -> "No planId provided, using default: " + effectivePlanId);
+        } else {
+            effectivePlanId = planId;
         }
         
-        LOGGER.info("Generating report: " + name + " of type: " + type + " for plan: " + planId);
+        LOGGER.info(() -> "Generating report: " + name + " of type: " + type + " for plan: " + effectivePlanId);
         
         Report report = new Report(name, type, startDate, endDate);
         report.setFormat(format);
-        report.setPlanId(planId);
+        report.setPlanId(effectivePlanId);
         report.setStatus(ReportStatus.GENERATING);
         report.setGeneratedBy("System");
         // Don't set user_id to avoid foreign key constraint issues
         
-        LOGGER.info("Creating report with ID: " + report.getId() + ", planId: " + planId + ", name: " + name);
+        final String reportId = report.getId();
+        LOGGER.info(() -> "Creating report with ID: " + reportId + ", planId: " + effectivePlanId + ", name: " + name);
         
         // Save initial report
         try {
@@ -107,8 +117,9 @@ public class ReportServiceImpl implements ReportService {
             report.markAsGenerated(filePath);
             report.setFileSizeBytes(file.length());
             
-            LOGGER.info("About to save final report: " + report.getId() + " with content length: " + 
-                       (report.getContent() != null ? report.getContent().length() : "null"));
+            final String finalReportId = report.getId();
+            final String finalContent = report.getContent() != null ? String.valueOf(report.getContent().length()) : "null";
+            LOGGER.info(() -> "About to save final report: " + finalReportId + " with content length: " + finalContent);
             
             report = reportRepository.save(report);
             LOGGER.info("Final report saved successfully: " + report.getId());
@@ -119,29 +130,32 @@ public class ReportServiceImpl implements ReportService {
             LOGGER.log(Level.SEVERE, "Failed to generate report: " + report.getId(), e);
             report.markAsFailed(e.getMessage());
             reportRepository.save(report);
-            throw new RuntimeException("Failed to generate report", e);
+            throw new IllegalStateException("Failed to generate report", e);
         }
     }
 
     @Override
     public Report generateCustomReport(String name, Map<String, Object> parameters, String planId) {
         // Use consistent default planId handling
+        final String finalPlanId;
         if (planId == null || planId.trim().isEmpty()) {
-            planId = "default-plan";
-            LOGGER.warning("No planId provided for custom report, using default: " + planId);
+            finalPlanId = DEFAULT_PLAN_ID;
+            LOGGER.warning(() -> "No planId provided for custom report, using default: " + finalPlanId);
+        } else {
+            finalPlanId = planId;
         }
         Report report = new Report();
         report.setName(name);
         report.setType(ReportType.CUSTOM);
-        report.setPlanId(planId);
+        report.setPlanId(finalPlanId);
         report.setData(parameters);
         
         // Extract date range from parameters if available
-        if (parameters.containsKey("startDate")) {
-            report.setStartDate(LocalDate.parse(parameters.get("startDate").toString()));
+        if (parameters.containsKey(START_DATE_KEY)) {
+            report.setStartDate(LocalDate.parse(parameters.get(START_DATE_KEY).toString()));
         }
-        if (parameters.containsKey("endDate")) {
-            report.setEndDate(LocalDate.parse(parameters.get("endDate").toString()));
+        if (parameters.containsKey(END_DATE_KEY)) {
+            report.setEndDate(LocalDate.parse(parameters.get(END_DATE_KEY).toString()));
         }
         
         return generateReport(report.getName(), report.getType(), ReportFormat.PDF, planId, 
@@ -172,7 +186,7 @@ public class ReportServiceImpl implements ReportService {
         } catch (Exception e) {
             report.markAsFailed(e.getMessage());
             reportRepository.save(report);
-            throw new RuntimeException("Failed to regenerate report", e);
+            throw new IllegalStateException("Failed to regenerate report", e);
         }
     }
     
@@ -189,29 +203,35 @@ public class ReportServiceImpl implements ReportService {
     @Override
     public List<Report> getReportsByPlanId(String planId) {
         // Use consistent default planId handling
+        final String finalPlanId;
         if (planId == null || planId.trim().isEmpty()) {
-            planId = "default-plan";
-            LOGGER.info("No planId provided for report retrieval, using default: " + planId);
+            finalPlanId = DEFAULT_PLAN_ID;
+            LOGGER.info(() -> "No planId provided for report retrieval, using default: " + finalPlanId);
+        } else {
+            finalPlanId = planId;
         }
         
-        LOGGER.info("Getting reports for plan: " + planId);
-        List<Report> reports = reportRepository.findByPlanId(planId);
-        LOGGER.info("Found " + reports.size() + " reports for plan: " + planId);
+        LOGGER.info(() -> "Getting reports for plan: " + finalPlanId);
+        List<Report> reports = reportRepository.findByPlanId(finalPlanId);
+        LOGGER.info(() -> "Found " + reports.size() + " reports for plan: " + finalPlanId);
         return reports;
     }
     
     @Override
     public Report generateGoalProgressReport(String planId) {
         // Use consistent default planId handling  
+        final String effectivePlanId;
         if (planId == null || planId.trim().isEmpty()) {
-            planId = "default-plan";
-            LOGGER.warning("No planId provided for goal progress report, using default: " + planId);
+            effectivePlanId = DEFAULT_PLAN_ID;
+            LOGGER.warning(() -> "No planId provided for goal progress report, using default: " + effectivePlanId);
+        } else {
+            effectivePlanId = planId;
         }
-        LOGGER.info("Generating goal progress report for plan: " + planId);
+        LOGGER.info(() -> "Generating goal progress report for plan: " + effectivePlanId);
         
         Report report = new Report("Goal Progress Report", ReportType.GOAL_PROGRESS, 
                                  LocalDate.now().minusMonths(1), LocalDate.now());
-        report.setPlanId(planId);
+        report.setPlanId(effectivePlanId);
         report.setStatus(ReportStatus.GENERATING);
         
         // Save initial report
@@ -238,7 +258,7 @@ public class ReportServiceImpl implements ReportService {
             LOGGER.log(Level.SEVERE, "Failed to generate goal progress report: " + report.getId(), e);
             report.markAsFailed(e.getMessage());
             reportRepository.save(report);
-            throw new RuntimeException("Failed to generate goal progress report", e);
+            throw new IllegalStateException("Failed to generate goal progress report", e);
         }
     }
     
@@ -342,7 +362,7 @@ public class ReportServiceImpl implements ReportService {
     
     @Override
     public void saveReportAsTemplate(String reportId, String templateName) {
-        LOGGER.info("Template created from report: " + reportId);
+        LOGGER.info(() -> "Template created from report: " + reportId);
     }
 
     // Scheduled Reports
@@ -534,12 +554,12 @@ public class ReportServiceImpl implements ReportService {
     
     @Override
     public void shareReportViaEmail(String reportId, List<String> emailAddresses) {
-        LOGGER.info("Sharing report " + reportId + " via email");
+        LOGGER.info(() -> "Sharing report " + reportId + " via email");
     }
     
     @Override
     public void shareReportViaNotification(String reportId, String userId) {
-        LOGGER.info("Sharing report " + reportId + " via notification");
+        LOGGER.info(() -> "Sharing report " + reportId + " via notification");
     }
     
     // Report Analytics

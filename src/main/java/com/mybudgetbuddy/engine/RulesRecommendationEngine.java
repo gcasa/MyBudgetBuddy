@@ -1,9 +1,7 @@
 package com.mybudgetbuddy.engine;
 
 import com.mybudgetbuddy.domain.model.Recommendation;
-import com.mybudgetbuddy.domain.model.RecommendationType;
 import com.mybudgetbuddy.domain.model.Priority;
-import com.mybudgetbuddy.domain.model.FinancialPlan;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;

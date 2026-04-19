@@ -1,11 +1,11 @@
 package com.mybudgetbuddy;
 
 import com.mybudgetbuddy.application.service.TransactionService;
-import com.mybudgetbuddy.application.service.BudgetService;
-import com.mybudgetbuddy.application.service.ReportService;
+
+
 import com.mybudgetbuddy.application.service.CategoryService;
 import com.mybudgetbuddy.application.service.impl.TransactionServiceImpl;
-import com.mybudgetbuddy.application.service.impl.ReportServiceImpl;
+
 import com.mybudgetbuddy.application.service.impl.CategoryServiceImpl;
 import com.mybudgetbuddy.domain.model.Budget;
 import com.mybudgetbuddy.domain.model.BudgetType;
@@ -34,10 +34,10 @@ import java.util.UUID;
  * TC-007: Transaction deletion
  */
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-class ComprehensiveSystemTestSuite {
+class ComprehensiveSystemTests {
 
     private TransactionService transactionService;
-    private ReportService reportService;
+
     private CategoryService categoryService;
     private String testPlanId;
     private String testCategoryId;
@@ -51,7 +51,6 @@ class ComprehensiveSystemTestSuite {
         
         // Initialize services
         transactionService = new TransactionServiceImpl();
-        reportService = new ReportServiceImpl();
         categoryService = new CategoryServiceImpl();
         
         // Setup test data

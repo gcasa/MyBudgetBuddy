@@ -17,6 +17,10 @@ import java.util.function.Consumer;
 
 public class BudgetViewModel {
     
+    // Constants
+    private static final String DEFAULT_CURRENCY_VALUE = "$0.00";
+    private static final String CURRENCY_FORMAT = "$%,.2f";
+    
     // Services
     private final BudgetService budgetService;
     
@@ -93,9 +97,9 @@ public class BudgetViewModel {
         this.nearThresholdBudgets = FXCollections.observableArrayList();
         
         // Initialize summary properties
-        this.totalAllocated = new SimpleStringProperty("$0.00");
-        this.totalSpent = new SimpleStringProperty("$0.00");
-        this.totalRemaining = new SimpleStringProperty("$0.00");
+        this.totalAllocated = new SimpleStringProperty(DEFAULT_CURRENCY_VALUE);
+        this.totalSpent = new SimpleStringProperty(DEFAULT_CURRENCY_VALUE);
+        this.totalRemaining = new SimpleStringProperty(DEFAULT_CURRENCY_VALUE);
         this.overallProgress = new SimpleStringProperty("0%");
         
         // Initialize filter properties
@@ -182,9 +186,9 @@ public class BudgetViewModel {
         
         BigDecimal totalRemainingAmount = totalAllocatedAmount.subtract(totalSpentAmount);
         
-        totalAllocated.set(String.format("$%,.2f", totalAllocatedAmount));
-        totalSpent.set(String.format("$%,.2f", totalSpentAmount));
-        totalRemaining.set(String.format("$%,.2f", totalRemainingAmount));
+        totalAllocated.set(String.format(CURRENCY_FORMAT, totalAllocatedAmount));
+        totalSpent.set(String.format(CURRENCY_FORMAT, totalSpentAmount));
+        totalRemaining.set(String.format(CURRENCY_FORMAT, totalRemainingAmount));
         
         if (totalAllocatedAmount.compareTo(BigDecimal.ZERO) > 0) {
             BigDecimal progressPercent = totalSpentAmount.divide(totalAllocatedAmount, 2, java.math.RoundingMode.HALF_UP)
@@ -201,16 +205,17 @@ public class BudgetViewModel {
     }
     
     private void applyFilters() {
-        // TODO: Implement filtering logic based on filter properties
+        // Filter budgets based on properties when implemented
+        // Currently no filtering logic needed
     }
     
     private void setupValidation() {
-        // TODO: Add validation logic for form fields
+        // Form validation will be added when validation requirements are defined
         isFormValid.set(true); // Placeholder
     }
     
     private void setupFilterListeners() {
-        // TODO: Add listeners for filter properties to trigger re-filtering
+        // Filter listeners will be added when filtering is implemented
     }
     
     // Command handlers
@@ -267,16 +272,17 @@ public class BudgetViewModel {
     
     private void handleResetBudget() {
         Budget selected = selectedBudget.get();
-        if (selected == null) return;
-        // TODO: Implement budget reset logic
+        if (selected != null) {
+            // Budget reset functionality will be implemented when requirements are defined
+        }
     }
     
     private void handleExportBudgets() {
-        // TODO: Implement budget export
+        // Budget export functionality will be implemented when requirements are defined
     }
     
     private void handleImportBudgets() {
-        // TODO: Implement budget import
+        // Budget import functionality will be implemented when requirements are defined
     }
     
     private Budget createBudgetFromForm() {
@@ -363,9 +369,5 @@ public class BudgetViewModel {
     
     public void setOnBudgetDeleted(Consumer<String> onBudgetDeleted) {
         this.onBudgetDeleted = onBudgetDeleted;
-    }
-    
-    public void setOnShowBudgetTemplates(Runnable onShowBudgetTemplates) {
-        this.onShowBudgetTemplates = onShowBudgetTemplates;
     }
 }

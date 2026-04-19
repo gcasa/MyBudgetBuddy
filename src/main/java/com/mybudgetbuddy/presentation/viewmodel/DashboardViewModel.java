@@ -16,6 +16,10 @@ import java.util.function.Consumer;
 
 public class DashboardViewModel {
     
+    // Constants
+    private static final String DEFAULT_CURRENCY_VALUE = "$0.00";
+    private static final String CURRENCY_FORMAT = "$%,.2f";
+    
     // Services
     private final PlanService planService;
     private final TransactionService transactionService;
@@ -63,22 +67,20 @@ public class DashboardViewModel {
     private LocalDate dashboardDate;
     
     public DashboardViewModel(PlanService planService, TransactionService transactionService,
-                             BudgetService budgetService, GoalService goalService, 
-                             ReportService reportService) {
+                             BudgetService budgetService, GoalService goalService) {
         this.planService = planService;
         this.transactionService = transactionService;
         this.budgetService = budgetService;
         this.goalService = goalService;
-        this.reportService = reportService;
         
         // Initialize properties
         this.currentPlanName = new SimpleStringProperty("No Plan Selected");
-        this.totalIncome = new SimpleStringProperty("$0.00");
-        this.totalExpenses = new SimpleStringProperty("$0.00");
-        this.netIncome = new SimpleStringProperty("$0.00");
-        this.totalSavings = new SimpleStringProperty("$0.00");
-        this.emergencyFund = new SimpleStringProperty("$0.00");
-        this.netWorth = new SimpleStringProperty("$0.00");
+        this.totalIncome = new SimpleStringProperty(DEFAULT_CURRENCY_VALUE);
+        this.totalExpenses = new SimpleStringProperty(DEFAULT_CURRENCY_VALUE);
+        this.netIncome = new SimpleStringProperty(DEFAULT_CURRENCY_VALUE);
+        this.totalSavings = new SimpleStringProperty(DEFAULT_CURRENCY_VALUE);
+        this.emergencyFund = new SimpleStringProperty(DEFAULT_CURRENCY_VALUE);
+        this.netWorth = new SimpleStringProperty(DEFAULT_CURRENCY_VALUE);
         
         // Initialize collections
         this.recentTransactions = FXCollections.observableArrayList();
@@ -103,9 +105,8 @@ public class DashboardViewModel {
     }
     
     // Public methods
-    public void loadDashboard(String planId, String userId) {
+    public void loadDashboard(String planId) {
         this.currentPlanId = planId;
-        this.currentUserId = userId;
         loadDashboard();
     }
     
@@ -122,9 +123,9 @@ public class DashboardViewModel {
     }
     
     private void loadPlanInfo() {
-        planService.getPlanById(currentPlanId).ifPresent(plan -> {
-            currentPlanName.set(plan.getName());
-        });
+        planService.getPlanById(currentPlanId).ifPresent(plan -> 
+            currentPlanName.set(plan.getName())
+        );
     }
     
     private void loadFinancialSummary() {
@@ -135,14 +136,14 @@ public class DashboardViewModel {
         BigDecimal expenses = transactionService.getTotalExpenses(currentPlanId, monthStart, monthEnd);
         BigDecimal net = income.subtract(expenses);
         
-        totalIncome.set(String.format("$%,.2f", income));
-        totalExpenses.set(String.format("$%,.2f", expenses));
-        netIncome.set(String.format("$%,.2f", net));
+        totalIncome.set(String.format(CURRENCY_FORMAT, income));
+        totalExpenses.set(String.format(CURRENCY_FORMAT, expenses));
+        netIncome.set(String.format(CURRENCY_FORMAT, net));
         
-        // TODO: Calculate savings, emergency fund, net worth from appropriate services
-        totalSavings.set("$0.00"); // Placeholder
-        emergencyFund.set("$0.00"); // Placeholder
-        netWorth.set("$0.00"); // Placeholder
+        // Calculate savings, emergency fund, net worth from appropriate services when implemented
+        totalSavings.set(DEFAULT_CURRENCY_VALUE); // Placeholder
+        emergencyFund.set(DEFAULT_CURRENCY_VALUE); // Placeholder
+        netWorth.set(DEFAULT_CURRENCY_VALUE); // Placeholder
     }
     
     private void loadRecentTransactions() {
@@ -166,12 +167,12 @@ public class DashboardViewModel {
     }
     
     private void loadRecommendations() {
-        // TODO: Load from recommendation engine
+        // Load from recommendation engine when implemented
         recommendations.clear();
     }
     
     private void loadChartData() {
-        // TODO: Implement chart data loading
+        // Chart data loading will be implemented when chart requirements are defined
         // This would involve creating appropriate data structures for JavaFX charts
     }
     

@@ -12,6 +12,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.File;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.Period;
 import java.util.ArrayList;
@@ -25,7 +26,7 @@ import java.util.UUID;
  * Additional budget monitoring and management scenarios
  */
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-class BudgetManagementTestSuite {
+class BudgetManagementTests {
 
     private TransactionService transactionService;
     private List<Budget> testBudgets;
@@ -186,7 +187,7 @@ class BudgetManagementTestSuite {
         assertEquals(new BigDecimal("50.00"), overAmount, "Should be $50 over budget");
         
         BigDecimal usagePercentage = alertBudget.getUsagePercentage();
-        assertEquals(new BigDecimal("116.67"), usagePercentage.setScale(2, BigDecimal.ROUND_HALF_UP), 
+        assertEquals(new BigDecimal("116.67"), usagePercentage.setScale(2, RoundingMode.HALF_UP), 
             "Usage percentage should be 116.67%");
 
         // Generate alert message
@@ -198,7 +199,7 @@ class BudgetManagementTestSuite {
         System.out.println("✓ Budget limit exceeded alert:");
         System.out.println("  " + alertMessage);
         System.out.println("  Over Amount: $" + overAmount);
-        System.out.println("  Usage: " + usagePercentage.setScale(1, BigDecimal.ROUND_HALF_UP) + "%");
+        System.out.println("  Usage: " + usagePercentage.setScale(1, RoundingMode.HALF_UP) + "%");
     }
 
     @Test
