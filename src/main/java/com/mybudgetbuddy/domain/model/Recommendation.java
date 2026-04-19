@@ -2,6 +2,7 @@ package com.mybudgetbuddy.domain.model;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -136,7 +137,7 @@ public class Recommendation implements Serializable {
         if (costToImplement.compareTo(BigDecimal.ZERO) == 0) {
             return BigDecimal.ZERO;
         }
-        return potentialSavings.divide(costToImplement, 2, BigDecimal.ROUND_HALF_UP);
+        return potentialSavings.divide(costToImplement, 2, RoundingMode.HALF_UP);
     }
     
     public boolean isHighImpact() {

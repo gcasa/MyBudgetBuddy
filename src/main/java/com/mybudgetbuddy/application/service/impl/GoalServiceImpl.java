@@ -8,11 +8,9 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.sql.*;
 import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 /**
  * SQLite implementation of GoalService.
@@ -64,8 +62,8 @@ public class GoalServiceImpl implements GoalService {
             return goal;
             
         } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "Failed to create goal: " + goal.getName(), e);
-            throw new RuntimeException("Failed to create goal", e);
+            LOGGER.log(Level.SEVERE, () -> "Failed to create goal: " + goal.getName());
+            throw new IllegalStateException("Failed to create goal", e);
         }
     }
     
@@ -94,8 +92,8 @@ public class GoalServiceImpl implements GoalService {
             return Optional.empty();
             
         } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "Failed to get goal by ID: " + id, e);
-            throw new RuntimeException("Failed to get goal", e);
+            LOGGER.log(Level.SEVERE, () -> "Failed to get goal by ID: " + id);
+            throw new IllegalStateException("Failed to get goal", e);
         }
     }
     
@@ -127,7 +125,7 @@ public class GoalServiceImpl implements GoalService {
             return goals;
             
         } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "Failed to get goals by plan ID: " + planId, e);
+            LOGGER.log(Level.SEVERE, () -> "Failed to get goals by plan ID: " + planId);
             // Return all goals as fallback
             return getAllGoals();
         }
@@ -160,7 +158,7 @@ public class GoalServiceImpl implements GoalService {
             return goals;
             
         } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "Failed to get active goals by plan ID: " + planId, e);
+            LOGGER.log(Level.SEVERE, () -> "Failed to get active goals by plan ID: " + planId);
             // Return all active goals as fallback
             return getGoalsByStatus(GoalStatus.ACTIVE);
         }
@@ -195,15 +193,15 @@ public class GoalServiceImpl implements GoalService {
             
             int rowsAffected = stmt.executeUpdate();
             if (rowsAffected == 0) {
-                throw new RuntimeException("Goal not found for update: " + goal.getId());
+                throw new IllegalArgumentException("Goal not found for update: " + goal.getId());
             }
             
             LOGGER.log(Level.INFO, "Updated goal: {0}", goal.getName());
             return goal;
             
         } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "Failed to update goal: " + goal.getId(), e);
-            throw new RuntimeException("Failed to update goal", e);
+            LOGGER.log(Level.SEVERE, () -> "Failed to update goal: " + goal.getId());
+            throw new IllegalStateException("Failed to update goal", e);
         }
     }
     
@@ -228,8 +226,8 @@ public class GoalServiceImpl implements GoalService {
             }
             
         } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "Failed to delete goal: " + goalId, e);
-            throw new RuntimeException("Failed to delete goal", e);
+            LOGGER.log(Level.SEVERE, () -> "Failed to delete goal: " + goalId);
+            throw new IllegalStateException("Failed to delete goal", e);
         }
     }
     
@@ -258,15 +256,15 @@ public class GoalServiceImpl implements GoalService {
             
             int rowsAffected = stmt.executeUpdate();
             if (rowsAffected == 0) {
-                throw new RuntimeException("Goal not found for progress update: " + goalId);
+                throw new IllegalArgumentException("Goal not found for progress update: " + goalId);
             }
             
             LOGGER.log(Level.INFO, "Updated progress for goal: {0} to amount: {1}", 
                       new Object[]{goalId, newAmount});
             
         } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "Failed to update progress for goal: " + goalId, e);
-            throw new RuntimeException("Failed to update progress", e);
+            LOGGER.log(Level.SEVERE, () -> "Failed to update progress for goal: " + goalId);
+            throw new IllegalStateException("Failed to update progress", e);
         }
     }
     
@@ -297,15 +295,15 @@ public class GoalServiceImpl implements GoalService {
             
             int rowsAffected = stmt.executeUpdate();
             if (rowsAffected == 0) {
-                throw new RuntimeException("Goal not found for contribution: " + goalId);
+                throw new IllegalArgumentException("Goal not found for contribution: " + goalId);
             }
             
             LOGGER.log(Level.INFO, "Added contribution for goal: {0} amount: {1}", 
                       new Object[]{goalId, contributionAmount});
             
         } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "Failed to add contribution for goal: " + goalId, e);
-            throw new RuntimeException("Failed to add contribution", e);
+            LOGGER.log(Level.SEVERE, () -> "Failed to add contribution for goal: " + goalId);
+            throw new IllegalStateException("Failed to add contribution", e);
         }
     }
     
@@ -370,7 +368,7 @@ public class GoalServiceImpl implements GoalService {
         List<Goal> allGoals = getActiveGoals(planId);
         return allGoals.stream()
             .filter(goal -> !isGoalOnTrack(goal.getId()))
-            .collect(Collectors.toList());
+            .toList();
     }
     
     @Override
@@ -400,7 +398,7 @@ public class GoalServiceImpl implements GoalService {
             return goals;
             
         } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "Failed to get completed goals by plan ID: " + planId, e);
+            LOGGER.log(Level.SEVERE, () -> "Failed to get completed goals by plan ID: " + planId);
             return getGoalsByStatus(GoalStatus.COMPLETED);
         }
     }
@@ -424,7 +422,7 @@ public class GoalServiceImpl implements GoalService {
         }
         
         updateGoal(goal);
-        LOGGER.info("Evaluated goal: " + goalId + " - Status: " + goal.getStatus());
+        LOGGER.log(Level.INFO, "Evaluated goal: {0} - Status: {1}", new Object[]{goalId, goal.getStatus()});
     }
     
     @Override
@@ -433,7 +431,7 @@ public class GoalServiceImpl implements GoalService {
         for (Goal goal : goals) {
             evaluateGoal(goal.getId());
         }
-        LOGGER.info("Evaluated " + goals.size() + " goals for plan: " + planId);
+        LOGGER.log(Level.INFO, "Evaluated {0} goals for plan: {1}", new Object[]{goals.size(), planId});
     }
     
     @Override
@@ -515,14 +513,14 @@ public class GoalServiceImpl implements GoalService {
             
             int rowsAffected = stmt.executeUpdate();
             if (rowsAffected == 0) {
-                throw new RuntimeException("Goal not found: " + goalId);
+                throw new IllegalArgumentException("Goal not found: " + goalId);
             }
             
-            LOGGER.info("Updated priority for goal: " + goalId + " to: " + priority);
+            LOGGER.log(Level.INFO, "Updated priority for goal: {0} to: {1}", new Object[]{goalId, priority});
             
         } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "Failed to set priority for goal: " + goalId, e);
-            throw new RuntimeException("Failed to set goal priority", e);
+            LOGGER.log(Level.SEVERE, () -> "Failed to set priority for goal: " + goalId);
+            throw new IllegalStateException("Failed to set goal priority", e);
         }
     }
     
@@ -550,7 +548,7 @@ public class GoalServiceImpl implements GoalService {
             return goals;
             
         } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "Failed to get goals by priority: " + priority + " for plan: " + planId, e);
+            LOGGER.log(Level.SEVERE, () -> "Failed to get goals by priority: " + priority + " for plan: " + planId);
             return getGoalsByPriority(priority);
         }
     }
@@ -586,7 +584,7 @@ public class GoalServiceImpl implements GoalService {
             return goals;
             
         } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "Failed to get sorted goals by priority for plan: " + planId, e);
+            LOGGER.log(Level.SEVERE, () -> "Failed to get sorted goals by priority for plan: " + planId);
             return getAllGoals();
         }
     }
@@ -609,7 +607,7 @@ public class GoalServiceImpl implements GoalService {
             setPriority(goalIds.get(i), priority);
         }
         
-        LOGGER.info("Reordered priorities for " + totalGoals + " goals");
+        LOGGER.log(Level.INFO, "Reordered priorities for {0} goals", totalGoals);
     }
     
     // Template and suggestion methods (placeholder implementations)
@@ -691,7 +689,7 @@ public class GoalServiceImpl implements GoalService {
     public void pauseGoal(String goalId) {
         Optional<Goal> goalOpt = getGoalById(goalId);
         if (goalOpt.isEmpty()) {
-            throw new RuntimeException("Goal not found: " + goalId);
+            throw new IllegalArgumentException("Goal not found: " + goalId);
         }
         
         Goal goal = goalOpt.get();
@@ -704,7 +702,7 @@ public class GoalServiceImpl implements GoalService {
     public void resumeGoal(String goalId) {
         Optional<Goal> goalOpt = getGoalById(goalId);
         if (goalOpt.isEmpty()) {
-            throw new RuntimeException("Goal not found: " + goalId);
+            throw new IllegalArgumentException("Goal not found: " + goalId);
         }
         
         Goal goal = goalOpt.get();
@@ -726,7 +724,7 @@ public class GoalServiceImpl implements GoalService {
     public void completeGoal(String goalId) {
         Optional<Goal> goalOpt = getGoalById(goalId);
         if (goalOpt.isEmpty()) {
-            throw new RuntimeException("Goal not found: " + goalId);
+            throw new IllegalArgumentException("Goal not found: " + goalId);
         }
         
         Goal goal = goalOpt.get();
@@ -825,7 +823,7 @@ public class GoalServiceImpl implements GoalService {
             
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Failed to get all goals", e);
-            throw new RuntimeException("Failed to get goals", e);
+            throw new IllegalStateException("Failed to get goals", e);
         }
     }
     
@@ -855,8 +853,8 @@ public class GoalServiceImpl implements GoalService {
             return goals;
             
         } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "Failed to get goals by status: " + status, e);
-            throw new RuntimeException("Failed to get goals by status", e);
+            LOGGER.log(Level.SEVERE, () -> "Failed to get goals by status: " + status);
+            throw new IllegalStateException("Failed to get goals by status", e);
         }
     }
     
@@ -886,8 +884,8 @@ public class GoalServiceImpl implements GoalService {
             return goals;
             
         } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "Failed to get goals by priority: " + priority, e);
-            throw new RuntimeException("Failed to get goals by priority", e);
+            LOGGER.log(Level.SEVERE, () -> "Failed to get goals by priority: " + priority);
+            throw new IllegalStateException("Failed to get goals by priority", e);
         }
     }
     

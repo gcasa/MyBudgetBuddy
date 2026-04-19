@@ -3,7 +3,6 @@ package com.mybudgetbuddy.validation;
 import com.mybudgetbuddy.model.Transaction;
 import com.mybudgetbuddy.model.TransactionType;
 import com.mybudgetbuddy.domain.model.Budget;
-import com.mybudgetbuddy.domain.model.BudgetType;
 
 import org.junit.jupiter.api.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -50,8 +49,6 @@ class ValidationTestSuite {
     @Order(2)
     @DisplayName("Transaction Validation: Required Fields")
     void testTransactionRequiredFields() {
-        Transaction transaction = new Transaction();
-
         // Test null description
         assertThrows(IllegalArgumentException.class, () -> {
             validateTransactionDescription(null);

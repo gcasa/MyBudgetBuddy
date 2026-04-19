@@ -2,6 +2,7 @@ package com.mybudgetbuddy.domain.model;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.Period;
 import java.util.UUID;
@@ -50,7 +51,7 @@ public class Budget implements Serializable {
         if (allocatedAmount.compareTo(BigDecimal.ZERO) == 0) {
             return BigDecimal.ZERO;
         }
-        return spentAmount.divide(allocatedAmount, 4, BigDecimal.ROUND_HALF_UP);
+        return spentAmount.divide(allocatedAmount, 4, RoundingMode.HALF_UP);
     }
     
     public boolean isOverBudget() {

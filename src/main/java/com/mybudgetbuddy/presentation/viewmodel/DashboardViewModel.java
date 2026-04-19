@@ -21,7 +21,7 @@ public class DashboardViewModel {
     private final TransactionService transactionService;
     private final BudgetService budgetService;
     private final GoalService goalService;
-    private final ReportService reportService;
+
     
     // Properties
     private final StringProperty currentPlanName;
@@ -59,7 +59,7 @@ public class DashboardViewModel {
     
     // Current context
     private String currentPlanId;
-    private String currentUserId;
+
     private LocalDate dashboardDate;
     
     public DashboardViewModel(PlanService planService, TransactionService transactionService,

@@ -86,7 +86,6 @@ public class GoalsViewModel {
     private final Command duplicateGoalCommand;
     
     // Callbacks
-    private Consumer<Goal> onEditGoal;
     private Consumer<String> onShowMessage;
     private Consumer<String> onShowError;
     
@@ -325,7 +324,8 @@ public class GoalsViewModel {
     
     private boolean canPauseGoal() {
         Goal goal = selectedGoal.get();
-        return goal != null && goal.getStatus() == GoalStatus.ACTIVE && !isLoading.get();
+        return goal != null && goal.getStatus() == GoalStatus.ACTIVE && 
+               goal.getCurrentAmount().compareTo(BigDecimal.ZERO) > 0 && !isLoading.get();
     }
     
     private boolean canResumeGoal() {
@@ -500,7 +500,7 @@ public class GoalsViewModel {
     public Command getDuplicateGoalCommand() { return duplicateGoalCommand; }
     
     // Callback setters
-    public void setOnEditGoal(Consumer<Goal> onEditGoal) { this.onEditGoal = onEditGoal; }
+    // Setter method removed - onEditGoal field no longer exists
     public void setOnShowMessage(Consumer<String> onShowMessage) { this.onShowMessage = onShowMessage; }
     public void setOnShowError(Consumer<String> onShowError) { this.onShowError = onShowError; }
 }

@@ -2,8 +2,6 @@ package com.mybudgetbuddy.engine;
 
 import com.mybudgetbuddy.domain.model.FinancialPlan;
 import com.mybudgetbuddy.domain.model.Scenario;
-import com.mybudgetbuddy.domain.model.Goal;
-import com.mybudgetbuddy.domain.model.Budget;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;

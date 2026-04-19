@@ -2,6 +2,7 @@ package com.mybudgetbuddy.domain.model;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -65,7 +66,7 @@ public class FinancialPlan implements Serializable {
         if (totalIncome.compareTo(BigDecimal.ZERO) == 0) {
             return BigDecimal.ZERO;
         }
-        return targetSavings.divide(totalIncome, 4, BigDecimal.ROUND_HALF_UP).multiply(new BigDecimal("100"));
+        return targetSavings.divide(totalIncome, 4, RoundingMode.HALF_UP).multiply(new BigDecimal("100"));
     }
     
     public boolean isHealthy() {

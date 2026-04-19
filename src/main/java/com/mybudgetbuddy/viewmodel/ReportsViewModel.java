@@ -76,7 +76,6 @@ public class ReportsViewModel {
     
     // Callbacks for UI interactions
     private Consumer<Report> onViewReport;
-    private Consumer<Report> onEditReport;
     private Consumer<String> onShowMessage;
     private Runnable onReportGenerated;
     
@@ -179,7 +178,6 @@ public class ReportsViewModel {
     
     // Callback setters
     public void setOnViewReport(Consumer<Report> onViewReport) { this.onViewReport = onViewReport; }
-    public void setOnEditReport(Consumer<Report> onEditReport) { this.onEditReport = onEditReport; }
     public void setOnShowMessage(Consumer<String> onShowMessage) { this.onShowMessage = onShowMessage; }
     public void setOnReportGenerated(Runnable onReportGenerated) { this.onReportGenerated = onReportGenerated; }
     
@@ -276,7 +274,8 @@ public class ReportsViewModel {
     
     private boolean canShareReport() {
         Report report = selectedReport.get();
-        return report != null && report.getStatus() == ReportStatus.COMPLETED;
+        return report != null && report.getStatus() == ReportStatus.COMPLETED && 
+               report.getFilePath() != null && !isLoading.get();
     }
     
     private boolean canScheduleReport() {
@@ -285,7 +284,8 @@ public class ReportsViewModel {
     
     private boolean canExport() {
         Report report = selectedReport.get();
-        return report != null && report.getStatus() == ReportStatus.COMPLETED;
+        return report != null && report.getStatus() == ReportStatus.COMPLETED &&
+               reportService != null && !isLoading.get();
     }
     
     // Async operations

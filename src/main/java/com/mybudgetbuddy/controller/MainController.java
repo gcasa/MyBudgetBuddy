@@ -124,7 +124,6 @@ public class MainController {
             
             goalsController = loader.getController();
             goalsController.setViewModel(goalsViewModel);
-            goalsController.setGoalService(goalService);
             
             goalsTab.setContent(goalsContent);
             goalsTabInitialized = true;

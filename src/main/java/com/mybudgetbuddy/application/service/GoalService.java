@@ -1,8 +1,6 @@
 package com.mybudgetbuddy.application.service;
 
 import com.mybudgetbuddy.domain.model.Goal;
-import com.mybudgetbuddy.domain.model.GoalType;
-import com.mybudgetbuddy.domain.model.GoalStatus;
 import com.mybudgetbuddy.domain.model.Priority;
 import java.math.BigDecimal;
 import java.time.LocalDate;

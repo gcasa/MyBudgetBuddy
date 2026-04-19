@@ -1,7 +1,6 @@
 package com.mybudgetbuddy.presentation.viewmodel;
 
 import com.mybudgetbuddy.application.service.BudgetService;
-import com.mybudgetbuddy.application.service.TransactionService;
 import com.mybudgetbuddy.domain.model.Budget;
 import com.mybudgetbuddy.domain.model.BudgetType;
 import com.mybudgetbuddy.command.Command;
@@ -20,7 +19,6 @@ public class BudgetViewModel {
     
     // Services
     private final BudgetService budgetService;
-    private final TransactionService transactionService;
     
     // Form properties for creating/editing budgets
     private final StringProperty budgetName;
@@ -68,15 +66,14 @@ public class BudgetViewModel {
     private Consumer<Budget> onBudgetCreated;
     private Consumer<Budget> onBudgetUpdated;
     private Consumer<String> onBudgetDeleted;
-    private Runnable onShowBudgetTemplates;
+
     
     // Context
     private String currentPlanId;
     private Budget currentEditingBudget;
     
-    public BudgetViewModel(BudgetService budgetService, TransactionService transactionService) {
+    public BudgetViewModel(BudgetService budgetService) {
         this.budgetService = budgetService;
-        this.transactionService = transactionService;
         
         // Initialize form properties
         this.budgetName = new SimpleStringProperty("");
