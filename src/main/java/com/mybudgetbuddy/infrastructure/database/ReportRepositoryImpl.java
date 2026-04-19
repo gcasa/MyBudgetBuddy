@@ -62,10 +62,11 @@ public class ReportRepositoryImpl implements ReportRepository {
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             
             stmt.setString(1, reportId);
-            ResultSet rs = stmt.executeQuery();
             
-            if (rs.next()) {
-                return Optional.of(mapResultSetToReport(rs));
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return Optional.of(mapResultSetToReport(rs));
+                }
             }
             return Optional.empty();
             
@@ -234,10 +235,11 @@ public class ReportRepositoryImpl implements ReportRepository {
     
     private List<Report> executeQueryWithStatement(PreparedStatement stmt) throws SQLException {
         List<Report> reports = new ArrayList<>();
-        ResultSet rs = stmt.executeQuery();
         
-        while (rs.next()) {
-            reports.add(mapResultSetToReport(rs));
+        try (ResultSet rs = stmt.executeQuery()) {
+            while (rs.next()) {
+                reports.add(mapResultSetToReport(rs));
+            }
         }
         
         return reports;
@@ -267,9 +269,10 @@ public class ReportRepositoryImpl implements ReportRepository {
                 stmt.setObject(i + 1, params[i]);
             }
             
-            ResultSet rs = stmt.executeQuery();
-            if (rs.next()) {
-                return rs.getLong(1);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getLong(1);
+                }
             }
             return 0;
             

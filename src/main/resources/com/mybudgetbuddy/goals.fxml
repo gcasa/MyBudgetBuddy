@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.*?>
 <BorderPane xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" 
             fx:controller="com.mybudgetbuddy.controller.GoalsController"
@@ -11,10 +13,42 @@
             <Label text="My Goals" style="-fx-font-size: 24px; -fx-font-weight: bold;" />
             <HBox spacing="10.0" alignment="CENTER_LEFT">
                <children>
-                  <Button fx:id="createButton" text="Create Goal" onAction="#handleCreateGoal" styleClass="primary-button" />
-                  <Button fx:id="editButton" text="Edit Goal" onAction="#handleEditGoal" />
-                  <Button fx:id="deleteButton" text="Delete Goal" onAction="#handleDeleteGoal" styleClass="danger-button" />
-                  <Button fx:id="refreshButton" text="Refresh" onAction="#handleRefresh" />
+                  <Button fx:id="createButton" text="Create Goal" onAction="#handleCreateGoal" styleClass="primary-button">
+                     <graphic>
+                        <ImageView fitHeight="16.0" fitWidth="16.0" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@icons/create-goal.png" />
+                           </image>
+                        </ImageView>
+                     </graphic>
+                  </Button>
+                  <Button fx:id="editButton" text="Edit Goal" onAction="#handleEditGoal">
+                     <graphic>
+                        <ImageView fitHeight="16.0" fitWidth="16.0" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@icons/edit-goal.png" />
+                           </image>
+                        </ImageView>
+                     </graphic>
+                  </Button>
+                  <Button fx:id="deleteButton" text="Delete Goal" onAction="#handleDeleteGoal" styleClass="danger-button">
+                     <graphic>
+                        <ImageView fitHeight="16.0" fitWidth="16.0" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@icons/delete-goal.png" />
+                           </image>
+                        </ImageView>
+                     </graphic>
+                  </Button>
+                  <Button fx:id="refreshButton" text="Refresh" onAction="#handleRefresh">
+                     <graphic>
+                        <ImageView fitHeight="16.0" fitWidth="16.0" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@icons/refresh.png" />
+                           </image>
+                        </ImageView>
+                     </graphic>
+                  </Button>
                </children>
             </HBox>
          </children>

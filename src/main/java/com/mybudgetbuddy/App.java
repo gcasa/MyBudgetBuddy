@@ -36,6 +36,77 @@ public class App extends Application {
         scene.getStylesheets().add(getClass().getResource("/com/mybudgetbuddy/styles.css").toExternalForm());
 
         primaryStage.setTitle("MyBudgetBuddy");
+        
+        // Add application icon with fallback
+        boolean iconLoaded = false;
+        try {
+            // Try to load custom icon first
+            java.io.InputStream iconStream = getClass().getResourceAsStream("/com/mybudgetbuddy/icons/app-icon.png");
+            if (iconStream != null) {
+                javafx.scene.image.Image appIcon = new javafx.scene.image.Image(iconStream);
+                if (!appIcon.isError()) {
+                    // Add multiple sizes for better compatibility
+                    primaryStage.getIcons().addAll(
+                        appIcon, 
+                        new javafx.scene.image.Image(iconStream, 16, 16, true, true),
+                        new javafx.scene.image.Image(iconStream, 32, 32, true, true),
+                        new javafx.scene.image.Image(iconStream, 64, 64, true, true)
+                    );
+                    iconLoaded = true;
+                    System.out.println("✅ Custom app icon loaded successfully (multiple sizes)");
+                } else {
+                    System.out.println("❌ Custom app icon failed to load: " + appIcon.getException());
+                }
+                iconStream.close();
+            } else {
+                System.out.println("❌ App icon resource not found: /com/mybudgetbuddy/icons/app-icon.png");
+            }
+        } catch (Exception e) {
+            System.out.println("❌ Error loading app icon: " + e.getMessage());
+        }
+        
+        // If custom icon failed, create a simple programmatic icon
+        if (!iconLoaded) {
+            try {
+                System.out.println("🔄 Creating fallback programmatic icon...");
+                javafx.scene.image.WritableImage fallbackIcon = new javafx.scene.image.WritableImage(64, 64);
+                javafx.scene.image.PixelWriter pw = fallbackIcon.getPixelWriter();
+                
+                // Create a bright green budget icon
+                for (int x = 0; x < 64; x++) {
+                    for (int y = 0; y < 64; y++) {
+                        // Green circular background
+                        double centerX = 32, centerY = 32, radius = 28;
+                        double distance = Math.sqrt((x - centerX) * (x - centerX) + (y - centerY) * (y - centerY));
+                        
+                        if (distance <= radius) {
+                            pw.setColor(x, y, javafx.scene.paint.Color.web("#4CAF50")); // Bright green
+                            
+                            // Add dollar sign shape (more visible)
+                            boolean isDollarSign = 
+                                // Vertical line
+                                (x >= 30 && x <= 34 && y >= 12 && y < 52) ||
+                                // Top curve
+                                (y >= 18 && y <= 22 && x >= 18 && x <= 46) ||
+                                // Middle line  
+                                (y >= 28 && y <= 32 && x >= 18 && x <= 46) ||
+                                // Bottom curve
+                                (y >= 38 && y <= 42 && x >= 18 && x <= 46);
+                                
+                            if (isDollarSign) {
+                                pw.setColor(x, y, javafx.scene.paint.Color.WHITE);
+                            }
+                        }
+                    }
+                }
+                
+                primaryStage.getIcons().add(fallbackIcon);
+                System.out.println("✅ Enhanced fallback programmatic icon created");
+            } catch (Exception e) {
+                System.out.println("❌ Could not create fallback icon: " + e.getMessage());
+            }
+        }
+        
         primaryStage.setResizable(true);
         primaryStage.setMinWidth(1400);
         primaryStage.setMinHeight(900);

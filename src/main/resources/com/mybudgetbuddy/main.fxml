@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
 <?import javafx.geometry.Insets?>
 <BorderPane xmlns="http://javafx.com/javafx/17"
             xmlns:fx="http://javafx.com/fxml/1"
@@ -24,7 +26,17 @@
     <!-- Center: Main Content with Navigation Tabs -->
     <center>
         <TabPane fx:id="mainTabPane" styleClass="main-tabs" tabClosingPolicy="UNAVAILABLE">
-            <Tab text="💳 Transactions" fx:id="transactionsTab" styleClass="main-tab">
+            <Tab fx:id="transactionsTab" styleClass="main-tab">
+                <text>
+                    Transactions
+                </text>
+                <graphic>
+                    <ImageView fitHeight="16.0" fitWidth="16.0" pickOnBounds="true" preserveRatio="true">
+                        <image>
+                            <Image url="@icons/transactions-tab.png" />
+                        </image>
+                    </ImageView>
+                </graphic>
                 <VBox VBox.vgrow="ALWAYS">
                     <!-- Transaction Table -->
                     <TableView fx:id="transactionTable" styleClass="transaction-table" VBox.vgrow="ALWAYS">
@@ -55,10 +67,30 @@
                     </HBox>
                 </VBox>
             </Tab>
-            <Tab text="📊 Reports" fx:id="reportsTab" styleClass="main-tab">
+            <Tab fx:id="reportsTab" styleClass="main-tab">
+                <text>
+                    Reports
+                </text>
+                <graphic>
+                    <ImageView fitHeight="16.0" fitWidth="16.0" pickOnBounds="true" preserveRatio="true">
+                        <image>
+                            <Image url="@icons/reports-tab.png" />
+                        </image>
+                    </ImageView>
+                </graphic>
                 <!-- Reports content will be loaded dynamically -->
             </Tab>
-            <Tab text="🎯 Goals" fx:id="goalsTab" styleClass="main-tab">
+            <Tab fx:id="goalsTab" styleClass="main-tab">
+                <text>
+                    Goals
+                </text>
+                <graphic>
+                    <ImageView fitHeight="16.0" fitWidth="16.0" pickOnBounds="true" preserveRatio="true">
+                        <image>
+                            <Image url="@icons/goals-tab.png" />
+                        </image>
+                    </ImageView>
+                </graphic>
                 <!-- Goals content will be loaded dynamically -->
             </Tab>
         </TabPane>
