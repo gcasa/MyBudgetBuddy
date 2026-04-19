@@ -9,7 +9,6 @@ import javafx.stage.Stage;
 import com.mybudgetbuddy.controller.MainController;
 import com.mybudgetbuddy.application.service.TransactionService;
 import com.mybudgetbuddy.application.service.impl.TransactionServiceImpl;
-import com.mybudgetbuddy.infrastructure.database.DatabaseManager;
 import com.mybudgetbuddy.viewmodel.MainViewModel;
 
 import java.util.logging.Level;
@@ -76,7 +75,9 @@ public class App extends Application {
                 for (int x = 0; x < 64; x++) {
                     for (int y = 0; y < 64; y++) {
                         // Green circular background
-                        double centerX = 32, centerY = 32, radius = 28;
+                        double centerX = 32;
+                        double centerY = 32;
+                        double radius = 28;
                         double distance = Math.sqrt((x - centerX) * (x - centerX) + (y - centerY) * (y - centerY));
                         
                         if (distance <= radius) {
@@ -118,7 +119,7 @@ public class App extends Application {
         // Handle clean database shutdown when application closes
         primaryStage.setOnCloseRequest(event -> {
             try {
-                DatabaseManager.getInstance().close();
+
                 LOGGER.info("Application shutdown completed successfully");
             } catch (Exception e) {
                 LOGGER.log(Level.WARNING, "Error during application shutdown", e);

@@ -35,9 +35,15 @@ class ValidationTests {
         // Test valid positive amounts
         assertDoesNotThrow(() -> {
             validateTransactionAmount(new BigDecimal("0.01"));
+        }, "Valid small amount should be accepted");
+        
+        assertDoesNotThrow(() -> {
             validateTransactionAmount(new BigDecimal("100.00"));
+        }, "Valid medium amount should be accepted");
+        
+        assertDoesNotThrow(() -> {
             validateTransactionAmount(new BigDecimal("9999999.99"));
-        }, "Valid positive amounts should be accepted");
+        }, "Valid large amount should be accepted");
 
         // Test excessive precision (more than 2 decimal places)
         BigDecimal excessivePrecision = new BigDecimal("100.123");
@@ -85,9 +91,15 @@ class ValidationTests {
         // Test past dates (should be valid)
         assertDoesNotThrow(() -> {
             validateTransactionDate(today.minusDays(1));
+        }, "Yesterday should be valid");
+        
+        assertDoesNotThrow(() -> {
             validateTransactionDate(today.minusMonths(6));
+        }, "Past month should be valid");
+        
+        assertDoesNotThrow(() -> {
             validateTransactionDate(today.minusYears(1));
-        }, "Past dates should be valid");
+        }, "Past year should be valid");
 
         // Test today (should be valid)
         assertDoesNotThrow(() -> {
@@ -115,13 +127,15 @@ class ValidationTests {
     @DisplayName("Transaction Validation: Category Rules")
     void testTransactionCategoryValidation() {
         // Test null category ID
+        String nullCategoryId = null;
         assertThrows(IllegalArgumentException.class, () -> {
-            validateTransactionCategoryId(null);
+            validateTransactionCategoryId(nullCategoryId);
         }, "Null category ID should be rejected");
 
         // Test empty category ID
+        String emptyCategoryId = "";
         assertThrows(IllegalArgumentException.class, () -> {
-            validateTransactionCategoryId("");
+            validateTransactionCategoryId(emptyCategoryId);
         }, "Empty category ID should be rejected");
 
         // Test invalid category format
@@ -143,45 +157,45 @@ class ValidationTests {
     void testBudgetValidation() {
         // Test negative budget amount
         Budget budget = new Budget();
+        budget.setAllocatedAmount(new BigDecimal("-500.00"));
         assertThrows(IllegalArgumentException.class, () -> {
-            budget.setAllocatedAmount(new BigDecimal("-500.00"));
             validateBudget(budget);
         }, "Negative budget amounts should be rejected");
 
         // Test zero budget amount
+        budget.setAllocatedAmount(BigDecimal.ZERO);
         assertThrows(IllegalArgumentException.class, () -> {
-            budget.setAllocatedAmount(BigDecimal.ZERO);
             validateBudget(budget);
         }, "Zero budget amounts should be rejected");
 
         // Test valid budget amounts
+        budget.setAllocatedAmount(new BigDecimal("500.00"));
+        budget.setCategoryId("expense-food");
+        budget.setName("Food Budget");
+        budget.setBudgetPeriod(Period.ofMonths(1));
         assertDoesNotThrow(() -> {
-            budget.setAllocatedAmount(new BigDecimal("500.00"));
-            budget.setCategoryId("expense-food");
-            budget.setName("Food Budget");
-            budget.setBudgetPeriod(Period.ofMonths(1));
             validateBudget(budget);
         }, "Valid budget should be accepted");
 
         // Test budget period validation
+        budget.setBudgetPeriod(null);
         assertThrows(IllegalArgumentException.class, () -> {
-            budget.setBudgetPeriod(null);
             validateBudget(budget);
         }, "Null budget period should be rejected");
 
         // Test budget threshold validation
+        budget.setWarningThreshold(new BigDecimal("1.5")); // 150% - invalid
         assertThrows(IllegalArgumentException.class, () -> {
-            budget.setWarningThreshold(new BigDecimal("1.5")); // 150% - invalid
             validateBudgetThreshold(budget);
         }, "Warning threshold above 100% should be rejected");
 
+        budget.setWarningThreshold(new BigDecimal("-0.1")); // Negative - invalid
         assertThrows(IllegalArgumentException.class, () -> {
-            budget.setWarningThreshold(new BigDecimal("-0.1")); // Negative - invalid
             validateBudgetThreshold(budget);
         }, "Negative warning threshold should be rejected");
 
+        budget.setWarningThreshold(new BigDecimal("0.8")); // 80% - valid
         assertDoesNotThrow(() -> {
-            budget.setWarningThreshold(new BigDecimal("0.8")); // 80% - valid
             validateBudgetThreshold(budget);
         }, "Valid warning threshold should be accepted");
     }
@@ -225,8 +239,8 @@ class ValidationTests {
         incomeTransaction.setAmount(new BigDecimal("1000.00"));
         
         // Income transactions should not have certain expense-only categories
+        incomeTransaction.setCategoryId("expense-food");
         assertThrows(IllegalArgumentException.class, () -> {
-            incomeTransaction.setCategoryId("expense-food");
             validateTransactionBusinessRules(incomeTransaction);
         }, "Income transactions should not use expense categories");
 
@@ -236,8 +250,8 @@ class ValidationTests {
         expenseTransaction.setAmount(new BigDecimal("100.00"));
         
         // Expense transactions should not have income-only categories
+        expenseTransaction.setCategoryId("income-salary");
         assertThrows(IllegalArgumentException.class, () -> {
-            expenseTransaction.setCategoryId("income-salary");
             validateTransactionBusinessRules(expenseTransaction);
         }, "Expense transactions should not use income categories");
 

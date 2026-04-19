@@ -69,6 +69,8 @@ public class ReportsController {
     @FXML private Label reportDetailsLabel;
     
     private ReportsViewModel viewModel;
+    
+    @SuppressWarnings("unused") // Field reserved for future report operations
     private ReportService reportService;
 
     public void setViewModel(ReportsViewModel viewModel) {

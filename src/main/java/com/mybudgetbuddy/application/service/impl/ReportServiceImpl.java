@@ -40,6 +40,20 @@ public class ReportServiceImpl implements ReportService {
     private static final String START_DATE_KEY = "startDate";
     private static final String END_DATE_KEY = "endDate";
     
+    // Report content constants
+    private static final String PERIOD_LABEL = "Period: ";
+    private static final String ANALYSIS_PERIOD_LABEL = "Analysis Period: ";
+    private static final String TOTAL_EXPENSES_LABEL = "Total Expenses";
+    private static final String TRANSACTION_COUNT_LABEL = "Transaction Count";
+    private static final String DATA_STATUS_LABEL = "Data Status";
+    private static final String TRANSACTION_DATA_UNAVAILABLE = "Transaction data temporarily unavailable";
+    private static final String TRANSACTION_SERVICE_UNAVAILABLE = "TransactionService not available";
+    private static final String REPORT_SEPARATOR_LONG = "------------------\n";
+    private static final String REPORT_SEPARATOR_SHORT = "------------\n";
+    private static final String DOUBLE_NEWLINE = "\\n\\n";
+    private static final String ACTIVE_STATUS = "✅ Active";
+    private static final String INACTIVE_STATUS = "❌ Not Available";
+    
     private final ReportRepository reportRepository;
     private final Path reportsDirectory;
     private final GoalService goalService;
@@ -99,7 +113,8 @@ public class ReportServiceImpl implements ReportService {
         // Save initial report
         try {
             report = reportRepository.save(report);
-            LOGGER.info("Initial report saved successfully: " + report.getId());
+            final Report savedReport = report;
+            LOGGER.info(() -> "Initial report saved successfully: " + savedReport.getId());
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Failed to save initial report: " + report.getId(), e);
             throw e;
@@ -122,7 +137,8 @@ public class ReportServiceImpl implements ReportService {
             LOGGER.info(() -> "About to save final report: " + finalReportId + " with content length: " + finalContent);
             
             report = reportRepository.save(report);
-            LOGGER.info("Final report saved successfully: " + report.getId());
+            final Report finalSavedReport = report;
+            LOGGER.info("Final report saved successfully: " + finalSavedReport.getId());
             
             return report;
             
@@ -300,7 +316,7 @@ public class ReportServiceImpl implements ReportService {
                     }
                 }
             } catch (Exception e) {
-                LOGGER.log(Level.WARNING, "Failed to get goal data: " + e.getMessage());
+                LOGGER.log(Level.WARNING, () -> "Failed to get goal data: " + e.getMessage());
                 content.append("Goal data temporarily unavailable\n");
             }
         } else {
@@ -352,10 +368,10 @@ public class ReportServiceImpl implements ReportService {
         ReportType type = mapTemplateToType(templateName);
         String name = templateName + " - " + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
         
-        LocalDate startDate = parameters.containsKey("startDate") ? 
-            LocalDate.parse(parameters.get("startDate").toString()) : LocalDate.now().minusMonths(1);
-        LocalDate endDate = parameters.containsKey("endDate") ? 
-            LocalDate.parse(parameters.get("endDate").toString()) : LocalDate.now();
+LocalDate startDate = parameters.containsKey(START_DATE_KEY) ?
+            LocalDate.parse(parameters.get(START_DATE_KEY).toString()) : LocalDate.now().minusMonths(1);
+        LocalDate endDate = parameters.containsKey(END_DATE_KEY) ?
+            LocalDate.parse(parameters.get(END_DATE_KEY).toString()) : LocalDate.now();
             
         return generateReport(name, type, ReportFormat.PDF, planId, startDate, endDate);
     }
@@ -370,7 +386,7 @@ public class ReportServiceImpl implements ReportService {
     public void scheduleReport(Report report, String cronExpression) {
         report.setDescription("Scheduled: " + cronExpression);
         reportRepository.save(report);
-        LOGGER.info("Report scheduled: " + report.getId());
+        LOGGER.info(() -> "Report scheduled: " + report.getId());
     }
     
     @Override
@@ -604,7 +620,7 @@ public class ReportServiceImpl implements ReportService {
     // Report Delivery
     @Override
     public void emailReport(String reportId, String emailAddress) {
-        LOGGER.info("Emailing report " + reportId + " to: " + emailAddress);
+        LOGGER.info(() -> "Emailing report " + reportId + " to: " + emailAddress);
     }
     
     @Override
@@ -614,14 +630,14 @@ public class ReportServiceImpl implements ReportService {
             try {
                 Files.copy(Paths.get(report.get().getFilePath()), Paths.get(downloadPath));
             } catch (IOException e) {
-                throw new RuntimeException("Failed to download report", e);
+                throw new IllegalStateException("Failed to download report", e);
             }
         }
     }
     
     @Override
     public void printReport(String reportId) {
-        LOGGER.info("Printing report: " + reportId);
+        LOGGER.info(() -> "Printing report: " + reportId);
     }
     
     // Report Maintenance
@@ -631,16 +647,16 @@ public class ReportServiceImpl implements ReportService {
         for (Report report : expiredReports) {
             deleteReport(report.getId());
         }
-        LOGGER.info("Cleaned up " + expiredReports.size() + " expired reports");
+        LOGGER.info(() -> "Cleaned up " + expiredReports.size() + " expired reports");
     }
     
     @Override
     public void optimizeReportStorage() {
-        List<Report> largeReports = reportRepository.findLargeReports(10 * 1024 * 1024); // > 10MB
+        List<Report> largeReports = reportRepository.findLargeReports(10L * 1024 * 1024); // > 10MB
         for (Report report : largeReports) {
             compressReport(report.getId());
         }
-        LOGGER.info("Optimized storage for " + largeReports.size() + " large reports");
+        LOGGER.info(() -> "Optimized storage for " + largeReports.size() + " large reports");
     }
     
     @Override
@@ -650,7 +666,7 @@ public class ReportServiceImpl implements ReportService {
     
     @Override
     public void compressReport(String reportId) {
-        LOGGER.info("Compressing report: " + reportId);
+        LOGGER.info(() -> "Compressing report: " + reportId);
     }
     
     // Private helper methods
@@ -677,13 +693,13 @@ public class ReportServiceImpl implements ReportService {
         }
         
         // Ensure content is persisted after generation
-        LOGGER.info("Report content generated, saving report: " + report.getId() + 
+        LOGGER.info(() -> "Report content generated, saving report: " + report.getId() + 
                    " with content length: " + (report.getContent() != null ? report.getContent().length() : "null") + 
                    " and planId: " + report.getPlanId());
         
         try {
             reportRepository.save(report);
-            LOGGER.info("Report content successfully saved for report: " + report.getId());
+            LOGGER.info(() -> "Report content successfully saved for report: " + report.getId());
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Failed to save report content for: " + report.getId(), e);
             throw e;
@@ -694,7 +710,7 @@ public class ReportServiceImpl implements ReportService {
         StringBuilder content = new StringBuilder();
         content.append("FINANCIAL SUMMARY REPORT\n");
         content.append("========================\n\n");
-        content.append("Period: ").append(report.getDateRangeString()).append("\n\n");
+        content.append(PERIOD_LABEL).append(report.getDateRangeString()).append("\n\n");
         
         LocalDate startDate = report.getStartDate();
         LocalDate endDate = report.getEndDate();
@@ -702,7 +718,7 @@ public class ReportServiceImpl implements ReportService {
         // Use actual transaction data for financial summary
         if (transactionService != null) {
             try {
-                LOGGER.info("Generating financial summary with actual transaction data for period: " + startDate + " to " + endDate);
+                LOGGER.info(() -> "Generating financial summary with actual transaction data for period: " + startDate + " to " + endDate);
                 
                 BigDecimal totalIncome = transactionService.getTotalIncomeForPeriod(startDate, endDate);
                 BigDecimal totalExpenses = transactionService.getTotalExpensesForPeriod(startDate, endDate);
@@ -716,10 +732,10 @@ public class ReportServiceImpl implements ReportService {
                 
                 // Add actual summary statistics
                 report.addSummaryStats("Total Income", "$" + totalIncome.toString());
-                report.addSummaryStats("Total Expenses", "$" + totalExpenses.toString());
+                report.addSummaryStats(TOTAL_EXPENSES_LABEL, "$" + totalExpenses.toString());
                 report.addSummaryStats("Net Income", "$" + netIncome.toString());
                 report.addSummaryStats("Savings Rate", savingsRate.setScale(1, java.math.RoundingMode.HALF_UP) + "%");
-                report.addSummaryStats("Transaction Count", String.valueOf(transactionCount));
+                report.addSummaryStats(TRANSACTION_COUNT_LABEL, String.valueOf(transactionCount));
                 
                 // Generate insights based on actual data
                 if (savingsRate.compareTo(BigDecimal.valueOf(20)) >= 0) {
@@ -748,28 +764,28 @@ public class ReportServiceImpl implements ReportService {
                 
             } catch (Exception e) {
                 LOGGER.log(Level.WARNING, "Failed to get transaction data for financial summary: " + e.getMessage(), e);
-                report.addSummaryStats("Data Status", "Transaction data temporarily unavailable");
+                report.addSummaryStats(DATA_STATUS_LABEL, TRANSACTION_DATA_UNAVAILABLE);
                 report.addActionItem("Retry financial summary when transaction service is available");
             }
         } else {
-            report.addSummaryStats("Data Status", "TransactionService not available");
+            report.addSummaryStats(DATA_STATUS_LABEL, TRANSACTION_SERVICE_UNAVAILABLE);
             report.addActionItem("Configure transaction service for detailed financial summary");
         }
         
         content.append("SUMMARY STATISTICS\n");
-        content.append("------------------\n");
+        content.append(REPORT_SEPARATOR_LONG);
         for (Map.Entry<String, String> stat : report.getSummaryStats().entrySet()) {
             content.append(stat.getKey()).append(": ").append(stat.getValue()).append("\n");
         }
         
         content.append("\nKEY INSIGHTS\n");
-        content.append("------------\n");
+        content.append(REPORT_SEPARATOR_SHORT);
         for (String insight : report.getKeyInsights()) {
             content.append("• ").append(insight).append("\n");
         }
         
         content.append("\nACTION ITEMS\n");
-        content.append("------------\n");
+        content.append(REPORT_SEPARATOR_SHORT);
         for (String action : report.getActionItems()) {
             content.append("• ").append(action).append("\n");
         }
@@ -781,7 +797,7 @@ public class ReportServiceImpl implements ReportService {
         StringBuilder content = new StringBuilder();
         content.append("BUDGET ANALYSIS REPORT\n");
         content.append("======================\n\n");
-        content.append("Analysis Period: ").append(report.getDateRangeString()).append("\n\n");
+        content.append(ANALYSIS_PERIOD_LABEL).append(report.getDateRangeString()).append("\n\n");
         
         LocalDate startDate = report.getStartDate();
         LocalDate endDate = report.getEndDate();
@@ -789,7 +805,7 @@ public class ReportServiceImpl implements ReportService {
         // Get actual transaction totals
         if (transactionService != null) {
             try {
-                LOGGER.info("Generating budget analysis with transaction data for period: " + startDate + " to " + endDate);
+                LOGGER.info(() -> "Generating budget analysis with transaction data for period: " + startDate + " to " + endDate);
                 
                 BigDecimal totalIncome = transactionService.getTotalIncomeForPeriod(startDate, endDate);
                 BigDecimal totalExpenses = transactionService.getTotalExpensesForPeriod(startDate, endDate);
@@ -798,10 +814,10 @@ public class ReportServiceImpl implements ReportService {
                 
                 // Calculate budget performance (using actual data)
                 report.addSummaryStats("Total Income", "$" + totalIncome.toString());
-                report.addSummaryStats("Total Expenses", "$" + totalExpenses.toString());
+                report.addSummaryStats(TOTAL_EXPENSES_LABEL, "$" + totalExpenses.toString());
                 report.addSummaryStats("Net Cash Flow", "$" + netFlow.toString());
-                report.addSummaryStats("Transaction Count", String.valueOf(transactions.size()));
-                report.addSummaryStats("Average Transaction", transactions.size() > 0 ? 
+                report.addSummaryStats(TRANSACTION_COUNT_LABEL, String.valueOf(transactions.size()));
+                report.addSummaryStats("Average Transaction", !transactions.isEmpty() ? 
                     "$" + totalExpenses.divide(BigDecimal.valueOf(transactions.size()), 2, java.math.RoundingMode.HALF_UP).toString() : "$0.00");
                 
                 // Generate insights based on actual data
@@ -811,7 +827,7 @@ public class ReportServiceImpl implements ReportService {
                     report.addKeyInsight("Negative cash flow of $" + netFlow + " requires attention");
                 }
                 
-                if (transactions.size() > 0) {
+                if (!transactions.isEmpty()) {
                     report.addKeyInsight("Recorded " + transactions.size() + " transactions during this period");
                 }
                 
@@ -825,22 +841,22 @@ public class ReportServiceImpl implements ReportService {
                 
             } catch (Exception e) {
                 LOGGER.log(Level.WARNING, "Failed to get transaction data for budget analysis: " + e.getMessage(), e);
-                report.addSummaryStats("Data Status", "Transaction data temporarily unavailable");
+                report.addSummaryStats(DATA_STATUS_LABEL, TRANSACTION_DATA_UNAVAILABLE);
                 report.addActionItem("Retry report generation when transaction service is available");
             }
         } else {
-            report.addSummaryStats("Data Status", "TransactionService not available");
+            report.addSummaryStats(DATA_STATUS_LABEL, TRANSACTION_SERVICE_UNAVAILABLE);
             report.addActionItem("Configure transaction service for detailed budget analysis");
         }
         
         content.append("BUDGET PERFORMANCE\n");
-        content.append("------------------\n");
+        content.append(REPORT_SEPARATOR_LONG);
         for (Map.Entry<String, String> stat : report.getSummaryStats().entrySet()) {
             content.append(stat.getKey()).append(": ").append(stat.getValue()).append("\n");
         }
         
         content.append("\nKEY INSIGHTS\n");
-        content.append("------------\n");
+        content.append(REPORT_SEPARATOR_SHORT);
         for (String insight : report.getKeyInsights()) {
             content.append("• ").append(insight).append("\n");
         }
@@ -866,7 +882,7 @@ public class ReportServiceImpl implements ReportService {
         // Use actual transaction data for cash flow analysis
         if (transactionService != null) {
             try {
-                LOGGER.info("Generating cash flow report with actual transaction data for period: " + startDate + " to " + endDate);
+                LOGGER.info(() -> "Generating cash flow report with actual transaction data for period: " + startDate + " to " + endDate);
                 
                 BigDecimal totalIncome = transactionService.getTotalIncomeForPeriod(startDate, endDate);
                 BigDecimal totalExpenses = transactionService.getTotalExpensesForPeriod(startDate, endDate);
@@ -911,11 +927,11 @@ public class ReportServiceImpl implements ReportService {
                 
             } catch (Exception e) {
                 LOGGER.log(Level.WARNING, "Failed to get transaction data for cash flow analysis: " + e.getMessage(), e);
-                report.addSummaryStats("Data Status", "Transaction data temporarily unavailable");
+                report.addSummaryStats(DATA_STATUS_LABEL, TRANSACTION_DATA_UNAVAILABLE);
                 report.addActionItem("Retry cash flow report when transaction service is available");
             }
         } else {
-            report.addSummaryStats("Data Status", "TransactionService not available");
+            report.addSummaryStats(DATA_STATUS_LABEL, TRANSACTION_SERVICE_UNAVAILABLE);
             report.addActionItem("Configure transaction service for detailed cash flow analysis");
         }
         
@@ -935,7 +951,7 @@ public class ReportServiceImpl implements ReportService {
         
         if (!report.getActionItems().isEmpty()) {
             content.append("\nACTION ITEMS\n");
-            content.append("------------\n");
+                content.append(REPORT_SEPARATOR_SHORT);
             for (String action : report.getActionItems()) {
                 content.append("• ").append(action).append("\n");
             }
@@ -948,7 +964,7 @@ public class ReportServiceImpl implements ReportService {
         StringBuilder content = new StringBuilder();
         content.append("EXPENSE BREAKDOWN REPORT\n");
         content.append("========================\n\n");
-        content.append("Analysis Period: ").append(report.getDateRangeString()).append("\n\n");
+        content.append(ANALYSIS_PERIOD_LABEL).append(report.getDateRangeString()).append("\n\n");
         
         LocalDate startDate = report.getStartDate();
         LocalDate endDate = report.getEndDate();
@@ -956,7 +972,7 @@ public class ReportServiceImpl implements ReportService {
         // Use actual transaction data for expense breakdown
         if (transactionService != null) {
             try {
-                LOGGER.info("Generating expense breakdown with actual transaction data for period: " + startDate + " to " + endDate);
+                LOGGER.info(() -> "Generating expense breakdown with actual transaction data for period: " + startDate + " to " + endDate);
                 
                 BigDecimal totalExpenses = transactionService.getTotalExpensesForPeriod(startDate, endDate);
                 Map<String, BigDecimal> categorySpending = transactionService.getCategorySpending(startDate, endDate);
@@ -995,25 +1011,25 @@ public class ReportServiceImpl implements ReportService {
                     report.addActionItem("Monitor spending in your top 3 categories for better budget control");
                     
                 } else {
-                    report.addSummaryStats("Total Expenses", "$" + totalExpenses.toString());
+                    report.addSummaryStats(TOTAL_EXPENSES_LABEL, "$" + totalExpenses.toString());
                     report.addSummaryStats("Categories Found", String.valueOf(categorySpending.size()));
-                    report.addSummaryStats("Transaction Count", String.valueOf(transactionCount));
+                    report.addSummaryStats(TRANSACTION_COUNT_LABEL, String.valueOf(transactionCount));
                     report.addKeyInsight("Limited category data available for detailed breakdown");
                     report.addActionItem("Ensure transactions have proper category assignments for better analysis");
                 }
                 
             } catch (Exception e) {
                 LOGGER.log(Level.WARNING, "Failed to get transaction data for expense breakdown: " + e.getMessage(), e);
-                report.addSummaryStats("Data Status", "Transaction data temporarily unavailable");
+                report.addSummaryStats(DATA_STATUS_LABEL, TRANSACTION_DATA_UNAVAILABLE);
                 report.addActionItem("Retry expense breakdown when transaction service is available");
             }
         } else {
-            report.addSummaryStats("Data Status", "TransactionService not available");
+            report.addSummaryStats(DATA_STATUS_LABEL, TRANSACTION_SERVICE_UNAVAILABLE);
             report.addActionItem("Configure transaction service for detailed expense breakdown");
         }
         
         content.append("EXPENSE CATEGORIES\n");
-        content.append("------------------\n");
+        content.append(REPORT_SEPARATOR_LONG);
         for (Map.Entry<String, String> stat : report.getSummaryStats().entrySet()) {
             content.append(stat.getKey()).append(": ").append(stat.getValue()).append("\n");
         }
@@ -1045,7 +1061,7 @@ public class ReportServiceImpl implements ReportService {
         content.append("Generated: ").append(report.getGeneratedDate()).append("\n");
         
         if (report.getStartDate() != null || report.getEndDate() != null) {
-            content.append("Period: ").append(report.getDateRangeString()).append("\n");
+            content.append(PERIOD_LABEL).append(report.getDateRangeString()).append("\n");
         }
         
         content.append("\n");
@@ -1061,14 +1077,12 @@ public class ReportServiceImpl implements ReportService {
         
         String content = formatReportContent(report, report.getFormat());
         
-        switch (report.getFormat()) {
-            case PDF:
-                byte[] pdfContent = generatePdfContent(content);
-                Files.write(filePath, pdfContent);
-                report.setPdfContent(pdfContent);
-                break;
-            default:
-                Files.write(filePath, content.getBytes());
+        if (report.getFormat() == ReportFormat.PDF) {
+            byte[] pdfContent = generatePdfContent(content);
+            Files.write(filePath, pdfContent);
+            report.setPdfContent(pdfContent);
+        } else {
+            Files.write(filePath, content.getBytes());
         }
         
         return filePath.toString();
@@ -1149,7 +1163,7 @@ public class ReportServiceImpl implements ReportService {
      * Enhanced financial summary with integrated goal and transaction analysis
      */
     public Report generateIntegratedFinancialSummary(String planId, LocalDate startDate, LocalDate endDate) {
-        LOGGER.info("Generating integrated financial summary for plan: " + planId);
+        LOGGER.info(() -> "Generating integrated financial summary for plan: " + planId);
         
         Report report = new Report("Integrated Financial Summary", ReportType.FINANCIAL_SUMMARY, startDate, endDate);
         report.setPlanId(planId);
@@ -1173,7 +1187,7 @@ public class ReportServiceImpl implements ReportService {
             LOGGER.log(Level.SEVERE, "Failed to generate integrated financial summary: " + report.getId(), e);
             report.markAsFailed(e.getMessage());
             reportRepository.save(report);
-            throw new RuntimeException("Failed to generate integrated financial summary", e);
+            throw new IllegalStateException("Failed to generate integrated financial summary", e);
         }
     }
     
@@ -1187,26 +1201,25 @@ public class ReportServiceImpl implements ReportService {
         content.append("--- TRANSACTION ANALYSIS ---\\n");
         if (transactionService != null) {
             try {
-                LOGGER.info("Attempting to get transaction data for period: " + startDate + " to " + endDate);
+                LOGGER.info(() -> "Attempting to get transaction data for period: " + startDate + " to " + endDate);
                 BigDecimal totalIncome = transactionService.getTotalIncomeForPeriod(startDate, endDate);
                 BigDecimal totalExpenses = transactionService.getTotalExpensesForPeriod(startDate, endDate);
                 BigDecimal netFlow = totalIncome.subtract(totalExpenses);
                 List<?> transactions = transactionService.getTransactionsByDateRange(startDate, endDate);
                 
-                LOGGER.info("Transaction data retrieved successfully - Income: " + totalIncome + ", Expenses: " + totalExpenses + ", Count: " + transactions.size());
+                LOGGER.info(() -> "Transaction data retrieved successfully - Income: " + totalIncome + ", Expenses: " + totalExpenses + ", Count: " + transactions.size());
                 
                 content.append("Total Income: $").append(totalIncome).append("\\n");
                 content.append("Total Expenses: $").append(totalExpenses).append("\\n");
                 content.append("Net Cash Flow: $").append(netFlow).append("\\n");
-                content.append("Transaction Count: ").append(transactions.size()).append("\\n\\n");
+                content.append("Transaction Count: ").append(transactions.size()).append(DOUBLE_NEWLINE);
                 
                 // Add detailed transaction list if available
                 if (!transactions.isEmpty()) {
                     content.append("Recent Transactions:\\n");
                     int count = 0;
                     for (Object obj : transactions) {
-                        if (obj instanceof com.mybudgetbuddy.model.Transaction && count < 10) {
-                            com.mybudgetbuddy.model.Transaction t = (com.mybudgetbuddy.model.Transaction) obj;
+                        if (obj instanceof com.mybudgetbuddy.model.Transaction t && count < 10) {
                             content.append("- ").append(t.getTransactionDate()).append(": ")
                                    .append(t.getDescription()).append(" $").append(t.getAmount()).append("\\n");
                             count++;
@@ -1217,11 +1230,11 @@ public class ReportServiceImpl implements ReportService {
                 
             } catch (Exception e) {
                 LOGGER.log(Level.WARNING, "Failed to get transaction data: " + e.getMessage(), e);
-                content.append("Transaction data temporarily unavailable: ").append(e.getMessage()).append("\\n\\n");
+                content.append("Transaction data temporarily unavailable: ").append(e.getMessage()).append(DOUBLE_NEWLINE);
             }
         } else {
             LOGGER.warning("TransactionService is null in ReportServiceImpl");
-            content.append("TransactionService not available\\n\\n");
+            content.append(TRANSACTION_SERVICE_UNAVAILABLE).append(DOUBLE_NEWLINE);
         }
         
         // Goals Progress Section
@@ -1235,13 +1248,13 @@ public class ReportServiceImpl implements ReportService {
                 content.append("Active Goals: ").append(activeGoals.size()).append("\\n");
                 content.append("Goals at Risk: ").append(goalsAtRisk.size()).append("\\n");
                 content.append("Overall Goal Progress: ").append(overallProgress).append("%\\n");
-                content.append("Total Goal Targets: $").append(goalService.getTotalGoalTargets(planId)).append("\\n\\n");
+                content.append("Total Goal Targets: $").append(goalService.getTotalGoalTargets(planId)).append(DOUBLE_NEWLINE);
             } catch (Exception e) {
-                LOGGER.log(Level.WARNING, "Failed to get goal data: " + e.getMessage());
-                content.append("Goal data temporarily unavailable\\n\\n");
+                LOGGER.log(Level.WARNING, () -> "Failed to get goal data: " + e.getMessage());
+                content.append("Goal data temporarily unavailable").append(DOUBLE_NEWLINE);
             }
         } else {
-            content.append("GoalService not available\\n\\n");
+            content.append("GoalService not available").append(DOUBLE_NEWLINE);
         }
         
         // Budget vs Reality
@@ -1251,18 +1264,18 @@ public class ReportServiceImpl implements ReportService {
                 List<?> overBudgets = budgetService.getOverBudgets(planId);
                 List<?> activeBudgets = budgetService.getActiveBudgets(planId);
                 
-                double adherenceRate = activeBudgets.size() > 0 ? 
+                double adherenceRate = !activeBudgets.isEmpty() ? 
                     ((double)(activeBudgets.size() - overBudgets.size()) / activeBudgets.size() * 100) : 0;
                 
                 content.append("Budget adherence: ").append(String.format("%.1f", adherenceRate)).append("%\\n");
                 content.append("Categories over budget: ").append(overBudgets.size()).append("\\n");
-                content.append("Active budget categories: ").append(activeBudgets.size()).append("\\n\\n");
+                content.append("Active budget categories: ").append(activeBudgets.size()).append(DOUBLE_NEWLINE);
             } catch (Exception e) {
-                LOGGER.log(Level.WARNING, "Failed to get budget data: " + e.getMessage());
-                content.append("Budget data temporarily unavailable\\n\\n");
+                LOGGER.log(Level.WARNING, () -> "Failed to get budget data: " + e.getMessage());
+                content.append("Budget data temporarily unavailable").append(DOUBLE_NEWLINE);
             }
         } else {
-            content.append("BudgetService not yet implemented - Integration ready when available\\n\\n");
+            content.append("BudgetService not yet implemented - Integration ready when available").append(DOUBLE_NEWLINE);
         }
         
         // Integrated Recommendations
@@ -1302,7 +1315,7 @@ public class ReportServiceImpl implements ReportService {
      * Generate goals-to-transactions correlation report
      */
     public Report generateGoalTransactionCorrelationReport(String planId, String goalId, LocalDate startDate, LocalDate endDate) {
-        LOGGER.info("Generating goal-transaction correlation report for goal: " + goalId);
+        LOGGER.info(() -> "Generating goal-transaction correlation report for goal: " + goalId);
         
         Report report = new Report("Goal-Transaction Correlation", ReportType.GOAL_PROGRESS, startDate, endDate);
         report.setPlanId(planId);
@@ -1326,15 +1339,15 @@ public class ReportServiceImpl implements ReportService {
             LOGGER.log(Level.SEVERE, "Failed to generate correlation report: " + report.getId(), e);
             report.markAsFailed(e.getMessage());
             reportRepository.save(report);
-            throw new RuntimeException("Failed to generate goal-transaction correlation report", e);
+            throw new IllegalStateException("Failed to generate goal-transaction correlation report", e);
         }
     }
     
     private void generateGoalTransactionCorrelationContent(Report report, String goalId, LocalDate startDate, LocalDate endDate) {
         StringBuilder content = new StringBuilder();
-        content.append("=== GOAL-TRANSACTION CORRELATION ANALYSIS ===\\n\\n");
+        content.append("=== GOAL-TRANSACTION CORRELATION ANALYSIS ===").append(DOUBLE_NEWLINE);
         content.append("Goal ID: ").append(goalId).append("\\n");
-        content.append("Analysis Period: ").append(startDate).append(" to ").append(endDate).append("\\n\\n");
+        content.append(ANALYSIS_PERIOD_LABEL).append(startDate).append(" to ").append(endDate).append(DOUBLE_NEWLINE);
         
         // Goal Details Section
         content.append("--- GOAL INFORMATION ---\\n");
@@ -1347,16 +1360,16 @@ public class ReportServiceImpl implements ReportService {
                     content.append("Target Amount: $").append(goal.getTargetAmount()).append("\\n");
                     content.append("Current Progress: ").append(goal.getProgressPercentage()).append("%\\n");
                     content.append("Deadline: ").append(goal.getTargetDate() != null ? goal.getTargetDate().toString() : "Not set").append("\\n");
-                    content.append("Status: ").append(goal.getStatus()).append("\\n\\n");
+                    content.append("Status: ").append(goal.getStatus()).append(DOUBLE_NEWLINE);
                 } else {
-                    content.append("Goal not found: ").append(goalId).append("\\n\\n");
+                    content.append("Goal not found: ").append(goalId).append(DOUBLE_NEWLINE);
                 }
             } catch (Exception e) {
-                LOGGER.log(Level.WARNING, "Failed to get goal details: " + e.getMessage());
-                content.append("Goal details temporarily unavailable\\n\\n");
+                LOGGER.log(Level.WARNING, () -> "Failed to get goal details: " + e.getMessage());
+                content.append("Goal details temporarily unavailable").append(DOUBLE_NEWLINE);
             }
         } else {
-            content.append("GoalService not available\\n\\n");
+            content.append("GoalService not available").append(DOUBLE_NEWLINE);
         }
         
         // Transaction Impact Analysis
@@ -1370,13 +1383,13 @@ public class ReportServiceImpl implements ReportService {
                 content.append("Actual contributions in period: $").append(actualContributions).append("\\n");
                 content.append("Period income: $").append(periodIncome).append("\\n");
                 content.append("Period expenses: $").append(periodExpenses).append("\\n");
-                content.append("Net available for goals: $").append(periodIncome.subtract(periodExpenses)).append("\\n\\n");
+                content.append("Net available for goals: $").append(periodIncome.subtract(periodExpenses)).append(DOUBLE_NEWLINE);
             } catch (Exception e) {
-                LOGGER.log(Level.WARNING, "Failed to analyze transaction impact: " + e.getMessage());
-                content.append("Transaction impact analysis temporarily unavailable\\n\\n");
+                LOGGER.log(Level.WARNING, () -> "Failed to analyze transaction impact: " + e.getMessage());
+                content.append("Transaction impact analysis temporarily unavailable").append(DOUBLE_NEWLINE);
             }
         } else {
-            content.append("Services not available for transaction impact analysis\\n\\n");
+            content.append("Services not available for transaction impact analysis").append(DOUBLE_NEWLINE);
         }
         
         // Correlation Insights
@@ -1436,7 +1449,7 @@ public class ReportServiceImpl implements ReportService {
      * Generate comprehensive cross-service integration report
      */
     public Report generateCrossServiceIntegrationReport(String planId, LocalDate startDate, LocalDate endDate) {
-        LOGGER.info("Generating cross-service integration report for plan: " + planId);
+        LOGGER.info(() -> "Generating cross-service integration report for plan: " + planId);
         
         Report report = new Report("Cross-Service Integration Report", ReportType.COMPARATIVE_ANALYSIS, startDate, endDate);
         report.setPlanId(planId);
@@ -1460,30 +1473,30 @@ public class ReportServiceImpl implements ReportService {
             LOGGER.log(Level.SEVERE, "Failed to generate cross-service report: " + report.getId(), e);
             report.markAsFailed(e.getMessage());
             reportRepository.save(report);
-            throw new RuntimeException("Failed to generate cross-service integration report", e);
+            throw new IllegalStateException("Failed to generate cross-service integration report", e);
         }
     }
     
     private void generateCrossServiceContent(Report report, String planId, LocalDate startDate, LocalDate endDate) {
         StringBuilder content = new StringBuilder();
-        content.append("=== CROSS-SERVICE INTEGRATION ANALYSIS ===\\n\\n");
+        content.append("=== CROSS-SERVICE INTEGRATION ANALYSIS ===").append(DOUBLE_NEWLINE);
         content.append("Plan ID: ").append(planId).append("\\n");
-        content.append("Period: ").append(startDate).append(" to ").append(endDate).append("\\n\\n");
+        content.append(PERIOD_LABEL).append(startDate).append(" to ").append(endDate).append(DOUBLE_NEWLINE);
         
         // Service Integration Status
         content.append("--- INTEGRATION STATUS ---\\n");
-        content.append("GoalService Integration: ").append(goalService != null ? "✅ Active" : "❌ Not Available").append("\\n");
-        content.append("TransactionService Integration: ").append(transactionService != null ? "✅ Active" : "❌ Not Available").append("\\n");
-        content.append("BudgetService Integration: ").append(budgetService != null ? "✅ Active" : "🔄 Not Yet Implemented").append("\\n");
+        content.append("GoalService Integration: ").append(goalService != null ? ACTIVE_STATUS : INACTIVE_STATUS).append("\\n");
+        content.append("TransactionService Integration: ").append(transactionService != null ? ACTIVE_STATUS : INACTIVE_STATUS).append("\\n");
+        content.append("BudgetService Integration: ").append(budgetService != null ? ACTIVE_STATUS : "🔄 Not Yet Implemented").append("\\n");
         content.append("CategoryService Integration: ✅ Available\\n");
-        content.append("PlanService Integration: ✅ Available\\n\\n");
+        content.append("PlanService Integration: ✅ Available").append(DOUBLE_NEWLINE);
         
         // Data Flow Analysis
         content.append("--- DATA FLOW ANALYSIS ---\\n");
         content.append("Transaction → Goal Updates: ").append(transactionService != null && goalService != null ? "🔄 Framework Ready" : "❌ Services Missing").append("\\n");
         content.append("Budget → Goal Alignment: ").append(budgetService != null && goalService != null ? "✅ Ready" : "🔄 BudgetService Pending").append("\\n");
         content.append("Goal Progress → Reports: ✅ Fully Implemented\\n");
-        content.append("Category → Goal Mapping: 🔄 Framework Ready\\n\\n");
+        content.append("Category → Goal Mapping: 🔄 Framework Ready").append(DOUBLE_NEWLINE);
         
         // Integration Opportunities
         content.append("--- INTEGRATION OPPORTUNITIES ---\\n");
@@ -1491,7 +1504,7 @@ public class ReportServiceImpl implements ReportService {
         content.append("2. Budget variance impact on goal timelines\\n");
         content.append("3. Transaction categorization for goal alignment\\n");
         content.append("4. Real-time goal progress reporting\\n");
-        content.append("5. Predictive goal achievement analysis\\n\\n");
+        content.append("5. Predictive goal achievement analysis").append(DOUBLE_NEWLINE);
         
         // Technical Implementation Status
         content.append("--- IMPLEMENTATION STATUS ---\\n");

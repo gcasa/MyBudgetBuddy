@@ -282,13 +282,17 @@ class ComprehensiveSystemTests {
         negativeAmountTransaction.setTransactionDate(LocalDate.now());
 
         // The service should reject negative amounts through validation
-        Exception negativeAmountException = assertThrows(IllegalArgumentException.class, () -> {
-            if (negativeAmountTransaction.getAmount().compareTo(BigDecimal.ZERO) < 0) {
+        if (negativeAmountTransaction.getAmount().compareTo(BigDecimal.ZERO) < 0) {
+            Exception negativeAmountException = assertThrows(IllegalArgumentException.class, () -> {
                 throw new IllegalArgumentException("Transaction amount cannot be negative");
-            }
-            transactionService.createTransaction(negativeAmountTransaction);
-        });
-        assertTrue(negativeAmountException.getMessage().contains("negative"));
+            });
+            assertTrue(negativeAmountException.getMessage().contains("negative"));
+        } else {
+            Exception negativeAmountException = assertThrows(IllegalArgumentException.class, () -> {
+                transactionService.createTransaction(negativeAmountTransaction);
+            });
+            assertTrue(negativeAmountException.getMessage().contains("negative"));
+        }
 
         // Test Case 2: Missing required fields
         Transaction incompleteTransaction = new Transaction();

@@ -50,13 +50,13 @@ public class ReportRepositoryImpl implements ReportRepository {
             
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Failed to save report: " + report.getId(), e);
-            throw new RuntimeException("Failed to save report", e);
+            throw new DatabaseException("Failed to save report", e);
         }
     }
     
     @Override
     public Optional<Report> findById(String reportId) {
-        String sql = "SELECT * FROM reports WHERE id = ?";
+        String sql = "SELECT id, title, type, plan_id, generated_date, start_date, end_date, status, file_path, file_size_bytes, content, expiry_date FROM reports WHERE id = ?";
         
         try (Connection conn = databaseManager.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -72,7 +72,7 @@ public class ReportRepositoryImpl implements ReportRepository {
             
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Failed to find report by ID: " + reportId, e);
-            throw new RuntimeException("Failed to find report", e);
+            throw new DatabaseException("Failed to find report", e);
         }
     }
     
@@ -102,7 +102,7 @@ public class ReportRepositoryImpl implements ReportRepository {
     
     @Override
     public List<Report> findByGeneratedDateRange(LocalDate startDate, LocalDate endDate) {
-        String sql = "SELECT * FROM reports WHERE DATE(generated_date) BETWEEN ? AND ? ORDER BY generated_date DESC";
+        String sql = "SELECT id, title, type, plan_id, generated_date, start_date, end_date, status, file_path, file_size_bytes, content, expiry_date FROM reports WHERE DATE(generated_date) BETWEEN ? AND ? ORDER BY generated_date DESC";
         
         try (Connection conn = databaseManager.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -114,7 +114,7 @@ public class ReportRepositoryImpl implements ReportRepository {
             
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Failed to find reports by date range", e);
-            throw new RuntimeException("Failed to find reports by date range", e);
+            throw new DatabaseException("Failed to find reports by date range", e);
         }
     }
     
@@ -126,7 +126,7 @@ public class ReportRepositoryImpl implements ReportRepository {
     
     @Override
     public List<Report> findLargeReports(long minSizeBytes) {
-        String sql = "SELECT * FROM reports WHERE file_size_bytes >= ? ORDER BY file_size_bytes DESC";
+        String sql = "SELECT id, title, type, plan_id, generated_date, start_date, end_date, status, file_path, file_size_bytes, content, expiry_date FROM reports WHERE file_size_bytes >= ? ORDER BY file_size_bytes DESC";
         
         try (Connection conn = databaseManager.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -136,13 +136,13 @@ public class ReportRepositoryImpl implements ReportRepository {
             
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Failed to find large reports", e);
-            throw new RuntimeException("Failed to find large reports", e);
+            throw new DatabaseException("Failed to find large reports", e);
         }
     }
     
     @Override
     public List<Report> findScheduledReports(String planId) {
-        String sql = "SELECT * FROM reports WHERE plan_id = ? AND status = 'PENDING' AND expiry_date > ?";
+        String sql = "SELECT id, title, type, plan_id, generated_date, start_date, end_date, status, file_path, file_size_bytes, content, expiry_date FROM reports WHERE plan_id = ? AND status = 'PENDING' AND expiry_date > ?";
         
         try (Connection conn = databaseManager.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -154,7 +154,7 @@ public class ReportRepositoryImpl implements ReportRepository {
             
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Failed to find scheduled reports", e);
-            throw new RuntimeException("Failed to find scheduled reports", e);
+            throw new DatabaseException("Failed to find scheduled reports", e);
         }
     }
     
@@ -187,7 +187,7 @@ public class ReportRepositoryImpl implements ReportRepository {
             
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Failed to delete old reports", e);
-            throw new RuntimeException("Failed to delete old reports", e);
+            throw new DatabaseException("Failed to delete old reports", e);
         }
     }
     
@@ -229,7 +229,7 @@ public class ReportRepositoryImpl implements ReportRepository {
             
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Failed to execute query: " + sql, e);
-            throw new RuntimeException("Failed to execute query", e);
+            throw new DatabaseException("Failed to execute query", e);
         }
     }
     
@@ -403,7 +403,7 @@ public class ReportRepositoryImpl implements ReportRepository {
         return Arrays.stream(str.split(","))
                 .map(String::trim)
                 .filter(s -> !s.isEmpty())
-                .collect(Collectors.toList());
+                .toList();
     }
     
     private String serializeStringMap(Map<String, String> map) {
@@ -438,9 +438,9 @@ public class ReportRepositoryImpl implements ReportRepository {
         }
         // Simple JSON-like serialization for basic types
         StringBuilder sb = new StringBuilder("{");
-        map.entrySet().forEach(entry -> {
-            sb.append("\"").append(entry.getKey()).append("\":\"").append(entry.getValue() != null ? entry.getValue().toString() : "null").append("\",");
-        });
+        map.entrySet().forEach(entry -> 
+            sb.append("\"").append(entry.getKey()).append("\":\"").append(entry.getValue() != null ? entry.getValue().toString() : "null").append("\",")
+        );
         if (sb.length() > 1) {
             sb.setLength(sb.length() - 1); // Remove last comma
         }

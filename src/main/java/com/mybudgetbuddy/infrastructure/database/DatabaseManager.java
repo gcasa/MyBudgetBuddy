@@ -18,22 +18,17 @@ public class DatabaseManager {
     private static final String DB_URL = "jdbc:sqlite:" + DB_FILE;
     
     private static volatile DatabaseManager instance;
-    private volatile Connection connection;
     
     private DatabaseManager() {
-        try {
-            // Create connection (JDBC 4.0+ auto-loads drivers)
-            connection = DriverManager.getConnection(DB_URL);
-            
-            // Enable foreign keys
-            try (Statement stmt = connection.createStatement()) {
+        // Test database connectivity on initialization
+        try (Connection testConn = DriverManager.getConnection(DB_URL)) {
+            try (Statement stmt = testConn.createStatement()) {
                 stmt.execute("PRAGMA foreign_keys = ON");
             }
-            
-            LOGGER.info("Database connection established: " + DB_FILE);
+            LOGGER.info("Database connection tested successfully: " + DB_FILE);
         } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "Failed to initialize database connection", e);
-            throw new RuntimeException("Failed to initialize database connection", e);
+            LOGGER.log(Level.SEVERE, "Failed to test database connection", e);
+            throw new DatabaseException("Failed to test database connection", e);
         }
     }
     
@@ -48,41 +43,35 @@ public class DatabaseManager {
     }
     
     /**
-     * Get the database connection
+     * Get a new database connection for thread-safe operations.
+     * Each caller gets their own connection to prevent SQLite thread conflicts.
      */
     public Connection getConnection() {
         try {
-            // Check if connection is still valid
-            if (connection == null || connection.isClosed()) {
-                synchronized (this) {
-                    // Double-check locking
-                    if (connection == null || connection.isClosed()) {
-                        connection = DriverManager.getConnection(DB_URL);
-                        try (Statement stmt = connection.createStatement()) {
-                            stmt.execute("PRAGMA foreign_keys = ON");
-                        }
-                    }
-                }
+            Connection conn = DriverManager.getConnection(DB_URL);
+            // Enable foreign keys for each new connection
+            try (Statement stmt = conn.createStatement()) {
+                stmt.execute("PRAGMA foreign_keys = ON");
             }
-            return connection;
+            return conn;
         } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "Failed to get database connection", e);
-            throw new RuntimeException("Failed to get database connection", e);
+            LOGGER.log(Level.SEVERE, "Failed to create database connection", e);
+            throw new DatabaseException("Failed to create database connection", e);
         }
     }
     
     /**
-     * Close the database connection
+     * Close a specific database connection
      */
-    public synchronized void close() {
-        try {
-            if (connection != null && !connection.isClosed()) {
-                connection.close();
-                connection = null;
-                LOGGER.info("Database connection closed");
+    public static void closeConnection(Connection conn) {
+        if (conn != null) {
+            try {
+                if (!conn.isClosed()) {
+                    conn.close();
+                }
+            } catch (SQLException e) {
+                LOGGER.log(Level.WARNING, "Error closing database connection", e);
             }
-        } catch (SQLException e) {
-            LOGGER.log(Level.WARNING, "Error closing database connection", e);
         }
     }
     

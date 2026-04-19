@@ -41,11 +41,11 @@
     -fx-font-weight: bold;
 }
 
-.table-view .table-row-cell:filled:hover {
+.table-view .table-row-cell:hover {
     -fx-background-color: #e3f2fd;
 }
 
-.table-view .table-row-cell:filled:selected {
+.table-view .table-row-cell.selected {
     -fx-background-color: #1976d2;
     -fx-text-fill: white;
 }
@@ -63,8 +63,8 @@
     -fx-background-color: transparent;
 }
 
-.scroll-pane>.scroll-bar:horizontal,
-.scroll-pane>.scroll-bar:vertical {
+.scroll-pane>.scroll-bar.horizontal,
+.scroll-pane>.scroll-bar.vertical {
     -fx-background-color: transparent;
 }
 
@@ -143,15 +143,15 @@
     -fx-font-size: 13px;
 }
 
-.transaction-table .table-row-cell:odd {
+.transaction-table .table-row-cell:nth-child(odd) {
     -fx-background-color: #f9fbff;
 }
 
-.transaction-table .table-row-cell:even {
+.transaction-table .table-row-cell:nth-child(even) {
     -fx-background-color: white;
 }
 
-.transaction-table .table-row-cell:selected {
+.transaction-table .table-row-cell.selected {
     -fx-background-color: #bbdefb;
 }
 
@@ -228,7 +228,7 @@
     -fx-border-color: transparent;
 }
 
-.main-tab:selected {
+.main-tab.selected {
     -fx-background-color: #ffffff;
     -fx-border-color: #1565c0;
 }
@@ -380,11 +380,11 @@
     -fx-background-color: #fafbfc;
 }
 
-.reports-table .table-row-cell:even {
+.reports-table .table-row-cell:nth-child(even) {
     -fx-background-color: white;
 }
 
-.reports-table .table-row-cell:selected {
+.reports-table .table-row-cell.selected {
     -fx-background-color: #bbdefb;
 }
 

@@ -84,11 +84,11 @@ public class GoalDialogController implements Initializable {
         
         // Format amount fields on focus lost
         targetAmountField.focusedProperty().addListener((obs, oldVal, newVal) -> {
-            if (!newVal) formatAmountField(targetAmountField);
+            if (!newVal.booleanValue()) formatAmountField(targetAmountField);
         });
         
         currentAmountField.focusedProperty().addListener((obs, oldVal, newVal) -> {
-            if (!newVal) formatAmountField(currentAmountField);
+            if (!newVal.booleanValue()) formatAmountField(currentAmountField);
         });
     }
     
@@ -155,7 +155,7 @@ public class GoalDialogController implements Initializable {
             errors.append("Invalid current amount. ");
         }
         
-        if (errors.length() > 0) {
+        if (!errors.isEmpty()) {
             statusLabel.setText(errors.toString());
             statusLabel.setStyle("-fx-text-fill: red;");
             return false;

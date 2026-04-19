@@ -41,7 +41,7 @@ public class DatabaseInitializer {
             
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Failed to initialize database schema", e);
-            throw new RuntimeException("Failed to initialize database schema", e);
+            throw new DatabaseException("Failed to initialize database schema", e);
         }
     }
     
