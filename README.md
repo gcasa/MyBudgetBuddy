@@ -1,5 +1,7 @@
 # MyBudgetBuddy
 
+[![CI](https://github.com/gcasa/CSC605-MyBudgetBuddy/actions/workflows/ci.yml/badge.svg)](https://github.com/gcasa/CSC605-MyBudgetBuddy/actions/workflows/ci.yml)
+
 A comprehensive personal finance management application built with JavaFX and SQLite, designed to help users track transactions, manage budgets, set financial goals, and generate insightful reports.
 
 ## 🌟 Features
