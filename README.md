@@ -125,6 +125,48 @@ java --module-path /path/to/javafx/lib --add-modules javafx.controls,javafx.fxml
      -cp target/classes com.mybudgetbuddy.App
 ```
 
+### Building on Windows
+
+#### Prerequisites
+
+1. **Install Java 17+**
+   - Download the JDK from [Adoptium](https://adoptium.net/) or [Oracle](https://www.oracle.com/java/technologies/downloads/)
+   - Run the installer and follow the prompts
+   - Verify installation: `java -version`
+
+2. **Install Maven 3.6+**
+   - Download from [Maven Downloads](https://maven.apache.org/download.cgi) (choose the binary zip archive)
+   - Extract to a directory, e.g., `C:\Program Files\Apache\maven`
+   - Add `MAVEN_HOME` to environment variables and append `%MAVEN_HOME%\bin` to `PATH`
+   - Verify installation: `mvn -version`
+
+#### Build and Run (Command Prompt or PowerShell)
+
+```cmd
+:: Clone and navigate to the project
+git clone <repository-url>
+cd CSC605-MyBudgetBuddy
+
+:: Build
+mvn clean compile
+
+:: Run
+mvn exec:java
+
+:: Or using the JavaFX plugin
+mvn javafx:run
+
+:: Package
+mvn clean package
+```
+
+#### Notes for Windows
+
+- Maven pulls JavaFX dependencies automatically — no manual JavaFX installation needed.
+- The SQLite database is stored at `%USERPROFILE%\.mybudgetbuddy.db` (equivalent to `~/.mybudgetbuddy.db` on Unix).
+- If you see `'mvn' is not recognized`, confirm that Maven's `bin` directory is on your `PATH` and restart your terminal.
+- Windows Defender or antivirus software may slow the first build while downloading dependencies; this is normal.
+
 ### Testing
 
 ```bash
