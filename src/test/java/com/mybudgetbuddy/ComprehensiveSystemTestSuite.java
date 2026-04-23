@@ -12,6 +12,7 @@ import com.mybudgetbuddy.domain.model.BudgetType;
 import com.mybudgetbuddy.model.Transaction;
 import com.mybudgetbuddy.model.TransactionType;
 import com.mybudgetbuddy.model.Category;
+import com.mybudgetbuddy.model.CategoryType;
 
 import org.junit.jupiter.api.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -53,6 +54,9 @@ class ComprehensiveSystemTests {
         transactionService = new TransactionServiceImpl();
         categoryService = new CategoryServiceImpl();
         
+        // Clean up transactions from previous tests for isolation
+        transactionService.getAllTransactions().forEach(t -> transactionService.deleteTransaction(t.getId()));
+        
         // Setup test data
         testPlanId = UUID.randomUUID().toString();
         testCategoryId = "expense-food";
@@ -73,6 +77,7 @@ class ComprehensiveSystemTests {
             testCategory.setId(testCategoryId);
             testCategory.setName("Food & Dining");
             testCategory.setDescription("Food and restaurant expenses");
+            testCategory.setType(CategoryType.EXPENSE);
             categoryService.createCategory(testCategory);
         } catch (Exception e) {
             // Category may already exist, that's fine

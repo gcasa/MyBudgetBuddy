@@ -44,6 +44,8 @@ class BudgetManagementTests {
         testBudgets = new ArrayList<>();
         testPlanId = UUID.randomUUID().toString();
         testCategoryId = "expense-food";
+        // Clean up transactions for isolation
+        transactionService.getAllTransactions().forEach(t -> transactionService.deleteTransaction(t.getId()));
     }
 
     @AfterEach
@@ -313,11 +315,11 @@ class BudgetManagementTests {
     void testBudgetResetAndPeriodManagement() {
         // Create budget for current month
         Budget periodicBudget = createBudget("Monthly Reset Budget", testCategoryId, "500.00", BudgetType.MONTHLY_BUDGET);
-        periodicBudget.setSpentAmount(new BigDecimal("325.00"));
+        periodicBudget.setSpentAmount(new BigDecimal("400.00"));
         
         // Verify current state
         assertTrue(periodicBudget.isNearWarningThreshold(), "Should be near warning threshold");
-        assertEquals(new BigDecimal("325.00"), periodicBudget.getSpentAmount());
+        assertEquals(new BigDecimal("400.00"), periodicBudget.getSpentAmount());
         
         // Simulate month-end reset
         resetBudgetForNewPeriod(periodicBudget);

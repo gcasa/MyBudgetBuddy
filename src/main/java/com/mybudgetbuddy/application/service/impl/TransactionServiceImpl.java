@@ -9,6 +9,7 @@ import com.mybudgetbuddy.model.Transaction;
 import com.mybudgetbuddy.model.TransactionType;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.PreparedStatement;
@@ -97,8 +98,23 @@ public class TransactionServiceImpl implements TransactionService {
         try (Connection conn = databaseManager.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             
-            setTransactionParameters(stmt, transaction);
-            stmt.setString(15, transaction.getId());
+            // UPDATE params: 14 SET columns + WHERE id (pos 15)
+            // setTransactionParameters is for INSERT (id at pos 1), so bind directly here
+            stmt.setString(1, transaction.getPlanId());
+            stmt.setString(2, transaction.getBudgetId());
+            stmt.setBigDecimal(3, transaction.getAmount());
+            stmt.setString(4, transaction.getType() != null ? transaction.getType().name() : null);
+            stmt.setString(5, transaction.getPaymentMethod() != null ? transaction.getPaymentMethod().name() : null);
+            stmt.setDate(6, transaction.getTransactionDate() != null ? Date.valueOf(transaction.getTransactionDate()) : null);
+            stmt.setString(7, transaction.getDescription());
+            stmt.setString(8, transaction.getCategoryId());
+            stmt.setString(9, transaction.getAccountId());
+            stmt.setString(10, transaction.getRecurringFrequency() != null ? transaction.getRecurringFrequency().name() : null);
+            stmt.setBoolean(11, transaction.getIsRecurring() != null ? transaction.getIsRecurring() : false);
+            stmt.setString(12, transaction.getParentTransactionId());
+            stmt.setDate(13, transaction.getNextOccurrence() != null ? Date.valueOf(transaction.getNextOccurrence()) : null);
+            stmt.setDate(14, transaction.getEndDate() != null ? Date.valueOf(transaction.getEndDate()) : null);
+            stmt.setString(15, transaction.getId());  // WHERE id = ?
             
             int rowsAffected = stmt.executeUpdate();
             if (rowsAffected == 0) {
@@ -270,7 +286,7 @@ public class TransactionServiceImpl implements TransactionService {
              ResultSet rs = stmt.executeQuery(sql)) {
             
             rs.next();
-            return rs.getBigDecimal(1);
+            return rs.getBigDecimal(1).setScale(2, RoundingMode.HALF_UP);
             
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Failed to get total income", e);
@@ -287,7 +303,7 @@ public class TransactionServiceImpl implements TransactionService {
              ResultSet rs = stmt.executeQuery(sql)) {
             
             rs.next();
-            return rs.getBigDecimal(1);
+            return rs.getBigDecimal(1).setScale(2, RoundingMode.HALF_UP);
             
         } catch (SQLException e) {
             throw new RuntimeException("Failed to get total expenses", e);
@@ -314,7 +330,7 @@ public class TransactionServiceImpl implements TransactionService {
             
             try (ResultSet rs = stmt.executeQuery()) {
                 rs.next();
-                return rs.getBigDecimal(1);
+                return rs.getBigDecimal(1).setScale(2, RoundingMode.HALF_UP);
             }
             
         } catch (SQLException e) {
@@ -338,7 +354,7 @@ public class TransactionServiceImpl implements TransactionService {
             
             try (ResultSet rs = stmt.executeQuery()) {
                 rs.next();
-                return rs.getBigDecimal(1);
+                return rs.getBigDecimal(1).setScale(2, RoundingMode.HALF_UP);
             }
             
         } catch (SQLException e) {
@@ -356,12 +372,12 @@ public class TransactionServiceImpl implements TransactionService {
     @Override
     public Map<String, BigDecimal> getCategorySpending(LocalDate startDate, LocalDate endDate) {
         String sql = """
-            SELECT c.name, COALESCE(SUM(t.amount), 0) as total
+            SELECT c.id, COALESCE(SUM(t.amount), 0) as total
             FROM categories c
             LEFT JOIN transactions t ON c.id = t.category_id 
                 AND t.transaction_date BETWEEN ? AND ?
                 AND t.type = 'EXPENSE'
-            GROUP BY c.id, c.name
+            GROUP BY c.id
             ORDER BY total DESC
         """;
         
@@ -375,10 +391,10 @@ public class TransactionServiceImpl implements TransactionService {
                 Map<String, BigDecimal> categorySpending = new LinkedHashMap<>();
                 
                 while (rs.next()) {
-                    String categoryName = rs.getString("name");
-                    BigDecimal total = rs.getBigDecimal("total");
-                    if (total != null && total.compareTo(BigDecimal.ZERO) > 0) {
-                        categorySpending.put(categoryName, total);
+                    String categoryId = rs.getString("id");
+                    BigDecimal total = rs.getBigDecimal("total").setScale(2, RoundingMode.HALF_UP);
+                    if (total.compareTo(BigDecimal.ZERO) > 0) {
+                        categorySpending.put(categoryId, total);
                     }
                 }
                 
@@ -500,7 +516,8 @@ public class TransactionServiceImpl implements TransactionService {
         transaction.setId(rs.getString("id"));
         transaction.setPlanId(rs.getString("plan_id"));
         transaction.setBudgetId(rs.getString("budget_id"));
-        transaction.setAmount(rs.getBigDecimal("amount"));
+        BigDecimal amount = rs.getBigDecimal("amount");
+        transaction.setAmount(amount != null ? amount.setScale(2, RoundingMode.HALF_UP) : null);
         
         String type = rs.getString("type");
         if (type != null) {

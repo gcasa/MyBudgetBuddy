@@ -51,7 +51,9 @@ public class Budget implements Serializable {
         if (allocatedAmount.compareTo(BigDecimal.ZERO) == 0) {
             return BigDecimal.ZERO;
         }
-        return spentAmount.divide(allocatedAmount, 4, RoundingMode.HALF_UP);
+        return spentAmount.divide(allocatedAmount, 4, RoundingMode.HALF_UP)
+                          .multiply(new BigDecimal("100"))
+                          .setScale(2, RoundingMode.HALF_UP);
     }
     
     public boolean isOverBudget() {
@@ -59,7 +61,8 @@ public class Budget implements Serializable {
     }
     
     public boolean isNearWarningThreshold() {
-        return getUsagePercentage().compareTo(warningThreshold) >= 0;
+        BigDecimal thresholdPercent = warningThreshold.multiply(new BigDecimal("100"));
+        return getUsagePercentage().compareTo(thresholdPercent) >= 0;
     }
     
     // Getters and Setters

@@ -40,6 +40,9 @@ class ReportGenerationTests {
         transactionService = new TransactionServiceImpl();
         testPlanId = UUID.randomUUID().toString();
         
+        // Clean up all transactions so period-based totals only reflect this test's data
+        transactionService.getAllTransactions().forEach(t -> transactionService.deleteTransaction(t.getId()));
+        
         setupTestTransactions();
     }
 
@@ -207,7 +210,7 @@ class ReportGenerationTests {
 
         // Test filtering by category
         List<Transaction> foodTransactions = transactionService.getTransactionsByCategory("expense-food");
-        assertEquals(2, foodTransactions.size(), "Should have 2 food transactions in current data");
+        assertEquals(3, foodTransactions.size(), "Should have 3 food transactions in current data");
 
         // Verify all food transactions are in food category
         boolean allFoodTransactionsValid = foodTransactions.stream()
@@ -309,16 +312,16 @@ class ReportGenerationTests {
     void testReportPerformanceAndLargeDatasetHandling() {
         // Create additional transactions to simulate larger dataset
         LocalDate today = LocalDate.now();
+        LocalDate startOfMonth = today.withDayOfMonth(1);
+        LocalDate endOfMonth = today.withDayOfMonth(today.lengthOfMonth());
+        int daysInMonthSoFar = today.getDayOfMonth();
         for (int i = 0; i < 100; i++) {
             createTransaction("Performance Test Transaction " + i, "50.00", 
-                TransactionType.EXPENSE, "expense-test", today.minusDays(i % 30));
+                TransactionType.EXPENSE, "expense-test", startOfMonth.plusDays(i % daysInMonthSoFar));
         }
 
         // Measure report generation time
         long startTime = System.currentTimeMillis();
-        
-        LocalDate startOfMonth = today.withDayOfMonth(1);
-        LocalDate endOfMonth = today.withDayOfMonth(today.lengthOfMonth());
         
         BigDecimal totalIncome = transactionService.getTotalIncomeForPeriod(startOfMonth, endOfMonth);
         BigDecimal totalExpenses = transactionService.getTotalExpensesForPeriod(startOfMonth, endOfMonth);

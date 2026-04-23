@@ -25,6 +25,8 @@ class BudgetServiceTest {
         File dataFile = new File(System.getProperty("user.home"), ".mybudgetbuddy_data.ser");
         if (dataFile.exists()) dataFile.delete();
         service = new TransactionServiceImpl();
+        // Clean up all transactions so each test starts with an empty slate
+        service.getAllTransactions().forEach(t -> service.deleteTransaction(t.getId()));
     }
 
     @AfterEach

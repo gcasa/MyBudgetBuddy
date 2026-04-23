@@ -95,13 +95,11 @@ public class GoalDialogController implements Initializable {
     private void bindToViewModel() {
         if (viewModel == null) return;
         
-        // Don't bind form fields to ViewModel properties for the dialog
-        // The dialog maintains its own state separate from the main ViewModel
+        // The dialog manages its own status label independently — do NOT bind it to
+        // the ViewModel's statusMessageProperty, because validateForm() calls setText()
+        // which throws "A bound value cannot be set" on a bound property.
         
-        // Only bind status and loading (these won't conflict)
-        if (viewModel.statusMessageProperty() != null) {
-            statusLabel.textProperty().bind(viewModel.statusMessageProperty());
-        }
+        // Only bind the loading indicator (read-only in this dialog)
         if (viewModel.isLoadingProperty() != null) {
             loadingIndicator.visibleProperty().bind(viewModel.isLoadingProperty());
         }

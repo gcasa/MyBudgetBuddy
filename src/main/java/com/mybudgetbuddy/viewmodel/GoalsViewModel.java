@@ -503,4 +503,27 @@ public class GoalsViewModel {
     // Setter method removed - onEditGoal field no longer exists
     public void setOnShowMessage(Consumer<String> onShowMessage) { this.onShowMessage = onShowMessage; }
     public void setOnShowError(Consumer<String> onShowError) { this.onShowError = onShowError; }
+
+    /**
+     * Persist a goal that was already built outside this ViewModel (e.g., from a dialog).
+     * Creates the goal if it has no ID, otherwise updates it.
+     */
+    public void persistGoal(Goal goal, boolean isNew) {
+        try {
+            if (isNew) {
+                goalService.createGoal(goal);
+                statusMessage.set("Goal created successfully");
+            } else {
+                goalService.updateGoal(goal);
+                statusMessage.set("Goal updated successfully");
+            }
+            loadGoalsAsync();
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Failed to persist goal", e);
+            statusMessage.set("Failed to save goal: " + e.getMessage());
+            if (onShowError != null) {
+                onShowError.accept("Failed to save goal: " + e.getMessage());
+            }
+        }
+    }
 }

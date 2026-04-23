@@ -195,69 +195,26 @@ public class GoalsController implements Initializable {
     
     private void openGoalDialog(Goal goal) {
         try {
-            Dialog<ButtonType> dialog = createGoalDialog(goal);
-            handleGoalDialogResult(dialog.showAndWait(), goal);
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/mybudgetbuddy/add-edit-goal.fxml"));
+            DialogPane dialogPane = loader.load();
+            GoalDialogController dialogController = loader.getController();
+            dialogController.setViewModel(viewModel);
+            dialogController.setGoal(goal);
+
+            Dialog<ButtonType> dialog = new Dialog<>();
+            dialog.setTitle(goal == null ? "Add Goal" : "Edit Goal");
+            dialog.setDialogPane(dialogPane);
+
+            Optional<ButtonType> result = dialog.showAndWait();
+            if (result.isPresent() && result.get() == ButtonType.OK) {
+                Goal goalToSave = dialogController.getGoal();
+                if (goalToSave != null && viewModel != null) {
+                    viewModel.persistGoal(goalToSave, goal == null);
+                }
+            }
         } catch (IOException e) {
             e.printStackTrace();
             showAlert("Error", "Failed to open goal dialog: " + e.getMessage());
-        }
-    }
-    
-    private Dialog<ButtonType> createGoalDialog(Goal goal) throws IOException {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/mybudgetbuddy/add-edit-goal.fxml"));
-        DialogPane dialogPane = loader.load();
-        GoalDialogController controller = loader.getController();
-        
-        // Set up the dialog controller
-        controller.setViewModel(viewModel);
-        controller.setGoal(goal);
-        
-        // Create and configure dialog
-        Dialog<ButtonType> dialog = new Dialog<>();
-        dialog.setTitle(goal == null ? "Add Goal" : "Edit Goal");
-        dialog.setDialogPane(dialogPane);
-        
-        return dialog;
-    }
-    
-    private void handleGoalDialogResult(Optional<ButtonType> result, Goal originalGoal) {
-        if (result.isPresent() && result.get() == ButtonType.OK) {
-            processGoalSave(originalGoal);
-        }
-    }
-    
-    private void processGoalSave(Goal originalGoal) {
-        try {
-            if (originalGoal == null) {
-                createNewGoal();
-            } else {
-                updateExistingGoal();
-            }
-            refreshGoalsList();
-        } catch (Exception e) {
-            showAlert("Error", "Failed to save goal: " + e.getMessage());
-        }
-    }
-    
-    private void createNewGoal() {
-        // Implementation for creating new goal would need dialog result
-        // This is a simplified version - you might need to pass the goal data
-        if (viewModel != null) {
-            viewModel.statusMessageProperty().set("Goal created successfully");
-        }
-    }
-    
-    private void updateExistingGoal() {
-        // Implementation for updating existing goal would need dialog result
-        // This is a simplified version - you might need to pass the goal data
-        if (viewModel != null) {
-            viewModel.statusMessageProperty().set("Goal updated successfully");
-        }
-    }
-    
-    private void refreshGoalsList() {
-        if (viewModel != null) {
-            viewModel.getRefreshCommand().execute();
         }
     }
     

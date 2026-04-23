@@ -46,9 +46,9 @@ class ValidationTests {
         }, "Valid large amount should be accepted");
 
         // Test excessive precision (more than 2 decimal places)
-        BigDecimal excessivePrecision = new BigDecimal("100.123");
-        assertEquals(2, excessivePrecision.scale(), 
-            "Amount should be limited to 2 decimal places");
+        assertThrows(IllegalArgumentException.class, () -> {
+            validateTransactionAmount(new BigDecimal("100.123"));
+        }, "Amount with more than 2 decimal places should be rejected");
     }
 
     @Test

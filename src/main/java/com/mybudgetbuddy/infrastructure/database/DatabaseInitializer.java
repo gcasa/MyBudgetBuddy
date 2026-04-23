@@ -1,6 +1,7 @@
 package com.mybudgetbuddy.infrastructure.database;
 
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.logging.Level;
@@ -31,6 +32,7 @@ public class DatabaseInitializer {
             createFinancialPlansTable(stmt);
             createCategoriesTable(stmt);
             createTransactionsTable(stmt);
+            migrateTransactionsRemovePlanIdFk(conn);
             createBudgetsTable(stmt);
             createGoalsTable(stmt);
             createScenariosTable(stmt);
@@ -43,6 +45,68 @@ public class DatabaseInitializer {
             LOGGER.log(Level.SEVERE, "Failed to initialize database schema", e);
             throw new DatabaseException("Failed to initialize database schema", e);
         }
+    }
+
+    /**
+     * Migrate existing transactions table to remove the FK constraint on plan_id.
+     * Transactions can legitimately exist without a financial plan, so this FK
+     * was too restrictive for standalone use. Uses SQLite's table-rebuild pattern.
+     */
+    private void migrateTransactionsRemovePlanIdFk(Connection conn) throws SQLException {
+        // Check if the existing transactions table still has a FK on plan_id
+        try (Statement check = conn.createStatement();
+             ResultSet rs = check.executeQuery(
+                     "SELECT sql FROM sqlite_master WHERE type='table' AND name='transactions'")) {
+            if (!rs.next()) {
+                return; // table doesn't exist yet, nothing to migrate
+            }
+            String tableSql = rs.getString("sql");
+            if (tableSql == null || !tableSql.contains("REFERENCES financial_plans")) {
+                return; // FK already removed or was never there
+            }
+        }
+
+        LOGGER.info("Migrating transactions table: removing plan_id foreign key constraint");
+        String newSchema = """
+            CREATE TABLE transactions_new (
+                id TEXT PRIMARY KEY,
+                plan_id TEXT,
+                budget_id TEXT,
+                amount DECIMAL(15,2) NOT NULL,
+                type TEXT NOT NULL CHECK (type IN ('INCOME', 'EXPENSE', 'TRANSFER', 'INVESTMENT', 'REFUND')),
+                payment_method TEXT,
+                transaction_date DATE NOT NULL,
+                description TEXT,
+                category_id TEXT,
+                account_id TEXT,
+                recurring_frequency TEXT,
+                is_recurring BOOLEAN DEFAULT FALSE,
+                parent_transaction_id TEXT,
+                next_occurrence DATE,
+                end_date DATE,
+                created_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+                updated_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (category_id) REFERENCES categories(id),
+                FOREIGN KEY (parent_transaction_id) REFERENCES transactions_new(id)
+            )
+        """;
+
+        try (Statement stmt = conn.createStatement()) {
+            stmt.execute("PRAGMA foreign_keys = OFF");
+            stmt.execute(newSchema);
+            stmt.execute("""
+                INSERT INTO transactions_new
+                SELECT id, plan_id, budget_id, amount, type, payment_method,
+                       transaction_date, description, category_id, account_id,
+                       recurring_frequency, is_recurring, parent_transaction_id,
+                       next_occurrence, end_date, created_date, updated_date
+                FROM transactions
+            """);
+            stmt.execute("DROP TABLE transactions");
+            stmt.execute("ALTER TABLE transactions_new RENAME TO transactions");
+            stmt.execute("PRAGMA foreign_keys = ON");
+        }
+        LOGGER.info("Transactions table migration complete");
     }
     
     private void createUsersTable(Statement stmt) throws SQLException {
@@ -116,7 +180,6 @@ public class DatabaseInitializer {
                 end_date DATE,
                 created_date DATETIME DEFAULT CURRENT_TIMESTAMP,
                 updated_date DATETIME DEFAULT CURRENT_TIMESTAMP,
-                FOREIGN KEY (plan_id) REFERENCES financial_plans(id),
                 FOREIGN KEY (category_id) REFERENCES categories(id),
                 FOREIGN KEY (parent_transaction_id) REFERENCES transactions(id)
             )
@@ -231,15 +294,11 @@ public class DatabaseInitializer {
     }
     
     private void insertDefaultCategories(Statement stmt) throws SQLException {
-        // Check if categories exist first
-        String checkSql = "SELECT COUNT(*) FROM categories";
-        var rs = stmt.executeQuery(checkSql);
-        rs.next();
-        if (rs.getInt(1) > 0) {
-            return; // Categories already exist
-        }
+        // Use INSERT OR IGNORE so this is idempotent — safe to call on every startup.
+        // The old COUNT(*) > 0 guard was wrong: it skipped ALL defaults as soon as
+        // any single category existed, leaving FK references broken.
         
-        // Insert default income categories
+        // Default income categories
         stmt.execute("INSERT OR IGNORE INTO categories (id, name, description, color, type) VALUES " +
                 "('income-salary', 'Salary', 'Regular employment income', '#4CAF50', 'INCOME')");
         stmt.execute("INSERT OR IGNORE INTO categories (id, name, description, color, type) VALUES " +
@@ -247,7 +306,7 @@ public class DatabaseInitializer {
         stmt.execute("INSERT OR IGNORE INTO categories (id, name, description, color, type) VALUES " +
                 "('income-investment', 'Investment', 'Investment returns and dividends', '#009688', 'INCOME')");
         
-        // Insert default expense categories
+        // Default expense categories
         stmt.execute("INSERT OR IGNORE INTO categories (id, name, description, color, type) VALUES " +
                 "('expense-food', 'Food & Dining', 'Groceries, restaurants, food delivery', '#FF9800', 'EXPENSE')");
         stmt.execute("INSERT OR IGNORE INTO categories (id, name, description, color, type) VALUES " +
@@ -255,10 +314,14 @@ public class DatabaseInitializer {
         stmt.execute("INSERT OR IGNORE INTO categories (id, name, description, color, type) VALUES " +
                 "('expense-housing', 'Housing', 'Rent, mortgage, utilities, maintenance', '#9C27B0', 'EXPENSE')");
         stmt.execute("INSERT OR IGNORE INTO categories (id, name, description, color, type) VALUES " +
+                "('expense-utilities', 'Utilities', 'Electricity, water, gas, internet', '#795548', 'EXPENSE')");
+        stmt.execute("INSERT OR IGNORE INTO categories (id, name, description, color, type) VALUES " +
                 "('expense-entertainment', 'Entertainment', 'Movies, games, hobbies', '#E91E63', 'EXPENSE')");
         stmt.execute("INSERT OR IGNORE INTO categories (id, name, description, color, type) VALUES " +
                 "('expense-healthcare', 'Healthcare', 'Medical, dental, pharmacy', '#F44336', 'EXPENSE')");
         stmt.execute("INSERT OR IGNORE INTO categories (id, name, description, color, type) VALUES " +
                 "('expense-shopping', 'Shopping', 'Clothing, electronics, misc purchases', '#607D8B', 'EXPENSE')");
+        stmt.execute("INSERT OR IGNORE INTO categories (id, name, description, color, type) VALUES " +
+                "('expense-test', 'Test', 'Test category for automated testing', '#BDBDBD', 'EXPENSE')");
     }
 }
