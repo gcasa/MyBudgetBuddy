@@ -35,7 +35,7 @@ A comprehensive personal finance management application built with JavaFX and SQ
 
 The application follows a clean architecture pattern with clear separation of concerns:
 
-```
+```text
 src/main/java/com/mybudgetbuddy/
 ├── App.java                           # JavaFX Application entry point
 ├── application/service/               # Business logic layer
@@ -242,7 +242,7 @@ mvn test -Dtest=BudgetServiceTest
 
 ## 📁 Project Structure
 
-```
+```text
 MyBudgetBuddy/
 ├── pom.xml                            # Maven configuration
 ├── README.md                          # This file

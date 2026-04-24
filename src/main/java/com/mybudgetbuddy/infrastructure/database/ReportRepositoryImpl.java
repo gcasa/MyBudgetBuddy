@@ -49,7 +49,7 @@ public class ReportRepositoryImpl implements ReportRepository {
             return report;
             
         } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "Failed to save report: " + report.getId(), e);
+            LOGGER.log(Level.SEVERE, e, () -> "Failed to save report: " + report.getId());
             throw new DatabaseException("Failed to save report", e);
         }
     }
@@ -71,7 +71,7 @@ public class ReportRepositoryImpl implements ReportRepository {
             return Optional.empty();
             
         } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "Failed to find report by ID: " + reportId, e);
+            LOGGER.log(Level.SEVERE, e, () -> "Failed to find report by ID: " + reportId);
             throw new DatabaseException("Failed to find report", e);
         }
     }
@@ -228,7 +228,7 @@ public class ReportRepositoryImpl implements ReportRepository {
             return executeQueryWithStatement(stmt);
             
         } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "Failed to execute query: " + sql, e);
+            LOGGER.log(Level.SEVERE, e, () -> "Failed to execute query: " + sql);
             throw new DatabaseException("Failed to execute query", e);
         }
     }
@@ -256,7 +256,7 @@ public class ReportRepositoryImpl implements ReportRepository {
             return stmt.executeUpdate() > 0;
             
         } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "Failed to execute update: " + sql, e);
+            LOGGER.log(Level.SEVERE, e, () -> "Failed to execute update: " + sql);
             return false;
         }
     }
@@ -277,7 +277,7 @@ public class ReportRepositoryImpl implements ReportRepository {
             return 0;
             
         } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "Failed to execute count: " + sql, e);
+            LOGGER.log(Level.SEVERE, e, () -> "Failed to execute count: " + sql);
             return 0;
         }
     }

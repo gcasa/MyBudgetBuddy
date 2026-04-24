@@ -25,6 +25,7 @@ import java.util.logging.Logger;
 public class GoalsViewModel {
     
     private static final Logger LOGGER = Logger.getLogger(GoalsViewModel.class.getName());
+    private static final String FAILED_TO_SAVE_GOAL = "Failed to save goal: ";
     
     // Service dependencies
     private final GoalService goalService;
@@ -147,9 +148,9 @@ public class GoalsViewModel {
             
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Failed to save goal", e);
-            errorMessage.set("Failed to save goal: " + e.getMessage());
+            errorMessage.set(FAILED_TO_SAVE_GOAL + e.getMessage());
             if (onShowError != null) {
-                onShowError.accept("Failed to save goal: " + e.getMessage());
+                onShowError.accept(FAILED_TO_SAVE_GOAL + e.getMessage());
             }
         }
     }
@@ -520,9 +521,9 @@ public class GoalsViewModel {
             loadGoalsAsync();
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Failed to persist goal", e);
-            statusMessage.set("Failed to save goal: " + e.getMessage());
+            statusMessage.set(FAILED_TO_SAVE_GOAL + e.getMessage());
             if (onShowError != null) {
-                onShowError.accept("Failed to save goal: " + e.getMessage());
+                onShowError.accept(FAILED_TO_SAVE_GOAL + e.getMessage());
             }
         }
     }

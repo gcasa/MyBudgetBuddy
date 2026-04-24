@@ -23,9 +23,9 @@ class ValidationTests {
     @DisplayName("Transaction Validation: Amount Rules")
     void testTransactionAmountValidation() {
         // Test negative amounts
-        assertThrows(IllegalArgumentException.class, () -> {
-            validateTransactionAmount(new BigDecimal("-100.00"));
-        }, "Negative amounts should be rejected");
+        BigDecimal negativeAmount = new BigDecimal("-100.00");
+        assertThrows(IllegalArgumentException.class, () -> validateTransactionAmount(negativeAmount),
+                "Negative amounts should be rejected");
 
         // Test zero amounts
         assertThrows(IllegalArgumentException.class, () -> {
@@ -46,9 +46,9 @@ class ValidationTests {
         }, "Valid large amount should be accepted");
 
         // Test excessive precision (more than 2 decimal places)
-        assertThrows(IllegalArgumentException.class, () -> {
-            validateTransactionAmount(new BigDecimal("100.123"));
-        }, "Amount with more than 2 decimal places should be rejected");
+        BigDecimal amountWithExcessivePrecision = new BigDecimal("100.123");
+        assertThrows(IllegalArgumentException.class, () -> validateTransactionAmount(amountWithExcessivePrecision),
+                "Amount with more than 2 decimal places should be rejected");
     }
 
     @Test
@@ -112,14 +112,14 @@ class ValidationTests {
         }, "Near future dates should be valid for planned transactions");
 
         // Test far future dates (business rule: reject dates more than 1 year in future)
-        assertThrows(IllegalArgumentException.class, () -> {
-            validateTransactionDate(today.plusYears(2));
-        }, "Far future dates should be rejected");
+        LocalDate farFutureDate = today.plusYears(2);
+        assertThrows(IllegalArgumentException.class, () -> validateTransactionDate(farFutureDate),
+                "Far future dates should be rejected");
 
         // Test very old dates (business rule: reject dates more than 10 years old)
-        assertThrows(IllegalArgumentException.class, () -> {
-            validateTransactionDate(today.minusYears(11));
-        }, "Very old dates should be rejected");
+        LocalDate veryOldDate = today.minusYears(11);
+        assertThrows(IllegalArgumentException.class, () -> validateTransactionDate(veryOldDate),
+                "Very old dates should be rejected");
     }
 
     @Test

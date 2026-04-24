@@ -71,8 +71,8 @@ public class TransactionServiceImpl implements TransactionService {
             return transaction;
             
         } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "Failed to create transaction with ID: " + transaction.getId(), e);
-            throw new RuntimeException("Failed to create transaction", e);
+            LOGGER.log(Level.SEVERE, e, () -> "Failed to create transaction with ID: " + transaction.getId());
+            throw new IllegalStateException("Failed to create transaction", e);
         }
     }
 
@@ -110,7 +110,7 @@ public class TransactionServiceImpl implements TransactionService {
             stmt.setString(8, transaction.getCategoryId());
             stmt.setString(9, transaction.getAccountId());
             stmt.setString(10, transaction.getRecurringFrequency() != null ? transaction.getRecurringFrequency().name() : null);
-            stmt.setBoolean(11, transaction.getIsRecurring() != null ? transaction.getIsRecurring() : false);
+            stmt.setBoolean(11, Boolean.TRUE.equals(transaction.getIsRecurring()));
             stmt.setString(12, transaction.getParentTransactionId());
             stmt.setDate(13, transaction.getNextOccurrence() != null ? Date.valueOf(transaction.getNextOccurrence()) : null);
             stmt.setDate(14, transaction.getEndDate() != null ? Date.valueOf(transaction.getEndDate()) : null);
@@ -124,8 +124,8 @@ public class TransactionServiceImpl implements TransactionService {
             return transaction;
             
         } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "Failed to update transaction with ID: " + transaction.getId(), e);
-            throw new RuntimeException("Failed to update transaction", e);
+            LOGGER.log(Level.SEVERE, e, () -> "Failed to update transaction with ID: " + transaction.getId());
+            throw new IllegalStateException("Failed to update transaction", e);
         }
     }
 
@@ -144,8 +144,8 @@ public class TransactionServiceImpl implements TransactionService {
             stmt.executeUpdate();
             
         } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "Failed to delete transaction with ID: " + transactionId, e);
-            throw new RuntimeException("Failed to delete transaction", e);
+            LOGGER.log(Level.SEVERE, e, () -> "Failed to delete transaction with ID: " + transactionId);
+            throw new IllegalStateException("Failed to delete transaction", e);
         }
     }
 
@@ -155,7 +155,7 @@ public class TransactionServiceImpl implements TransactionService {
             return Optional.empty();
         }
         
-        String sql = "SELECT * FROM transactions WHERE id = ?";
+        String sql = "SELECT id, plan_id, budget_id, amount, type, payment_method, transaction_date, description, category_id, account_id, recurring_frequency, is_recurring, parent_transaction_id, next_occurrence, end_date FROM transactions WHERE id = ?";
         
         try (Connection conn = databaseManager.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -170,14 +170,14 @@ public class TransactionServiceImpl implements TransactionService {
             return Optional.empty();
             
         } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "Failed to get transaction by ID: " + transactionId, e);
-            throw new RuntimeException("Failed to get transaction by ID", e);
+            LOGGER.log(Level.SEVERE, e, () -> "Failed to get transaction by ID: " + transactionId);
+            throw new IllegalStateException("Failed to get transaction by ID", e);
         }
     }
 
     @Override
     public List<Transaction> getAllTransactions() {
-        String sql = "SELECT * FROM transactions ORDER BY transaction_date DESC";
+        String sql = "SELECT id, plan_id, budget_id, amount, type, payment_method, transaction_date, description, category_id, account_id, recurring_frequency, is_recurring, parent_transaction_id, next_occurrence, end_date FROM transactions ORDER BY transaction_date DESC";
         
         try (Connection conn = databaseManager.getConnection();
              Statement stmt = conn.createStatement();
@@ -191,15 +191,18 @@ public class TransactionServiceImpl implements TransactionService {
             return transactions;
             
         } catch (SQLException e) {
-            throw new RuntimeException("Failed to get all transactions", e);
+            throw new IllegalStateException("Failed to get all transactions", e);
         }
     }
 
     @Override
     public List<Transaction> getTransactionsByDateRange(LocalDate startDate, LocalDate endDate) {
         String sql = """
-            SELECT * FROM transactions 
-            WHERE transaction_date BETWEEN ? AND ? 
+            SELECT id, plan_id, budget_id, amount, type, payment_method, transaction_date,
+                   description, category_id, account_id, recurring_frequency, is_recurring,
+                   parent_transaction_id, next_occurrence, end_date
+            FROM transactions
+            WHERE transaction_date BETWEEN ? AND ?
             ORDER BY transaction_date DESC
         """;
         
@@ -219,15 +222,18 @@ public class TransactionServiceImpl implements TransactionService {
             return transactions;
             
         } catch (SQLException e) {
-            throw new RuntimeException("Failed to get transactions by date range", e);
+            throw new IllegalStateException("Failed to get transactions by date range", e);
         }
     }
 
     @Override
     public List<Transaction> getTransactionsByCategory(String categoryId) {
         String sql = """
-            SELECT * FROM transactions 
-            WHERE category_id = ? 
+            SELECT id, plan_id, budget_id, amount, type, payment_method, transaction_date,
+                   description, category_id, account_id, recurring_frequency, is_recurring,
+                   parent_transaction_id, next_occurrence, end_date
+            FROM transactions
+            WHERE category_id = ?
             ORDER BY transaction_date DESC
         """;
         
@@ -246,15 +252,18 @@ public class TransactionServiceImpl implements TransactionService {
             return transactions;
             
         } catch (SQLException e) {
-            throw new RuntimeException("Failed to get transactions by category", e);
+            throw new IllegalStateException("Failed to get transactions by category", e);
         }
     }
 
     @Override
     public List<Transaction> getTransactionsByType(TransactionType type) {
         String sql = """
-            SELECT * FROM transactions 
-            WHERE type = ? 
+            SELECT id, plan_id, budget_id, amount, type, payment_method, transaction_date,
+                   description, category_id, account_id, recurring_frequency, is_recurring,
+                   parent_transaction_id, next_occurrence, end_date
+            FROM transactions
+            WHERE type = ?
             ORDER BY transaction_date DESC
         """;
         
@@ -273,7 +282,7 @@ public class TransactionServiceImpl implements TransactionService {
             return transactions;
             
         } catch (SQLException e) {
-            throw new RuntimeException("Failed to get transactions by type", e);
+            throw new IllegalStateException("Failed to get transactions by type", e);
         }
     }
 
@@ -290,7 +299,7 @@ public class TransactionServiceImpl implements TransactionService {
             
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Failed to get total income", e);
-            throw new RuntimeException("Failed to get total income", e);
+            throw new IllegalStateException("Failed to get total income", e);
         }
     }
 
@@ -306,7 +315,7 @@ public class TransactionServiceImpl implements TransactionService {
             return rs.getBigDecimal(1).setScale(2, RoundingMode.HALF_UP);
             
         } catch (SQLException e) {
-            throw new RuntimeException("Failed to get total expenses", e);
+            throw new IllegalStateException("Failed to get total expenses", e);
         }
     }
 
@@ -335,7 +344,7 @@ public class TransactionServiceImpl implements TransactionService {
             
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Failed to get total income for period", e);
-            throw new RuntimeException("Failed to get total income for period", e);
+            throw new IllegalStateException("Failed to get total income for period", e);
         }
     }
 
@@ -359,7 +368,7 @@ public class TransactionServiceImpl implements TransactionService {
             
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Failed to get total expenses for period", e);
-            throw new RuntimeException("Failed to get total expenses for period", e);
+            throw new IllegalStateException("Failed to get total expenses for period", e);
         }
     }
 
@@ -403,7 +412,7 @@ public class TransactionServiceImpl implements TransactionService {
             
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Failed to get category spending", e);
-            throw new RuntimeException("Failed to get category spending", e);
+            throw new IllegalStateException("Failed to get category spending", e);
         }
     }
 
@@ -428,7 +437,7 @@ public class TransactionServiceImpl implements TransactionService {
             
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Failed to get total income for plan and period", e);
-            throw new RuntimeException("Failed to get total income for plan and period", e);
+            throw new IllegalStateException("Failed to get total income for plan and period", e);
         }
     }
 
@@ -453,15 +462,18 @@ public class TransactionServiceImpl implements TransactionService {
             
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Failed to get total expenses for plan and period", e);
-            throw new RuntimeException("Failed to get total expenses for plan and period", e);
+            throw new IllegalStateException("Failed to get total expenses for plan and period", e);
         }
     }
 
     @Override
     public List<Transaction> getRecentTransactions(String planId, int limit) {
         String sql = """
-            SELECT * FROM transactions 
-            WHERE plan_id = ? 
+            SELECT id, plan_id, budget_id, amount, type, payment_method, transaction_date,
+                   description, category_id, account_id, recurring_frequency, is_recurring,
+                   parent_transaction_id, next_occurrence, end_date
+            FROM transactions
+            WHERE plan_id = ?
             ORDER BY transaction_date DESC, created_date DESC
             LIMIT ?
         """;
@@ -482,7 +494,7 @@ public class TransactionServiceImpl implements TransactionService {
             
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Failed to get recent transactions for plan", e);
-            throw new RuntimeException("Failed to get recent transactions for plan", e);
+            throw new IllegalStateException("Failed to get recent transactions for plan", e);
         }
     }
 
@@ -501,7 +513,7 @@ public class TransactionServiceImpl implements TransactionService {
         stmt.setString(9, transaction.getCategoryId());  // category_id
         stmt.setString(10, transaction.getAccountId());  // account_id
         stmt.setString(11, transaction.getRecurringFrequency() != null ? transaction.getRecurringFrequency().name() : null);  // recurring_frequency
-        stmt.setBoolean(12, transaction.getIsRecurring() != null ? transaction.getIsRecurring() : false);  // is_recurring
+        stmt.setBoolean(12, Boolean.TRUE.equals(transaction.getIsRecurring()));  // is_recurring
         stmt.setString(13, transaction.getParentTransactionId());  // parent_transaction_id
         stmt.setDate(14, transaction.getNextOccurrence() != null ? Date.valueOf(transaction.getNextOccurrence()) : null);  // next_occurrence
         stmt.setDate(15, transaction.getEndDate() != null ? Date.valueOf(transaction.getEndDate()) : null);  // end_date
