@@ -72,16 +72,16 @@ class ComprehensiveSystemTests {
     }
 
     private void createTestCategory() {
-        try {
-            Category testCategory = new Category();
-            testCategory.setId(testCategoryId);
-            testCategory.setName("Food & Dining");
-            testCategory.setDescription("Food and restaurant expenses");
-            testCategory.setType(CategoryType.EXPENSE);
-            categoryService.createCategory(testCategory);
-        } catch (Exception e) {
-            // Category may already exist, that's fine
+        if (categoryService.getCategoryById(testCategoryId).isPresent()) {
+            return;
         }
+
+        Category testCategory = new Category();
+        testCategory.setId(testCategoryId);
+        testCategory.setName("Food & Dining");
+        testCategory.setDescription("Food and restaurant expenses");
+        testCategory.setType(CategoryType.EXPENSE);
+        categoryService.createCategory(testCategory);
     }
 
     // TC-001: Enter valid transaction (amount, category, date) and submit

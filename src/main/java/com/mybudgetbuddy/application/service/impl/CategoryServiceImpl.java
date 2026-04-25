@@ -34,6 +34,11 @@ public class CategoryServiceImpl implements CategoryService {
         if (category.getId() == null || category.getId().isEmpty()) {
             category.setId(UUID.randomUUID().toString());
         }
+
+        // Avoid database-level primary key violations and provide a clearer error.
+        if (categoryExists(category.getId())) {
+            throw new IllegalArgumentException("Category already exists: " + category.getId());
+        }
         
         String sql = """
             INSERT INTO categories (id, name, description, color, type)
