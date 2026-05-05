@@ -55,22 +55,23 @@ class ReportGenerationTests {
     private void setupTestTransactions() {
         // Create a comprehensive set of test transactions for reporting
         LocalDate today = LocalDate.now();
-        
-        // Current month transactions
+        LocalDate startOfMonth = today.withDayOfMonth(1);
+        LocalDate lastMonthStart = startOfMonth.minusMonths(1);
+
+        // Current month transactions — anchored to startOfMonth to avoid spilling into previous month
         createTransaction("Salary", "5000.00", TransactionType.INCOME, "income-salary", today);
-        createTransaction("Freelance Work", "1200.00", TransactionType.INCOME, "income-freelance", today.minusDays(5));
-        
-        createTransaction("Rent", "1500.00", TransactionType.EXPENSE, "expense-housing", today.minusDays(1));
-        createTransaction("Groceries", "300.00", TransactionType.EXPENSE, "expense-food", today.minusDays(3));
-        createTransaction("Restaurant", "85.50", TransactionType.EXPENSE, "expense-food", today.minusDays(7));
-        createTransaction("Gas", "60.00", TransactionType.EXPENSE, "expense-transport", today.minusDays(2));
-        createTransaction("Utilities", "150.00", TransactionType.EXPENSE, "expense-utilities", today.minusDays(4));
-        
-        // Previous month transactions
-        LocalDate lastMonth = today.minusMonths(1);
-        createTransaction("Previous Salary", "5000.00", TransactionType.INCOME, "income-salary", lastMonth);
-        createTransaction("Previous Rent", "1500.00", TransactionType.EXPENSE, "expense-housing", lastMonth.minusDays(5));
-        createTransaction("Previous Groceries", "280.00", TransactionType.EXPENSE, "expense-food", lastMonth.minusDays(10));
+        createTransaction("Freelance Work", "1200.00", TransactionType.INCOME, "income-freelance", startOfMonth);
+
+        createTransaction("Rent", "1500.00", TransactionType.EXPENSE, "expense-housing", startOfMonth.plusDays(1));
+        createTransaction("Groceries", "300.00", TransactionType.EXPENSE, "expense-food", startOfMonth.plusDays(2));
+        createTransaction("Restaurant", "85.50", TransactionType.EXPENSE, "expense-food", startOfMonth.plusDays(3));
+        createTransaction("Gas", "60.00", TransactionType.EXPENSE, "expense-transport", startOfMonth.plusDays(2));
+        createTransaction("Utilities", "150.00", TransactionType.EXPENSE, "expense-utilities", startOfMonth.plusDays(1));
+
+        // Previous month transactions — anchored to lastMonthStart to avoid spilling into earlier months
+        createTransaction("Previous Salary", "5000.00", TransactionType.INCOME, "income-salary", lastMonthStart);
+        createTransaction("Previous Rent", "1500.00", TransactionType.EXPENSE, "expense-housing", lastMonthStart.plusDays(5));
+        createTransaction("Previous Groceries", "280.00", TransactionType.EXPENSE, "expense-food", lastMonthStart.plusDays(10));
     }
 
     private void createTransaction(String description, String amount, TransactionType type, String categoryId, LocalDate date) {
