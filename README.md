@@ -1,6 +1,6 @@
 # MyBudgetBuddy
 
-[![CI](https://github.com/gcasa/CSC605-MyBudgetBuddy/actions/workflows/ci.yml/badge.svg)](https://github.com/gcasa/CSC605-MyBudgetBuddy/actions/workflows/ci.yml)
+[![CI](https://github.com/gcasa/MyBudgetBuddy/actions/workflows/ci.yml/badge.svg)](https://github.com/gcasa/MyBudgetBuddy/actions/workflows/ci.yml)
 
 A comprehensive personal finance management application built with JavaFX and SQLite, designed to help users track transactions, manage budgets, set financial goals, and generate insightful reports.
 
@@ -63,7 +63,7 @@ src/main/java/com/mybudgetbuddy/
 
 ```bash
 git clone <repository-url>
-cd CSC605-MyBudgetBuddy
+cd MyBudgetBuddy
 ```
 
 ### 2. Build the Project
@@ -147,7 +147,7 @@ java --module-path /path/to/javafx/lib --add-modules javafx.controls,javafx.fxml
 ```cmd
 :: Clone and navigate to the project
 git clone <repository-url>
-cd CSC605-MyBudgetBuddy
+cd MyBudgetBuddy
 
 :: Build
 mvn clean compile
